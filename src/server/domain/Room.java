@@ -1,8 +1,9 @@
 package server.domain;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class Room {
+public class Room implements Serializable {
     public String roomName;
     public String nickname;
     public String firstStatus;
@@ -12,15 +13,15 @@ public class Room {
     public Integer chatCount;
     public Timestamp timestamp;
 
-    public Room(String roomName, String nickname, String firstStatus, String secondStatus, Integer firstStatusCount, Integer secondStatusCount, Integer chatCount, Timestamp timestamp) {
+    public Room(String roomName, String firstStatus, String secondStatus, String nickname) {
         this.roomName = roomName;
         this.nickname = nickname;
         this.firstStatus = firstStatus;
         this.secondStatus = secondStatus;
-        this.firstStatusCount = firstStatusCount;
-        this.secondStatusCount = secondStatusCount;
-        this.chatCount = chatCount;
-        this.timestamp = timestamp;
+        this.firstStatusCount = 0;
+        this.secondStatusCount = 0;
+        this.chatCount = 0;
+        this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
     public String getRoomName() {

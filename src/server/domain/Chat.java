@@ -1,8 +1,9 @@
 package server.domain;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class Chat {
+public class Chat implements Serializable {
     public Integer id;
     public String nickname;
     public String contents;
