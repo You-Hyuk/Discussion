@@ -21,10 +21,13 @@ public class ChatThread extends Thread {
     private HashMap roomMap; //방 관리
     private boolean initFlag = false;
     private User user;
+    private ChatController chatController;
 
     public ChatThread(Socket sock, HashMap roomMap, HashMap userMap) {
         this.sock = sock;
         this.roomMap = roomMap;
+        this.userMap = userMap;
+        this.chatController = new ChatController(roomMap, userMap);
         try {
             pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -32,12 +35,7 @@ public class ChatThread extends Thread {
             //클라이언트가 접속 되면 id를 전송한다는 프로토콜을 정의했기 때문에 readLine()을 통해 id를 받는다
             nickname = br.readLine();
             this.user = new User(nickname, pw);
-//            broadcast(id + "님이 접속하였습니다.");
 
-            //임계 영역을 통한 동기화 문제 해결
-//            synchronized (hm) {
-//                hm.put(this.nickName, pw);
-//            }
             initFlag = true;
         } catch (Exception ex) {
             System.out.println(ex);
@@ -47,8 +45,25 @@ public class ChatThread extends Thread {
     public void run() {
         try {
             String line = null;
+            Room room;
             while ((line = br.readLine()) != null) {
-                broadcast(line);
+//                broadcast(line);
+                if(line.startsWith("/c")){
+                    String[] s = line.split(" ");
+                    String roomName = s[1];
+                    String firstStatus = s[2];
+                    String secondStatus = s[3];
+                    String nickName = user.getNickname();
+                    room = new Room(roomName, firstStatus, secondStatus, nickname);
+                    chatController.createRoom(room);
+                }
+
+                if(line.startsWith("/e")){
+                    String roomName = line.substring(3);
+                    System.out.println(roomName);
+                    userMap = (HashMap) roomMap.get(roomName);
+                    chatController.enterRoom(roomName);
+                }
             }
         } catch (Exception ex) {
             System.out.println(ex);
@@ -75,20 +90,6 @@ public class ChatThread extends Thread {
                 pw.println(msg);
                 pw.flush();
             }
-        }
-    }
-
-    // 방 입장
-    public void enterRoom(Room room){
-        synchronized (userMap){
-            userMap.put(user, user.printWriter);
-        }
-    }
-
-    // 방 퇴장
-    public void exitRoom(){
-        synchronized (userMap){
-            userMap.remove(user);
         }
     }
 }
