@@ -4,45 +4,36 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 public class Chat implements Serializable {
-    public Integer id;
-    public String nickname;
-    public String contents;
+    public String userName;
+    public String message;
     public Status status;
     public Timestamp timestamp;
     public Integer like;
 
-    public Chat(Integer id, String nickname, String contents, Status status, Timestamp timestamp, Integer like) {
-        this.id = id;
-        this.nickname = nickname;
-        this.contents = contents;
+    public Chat(String userName, String message, Status status) {
+        this.userName = userName;
+        this.message = message;
         this.status = status;
-        this.timestamp = timestamp;
-        this.like = like;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+        this.timestamp = new Timestamp(System.currentTimeMillis());
+        this.like = 0;
     }
 
 
-    public String getContents() {
-        return contents;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setContents(String contents) {
-        this.contents = contents;
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public Status getStatus() {
@@ -71,7 +62,7 @@ public class Chat implements Serializable {
 
     @Override
     public String toString(){
-        return this.id + "\t" + this.nickname + "\t" + this.contents+ "\t" + this.status + "\t" + this.timestamp + "\t" + this.like;
+        return this.userName + "\t" + this.message + "\t" + this.status + "\t" + this.timestamp + "\t" + this.like;
     }
 
 }
