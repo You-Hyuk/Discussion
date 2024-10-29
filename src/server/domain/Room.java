@@ -2,26 +2,31 @@ package server.domain;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 public class Room implements Serializable {
     public String roomName;
-    public String nickname;
+    public String userName;
     public String firstStatus;
     public String secondStatus;
     public Integer firstStatusCount;
     public Integer secondStatusCount;
     public Integer chatCount;
     public Timestamp timestamp;
+    public ArrayList<User> userList;
+    public String chatFileName;
 
-    public Room(String roomName, String firstStatus, String secondStatus, String nickname) {
+    public Room(String roomName, String firstStatus, String secondStatus, String userName) {
         this.roomName = roomName;
-        this.nickname = nickname;
+        this.userName = userName;
         this.firstStatus = firstStatus;
         this.secondStatus = secondStatus;
         this.firstStatusCount = 0;
         this.secondStatusCount = 0;
         this.chatCount = 0;
+        this.userList = new ArrayList<>();
         this.timestamp = new Timestamp(System.currentTimeMillis());
+        this.chatFileName = "";
     }
 
     public String getRoomName() {
@@ -32,12 +37,12 @@ public class Room implements Serializable {
         this.roomName = roomName;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getFirstStatus() {
@@ -92,7 +97,7 @@ public class Room implements Serializable {
     public String toString() {
         return "Room{" +
                 "roomName='" + roomName + '\'' +
-                ", nickname='" + nickname + '\'' +
+                ", nickname='" + userName + '\'' +
                 ", firstStatus='" + firstStatus + '\'' +
                 ", secondStatus='" + secondStatus + '\'' +
                 ", firstStatusCount=" + firstStatusCount +
@@ -100,5 +105,27 @@ public class Room implements Serializable {
                 ", chatCount=" + chatCount +
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    // User 관리 메소드
+    public void addUser(User user){
+        userList.add(user);
+    }
+
+    public void removeUser(User user){
+        userList.remove(user);
+    }
+
+    public ArrayList<User> getUserList(){
+        return userList;
+    }
+
+    //채팅 기록 관리
+    public void setChatFileName(String chatFileName){
+        this.chatFileName = chatFileName;
+    }
+
+    public String getChatFileName() {
+        return chatFileName;
     }
 }
