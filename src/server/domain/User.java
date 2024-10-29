@@ -3,20 +3,20 @@ package server.domain;
 import java.io.PrintWriter;
 
 public class User {
-    public String nickname;
+    public String userName;
     public PrintWriter printWriter;
 
-    public User(String nickname, PrintWriter printWriter) {
-        this.nickname = nickname;
+    public User(String userName, PrintWriter printWriter) {
+        this.userName = userName;
         this.printWriter = printWriter;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public PrintWriter getPrintWriter() {
