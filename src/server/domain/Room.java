@@ -97,16 +97,7 @@ public class Room implements Serializable {
 
     @Override
     public String toString() {
-        return "Room{" +
-                "roomName='" + roomName + '\'' +
-                ", nickname='" + userName + '\'' +
-                ", firstStatus='" + firstStatus + '\'' +
-                ", secondStatus='" + secondStatus + '\'' +
-                ", firstStatusCount=" + firstStatusCount +
-                ", secondStatusCount=" + secondStatusCount +
-                ", chatCount=" + chatCount +
-                ", timestamp=" + timestamp +
-                '}';
+        return String.format("%-20s %-20s %-5d %-5d", roomName, userName, firstStatusCount, secondStatusCount);
     }
 
     // User 관리 메소드

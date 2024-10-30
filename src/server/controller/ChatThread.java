@@ -15,25 +15,26 @@ public class ChatThread extends Thread {
     private String userName;
     private BufferedReader br;  //buffer 사용 용도
     private PrintWriter pw;  //println() 사용 용도
-    private boolean initFlag = false;
     private User user;
-    private ChatController chatController;
-    private boolean inRoom = false;
     private Room room;
+
+    private ChatController chatController = new ChatController();
+    private boolean inRoom = false;
     private Status status = Status.STATUS1; //변경 필요
+    private boolean hasStatus = false;
 
     public ChatThread(Socket sock) {
         this.sock = sock;
-        this.chatController = new ChatController();
         try {
             pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
             //클라이언트가 접속 되면 id를 전송한다는 프로토콜을 정의했기 때문에 readLine()을 통해 id를 받는다
-            this.userName = br.readLine();
-            this.user = new User(userName, pw);
+            userName = br.readLine();
+            user = new User(userName, pw);
             System.out.println("userName = " + userName);
-            initFlag = true;
+
+            chatController.printRoomList(user);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

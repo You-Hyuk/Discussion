@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 public class ChatController {
-    private User user;
     private RoomRepository roomRepository = new RoomRepository();
     private ChatRepository chatRepository = new ChatRepository();
 
@@ -22,6 +21,20 @@ public class ChatController {
         chatRepository.createChatFile(room);
         roomRepository.createRoom(room);
         System.out.println(room.getRoomName() + " 생성 완료");
+    }
+
+    public void printRoomList(User user){
+        ArrayList<Room> rooms = roomRepository.getRoomList();
+        synchronized (user) {
+            PrintWriter pw = user.getPrintWriter();
+            pw.println("------------- 토론 채팅방 리스트 -------------");
+            pw.flush();
+            for (Room room : rooms) {
+                pw.println(room.toString());
+            }
+            pw.println("----------------------------------------------");
+            pw.flush();
+        }
     }
 
 
