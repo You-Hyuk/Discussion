@@ -1,6 +1,7 @@
 package server.repository;
 
 import server.domain.Room;
+import server.domain.User;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class RoomRepository {
     private ObjectOutputStream oos;
     private FileOutputStream fos;
 
-    private final String ROOM_FILE = "./data/room.txt";
+    private final String ROOM_FILE = "src/server/data/room.txt";
     public Room findRoomByName(String roomName) {
         try{
             ArrayList<Room> rooms = readRoom();
@@ -21,14 +22,24 @@ public class RoomRepository {
                     return room;
             }
         }catch (Exception e){
-            e.printStackTrace();
+            e.getMessage();
         }
         System.out.println("해당 이름의 채팅방이 존재하지 않습니다.");
         return null;
     }
 
-    public RoomRepository() {
+    // 채팅방 안의 User를 반환
+    public User findUserByName(Room room, String userName){
+        ArrayList<User> userList = room.getUserList();
+        for (User user : userList) {
+            if (user.getUserName().equals(userName)){
+                return user;
+            }
+        }
+        System.out.println(userName + " 에 일치하는 User가 존재하지 않습니다");
+        return null;
     }
+
 
     public void createRoom(Room room){
         try{
@@ -48,10 +59,11 @@ public class RoomRepository {
 
     public ArrayList<Room> readRoom() {
         ArrayList<Room> rooms = null;
-        try (FileInputStream fis = new FileInputStream(ROOM_FILE);
-             ObjectInputStream ois = new ObjectInputStream(fis)) {
+        try  {
+            FileInputStream fis = new FileInputStream(ROOM_FILE);
+            ObjectInputStream ois = new ObjectInputStream(fis);
 
-            rooms = (ArrayList<Room>) ois.readObject();
+            rooms = (ArrayList) ois.readObject();
 
         } catch (EOFException eof) {
             // EOFException 발생 시 빈 리스트로 초기화
@@ -62,7 +74,7 @@ public class RoomRepository {
             System.out.println("파일이 없습니다. 새 파일을 생성합니다.");
             rooms = new ArrayList<>();
         } catch (Exception e) {
-            e.printStackTrace();
+            e.getMessage();
         }
         return rooms;
     }
