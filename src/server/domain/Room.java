@@ -29,6 +29,8 @@ public class Room implements Serializable {
         this.chatFileName = "";
     }
 
+    //Status를 입력하지 않았을 경우 생성자 필요
+
     public String getRoomName() {
         return roomName;
     }

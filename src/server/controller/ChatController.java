@@ -46,10 +46,11 @@ public class ChatController {
     // 채팅방 퇴장
     public void exitRoom(Room room,User user){
         room.removeUser(user);
+        System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 방에서 퇴장하였습니다.");
     }
 
     //상태에 따른 구분 필요
-    public void chat(Room room, String userName, Status status, String message){
+    public void chat(Room room, User user, Status status, String message){
         ArrayList<User> userList = room.getUserList();
         synchronized (userList){
             Collection<PrintWriter> collection = new ArrayList<>();
@@ -63,6 +64,7 @@ public class ChatController {
                 pw.flush();
             }
         }
+        String userName = user.getUserName();
         Chat chat = new Chat(userName, message, status);
         chatRepository.saveChat(room, chat);
     }

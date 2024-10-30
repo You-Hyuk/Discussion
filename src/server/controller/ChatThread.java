@@ -62,10 +62,16 @@ public class ChatThread extends Thread {
                     this.room = enteredRoom;
                 }
 
-                if(line.split(" ")[0].equals("/chat") && inRoom){
+                if(line.split(" ")[0].equals("/exit") && inRoom) {
+                    chatController.exitRoom(room, user);
+                    chatController.sendToClient(user, user.getUserName() + " 님이 " + room.getRoomName() + "방을 퇴장하였습니다.");
+                    inRoom = false;
+                }
+
+                if(inRoom && hasStatus){
                     String message = line.substring(6);
                     System.out.println(message);
-                    chatController.chat(room, userName, status, message);
+                    chatController.chat(room, user, status, message);
                 }
             }
         } catch (Exception ex) {
