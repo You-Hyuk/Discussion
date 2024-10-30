@@ -14,6 +14,7 @@ public class RoomRepository {
     private FileOutputStream fos;
 
     private final String ROOM_FILE = "src/server/data/room.txt";
+
     public Room findRoomByName(String roomName) {
         try{
             ArrayList<Room> rooms = readRoom();
@@ -26,6 +27,11 @@ public class RoomRepository {
         }
         System.out.println("해당 이름의 채팅방이 존재하지 않습니다.");
         return null;
+    }
+
+    public ArrayList<Room> getRoomList(){
+        ArrayList<Room> rooms = readRoom();
+        return rooms;
     }
 
     // 채팅방 안의 User를 반환

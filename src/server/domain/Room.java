@@ -29,6 +29,8 @@ public class Room implements Serializable {
         this.chatFileName = "";
     }
 
+    //Status를 입력하지 않았을 경우 생성자 필요
+
     public String getRoomName() {
         return roomName;
     }
@@ -95,16 +97,7 @@ public class Room implements Serializable {
 
     @Override
     public String toString() {
-        return "Room{" +
-                "roomName='" + roomName + '\'' +
-                ", nickname='" + userName + '\'' +
-                ", firstStatus='" + firstStatus + '\'' +
-                ", secondStatus='" + secondStatus + '\'' +
-                ", firstStatusCount=" + firstStatusCount +
-                ", secondStatusCount=" + secondStatusCount +
-                ", chatCount=" + chatCount +
-                ", timestamp=" + timestamp +
-                '}';
+        return String.format("%-20s %-20s %-5d %-5d", roomName, userName, firstStatusCount, secondStatusCount);
     }
 
     // User 관리 메소드
