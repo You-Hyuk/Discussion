@@ -54,15 +54,6 @@ public class ChatThread extends Thread {
                     chatController.sendToClient(user, user.getUserName() + " 님이 " + roomName + " 토론 채팅방을 생성하였습니다.");
                 }
 
-                //Status 선택 메소드 추가 필요
-                if(line.split(" ")[0].equals("/e")){
-                    String[] s = line.split(" ");
-                    String roomName = s[1];
-                    Room enteredRoom = chatController.enterRoom(roomName, user);
-                    this.inRoom = true;
-                    this.room = enteredRoom;
-                }
-
                 if(line.split(" ")[0].equals("/exit") && inRoom) {
                     chatController.exitRoom(room, user);
                     chatController.sendToClient(user, user.getUserName() + " 님이 " + room.getRoomName() + "방을 퇴장하였습니다.");
@@ -70,10 +61,34 @@ public class ChatThread extends Thread {
                 }
 
                 if(inRoom && hasStatus){
-                    String message = line.substring(6);
-                    System.out.println(message);
+                    String message = line;
                     chatController.chat(room, user, status, message);
                 }
+
+                //Status 선택 메소드 추가 필요
+                if(line.split(" ")[0].equals("/e")){
+                    String[] s = line.split(" ");
+                    String roomName = s[1];
+                    chatController.selectStatus(roomName, user);
+                    String selectStatus = br.readLine();
+                    if (selectStatus.equals("1")){
+                        status = Status.STATUS1;
+                        this.hasStatus = true;
+                    }
+                    if (selectStatus.equals("2")){
+                        status = Status.STATUS2;
+                        this.hasStatus = true;
+                    }
+                    if (selectStatus.equals("3")){
+                        status = Status.NONE;
+                    }
+                    Room enteredRoom = chatController.enterRoom(roomName, user);
+                    inRoom = true;
+                    room = enteredRoom;
+                    continue;
+                }
+
+
             }
         } catch (Exception ex) {
             System.out.println(ex);

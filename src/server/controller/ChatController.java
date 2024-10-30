@@ -38,7 +38,7 @@ public class ChatController {
     }
 
 
-    // 방 입장
+    // 채팅방 입장
     public Room enterRoom(String roomName, User user){
         Room room = roomRepository.findRoomByName(roomName);
         room.addUser(user);
@@ -56,6 +56,20 @@ public class ChatController {
         return room;
     }
 
+    // 채팅방 Status 선택
+    public void selectStatus(String roomName, User user){
+        Room room = roomRepository.findRoomByName(roomName);
+        String firstStatus = room.getFirstStatus();
+        String secondStatus = room.getSecondStatus();
+
+        synchronized (user){
+            PrintWriter printWriter = user.getPrintWriter();
+            printWriter.println("Status 선택");
+            printWriter.println(firstStatus + "\t\t\t" + "NONE" + "\t\t\t" + secondStatus);
+            printWriter.flush();
+        }
+    }
+
     // 채팅방 퇴장
     public void exitRoom(Room room,User user){
         room.removeUser(user);
@@ -65,6 +79,15 @@ public class ChatController {
     //상태에 따른 구분 필요
     public void chat(Room room, User user, Status status, String message){
         ArrayList<User> userList = room.getUserList();
+        String selectStatus = "";
+        if (status == Status.STATUS1){
+            selectStatus = room.getFirstStatus();
+        }
+        if (status == Status.STATUS2){
+            selectStatus = room.getSecondStatus();
+        }
+
+        String chatHistory = selectStatus + " : " + message;
         synchronized (userList){
             Collection<PrintWriter> collection = new ArrayList<>();
             for (User user1 : userList) {
@@ -73,12 +96,12 @@ public class ChatController {
             Iterator iter = collection.iterator();
             while (iter.hasNext()) {
                 PrintWriter pw = (PrintWriter) iter.next();
-                pw.println(message);
+                pw.println(chatHistory);
                 pw.flush();
             }
         }
         String userName = user.getUserName();
-        Chat chat = new Chat(userName, message, status);
+        Chat chat = new Chat(userName, chatHistory, status);
         chatRepository.saveChat(room, chat);
     }
 

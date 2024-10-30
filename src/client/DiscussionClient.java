@@ -35,6 +35,16 @@ public class DiscussionClient {
                     endflag = true;
                     break;
                 }
+
+                if(line.split(" ")[0].equals("/e")){
+                    String selectStatus = null;
+                    if ((selectStatus = keyboard.readLine()) != null){
+                        if (selectStatus.equals("1") || selectStatus.equals("2") || selectStatus.equals("3")) {
+                            pw.println(selectStatus);
+                            pw.flush();
+                        }
+                    }
+                }
             }
 
             System.out.println("클라이언트의 접속을 종료합니다.");
