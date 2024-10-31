@@ -1,10 +1,11 @@
 package server.domain;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 
-public class User {
-    public String userName;
-    public PrintWriter printWriter;
+public class User implements Serializable {
+    private String userName;
+    private PrintWriter printWriter;
 
     public User(String userName, PrintWriter printWriter) {
         this.userName = userName;

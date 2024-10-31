@@ -8,14 +8,17 @@ import server.repository.ChatRepository;
 import server.repository.RoomRepository;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 public class ChatController {
     private RoomRepository roomRepository = new RoomRepository();
     private ChatRepository chatRepository = new ChatRepository();
+    private RoomController roomController;
+    private Map<String, List<PrintWriter>> userMap;
 
+    public ChatController(Map<String, List<PrintWriter>> userMap) {
+        this.userMap = userMap;
+    }
 
     public void createRoom(Room room){
         chatRepository.createChatFile(room);
@@ -41,7 +44,6 @@ public class ChatController {
     // 채팅방 입장
     public Room enterRoom(String roomName, User user){
         Room room = roomRepository.findRoomByName(roomName);
-        room.addUser(user);
         System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 에 입장하였습니다.");
         sendToClient(user,user.getUserName() + " 님이 " + roomName + " 토론 채팅방에 입장하였습니다.");
         ArrayList<Chat> chats = chatRepository.findChatHistory(room);
@@ -73,7 +75,7 @@ public class ChatController {
     // 채팅방 퇴장
     public void exitRoom(Room room,User user){
         room.removeUser(user);
-        System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 방에서 퇴장하였습니다.");
+        System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 에서 퇴장하였습니다.");
     }
 
     //상태에 따른 구분 필요
@@ -87,7 +89,7 @@ public class ChatController {
             selectStatus = room.getSecondStatus();
         }
 
-        String chatHistory = selectStatus + " : " + message;
+        String chat = selectStatus + " : " + message;
         synchronized (userList){
             Collection<PrintWriter> collection = new ArrayList<>();
             for (User user1 : userList) {
@@ -96,13 +98,13 @@ public class ChatController {
             Iterator iter = collection.iterator();
             while (iter.hasNext()) {
                 PrintWriter pw = (PrintWriter) iter.next();
-                pw.println(chatHistory);
+                pw.println(chat);
                 pw.flush();
             }
         }
         String userName = user.getUserName();
-        Chat chat = new Chat(userName, chatHistory, status);
-        chatRepository.saveChat(room, chat);
+        Chat chatHistory = new Chat(userName, chat, status);
+        chatRepository.saveChat(room, chatHistory);
     }
 
     public void sendToClient(User user, String msg){

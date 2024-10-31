@@ -8,8 +8,6 @@ import java.util.ArrayList;
 
 public class RoomRepository {
 
-    private FileInputStream fis;
-    private ObjectInputStream ois;
     private ObjectOutputStream oos;
     private FileOutputStream fos;
 
@@ -44,6 +42,27 @@ public class RoomRepository {
         }
         System.out.println(userName + " 에 일치하는 User가 존재하지 않습니다");
         return null;
+    }
+
+    public Room addUserToRoom(String roomName, User user){
+        ArrayList<Room> rooms = readRoom();
+        Room room1 = findRoomByName(roomName);
+        room1.addUser(user);
+
+        for (int i = 0; i < rooms.size(); i++) {
+            if (rooms.get(i).getRoomName().equals(roomName)) {
+                rooms.set(i, room1);  // 업데이트된 Room 객체로 교체
+                break;
+            }
+        }
+        try {
+            fos = new FileOutputStream(ROOM_FILE);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(rooms);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return room1;
     }
 
 

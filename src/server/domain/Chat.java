@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 public class Chat implements Serializable {
-    public String userName;
-    public String message;
-    public Status status;
-    public Timestamp timestamp;
-    public Integer like;
+    private String userName;
+    private String message;
+    private Status status;
+    private Timestamp timestamp;
+    private Integer like;
 
     public Chat(String userName, String message, Status status) {
         this.userName = userName;

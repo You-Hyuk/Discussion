@@ -5,16 +5,16 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class Room implements Serializable {
-    public String roomName;
-    public String userName;
-    public String firstStatus;
-    public String secondStatus;
-    public Integer firstStatusCount;
-    public Integer secondStatusCount;
-    public Integer chatCount;
-    public Timestamp timestamp;
-    public ArrayList<User> userList;
-    public String chatFileName;
+    private String roomName;
+    private String userName;
+    private String firstStatus;
+    private String secondStatus;
+    private Integer firstStatusCount;
+    private Integer secondStatusCount;
+    private Integer chatCount;
+    private Timestamp timestamp;
+    private ArrayList<User> userList;
+    private String chatFileName;
 
     public Room(String roomName, String firstStatus, String secondStatus, String userName) {
         this.roomName = roomName;
@@ -102,7 +102,7 @@ public class Room implements Serializable {
 
     // User 관리 메소드
     public void addUser(User user){
-        userList.add(user);
+        this.userList.add(user);
     }
 
     public void removeUser(User user){
