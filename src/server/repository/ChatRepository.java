@@ -39,7 +39,6 @@ public class ChatRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("fileName = " + fileName);
         room.setChatFileName(file.getName());
         System.out.println(room.getChatFileName());
     }
@@ -81,7 +80,6 @@ public class ChatRepository {
     public ArrayList<Chat> readChatHistory(Room room) {
         ArrayList<Chat> chatHistory = null;
         String chatFileName = room.getChatFileName();
-        System.out.println("chatFileName = " + chatFileName);
         String path = DIRECTORY_PATH + chatFileName;
 
         try{

@@ -72,7 +72,7 @@ public class ChatController {
     // 채팅방 퇴장
     public void exitRoom(Room room,User user){
         room.removeUser(user);
-        System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 방에서 퇴장하였습니다.");
+        System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 에서 퇴장하였습니다.");
     }
 
     //상태에 따른 구분 필요
@@ -86,7 +86,7 @@ public class ChatController {
             selectStatus = room.getSecondStatus();
         }
 
-        String chatHistory = selectStatus + " : " + message;
+        String chat = selectStatus + " : " + message;
         synchronized (userList){
             Collection<PrintWriter> collection = new ArrayList<>();
             for (User user1 : userList) {
@@ -95,13 +95,13 @@ public class ChatController {
             Iterator iter = collection.iterator();
             while (iter.hasNext()) {
                 PrintWriter pw = (PrintWriter) iter.next();
-                pw.println(chatHistory);
+                pw.println(chat);
                 pw.flush();
             }
         }
         String userName = user.getUserName();
-        Chat chat = new Chat(userName, chatHistory, status);
-        chatRepository.saveChat(room, chat);
+        Chat chatHistory = new Chat(userName, chat, status);
+        chatRepository.saveChat(room, chatHistory);
     }
 
     public void sendToClient(User user, String msg){
