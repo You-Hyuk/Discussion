@@ -1,5 +1,7 @@
-package server.controller;
+package server.application;
 
+import server.controller.ChatController;
+import server.controller.RoomController;
 import server.domain.Room;
 import server.domain.Status;
 import server.domain.User;
@@ -10,6 +12,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 
 public class ChatThread extends Thread {
     private Socket sock;
@@ -19,14 +22,18 @@ public class ChatThread extends Thread {
     private User user;
     private Room room;
     private Status status;
-    private HashMap<Room, User> userMap;
+    private HashMap<String, List<PrintWriter>> userMap;
 
-    private ChatController chatController = new ChatController();
+    private ChatController chatController;
     private boolean inRoom = false;
     private boolean hasStatus = false;
+    private RoomController roomController;
 
-    public ChatThread(Socket sock) {
+    public ChatThread(Socket sock, HashMap userMap) {
         this.sock = sock;
+        this.userMap = userMap;
+        this.roomController = new RoomController(userMap);
+        this.chatController = new ChatController(userMap);
         try {
             pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -58,6 +65,7 @@ public class ChatThread extends Thread {
 
                 if(line.split(" ")[0].equals("/exit") && inRoom) {
                     chatController.exitRoom(room, user);
+                    roomController.removeUserFromRoom(room.getRoomName(), user.getPrintWriter());
                     chatController.sendToClient(user, user.getUserName() + " 님이 " + room.getRoomName() + "방을 퇴장하였습니다.");
                     inRoom = false;
                 }
@@ -84,9 +92,10 @@ public class ChatThread extends Thread {
                         status = Status.NONE;
                     }
                     Room enteredRoom = chatController.enterRoom(roomName, user);
+                    roomController.addUserToRoom(roomName, user.getPrintWriter());
                     inRoom = true;
                     room = enteredRoom;
-                    continue;
+
                 }
 
 

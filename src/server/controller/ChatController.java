@@ -8,14 +8,17 @@ import server.repository.ChatRepository;
 import server.repository.RoomRepository;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 public class ChatController {
     private RoomRepository roomRepository = new RoomRepository();
     private ChatRepository chatRepository = new ChatRepository();
+    private RoomController roomController;
+    private Map<String, List<PrintWriter>> userMap;
 
+    public ChatController(Map<String, List<PrintWriter>> userMap) {
+        this.userMap = userMap;
+    }
 
     public void createRoom(Room room){
         chatRepository.createChatFile(room);
@@ -40,7 +43,7 @@ public class ChatController {
 
     // 채팅방 입장
     public Room enterRoom(String roomName, User user){
-        Room room = roomRepository.addUserToRoom(roomName, user);
+        Room room = roomRepository.findRoomByName(roomName);
         System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 에 입장하였습니다.");
         sendToClient(user,user.getUserName() + " 님이 " + roomName + " 토론 채팅방에 입장하였습니다.");
         ArrayList<Chat> chats = chatRepository.findChatHistory(room);

@@ -8,11 +8,8 @@ import java.util.ArrayList;
 
 public class ChatRepository {
 
-    private FileInputStream fis;
-    private ObjectInputStream ois;
     private ObjectOutputStream oos;
     private FileOutputStream fos;
-    private BufferedReader br;
 
     private final String DIRECTORY_PATH = "src/server/data/";
 

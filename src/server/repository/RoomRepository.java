@@ -8,8 +8,6 @@ import java.util.ArrayList;
 
 public class RoomRepository {
 
-    private FileInputStream fis;
-    private ObjectInputStream ois;
     private ObjectOutputStream oos;
     private FileOutputStream fos;
 
