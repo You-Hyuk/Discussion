@@ -46,6 +46,27 @@ public class RoomRepository {
         return null;
     }
 
+    public Room addUserToRoom(String roomName, User user){
+        ArrayList<Room> rooms = readRoom();
+        Room room1 = findRoomByName(roomName);
+        room1.addUser(user);
+
+        for (int i = 0; i < rooms.size(); i++) {
+            if (rooms.get(i).getRoomName().equals(roomName)) {
+                rooms.set(i, room1);  // 업데이트된 Room 객체로 교체
+                break;
+            }
+        }
+        try {
+            fos = new FileOutputStream(ROOM_FILE);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(rooms);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return room1;
+    }
+
 
     public void createRoom(Room room){
         try{

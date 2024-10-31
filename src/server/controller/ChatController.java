@@ -40,8 +40,7 @@ public class ChatController {
 
     // 채팅방 입장
     public Room enterRoom(String roomName, User user){
-        Room room = roomRepository.findRoomByName(roomName);
-        room.addUser(user);
+        Room room = roomRepository.addUserToRoom(roomName, user);
         System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 에 입장하였습니다.");
         sendToClient(user,user.getUserName() + " 님이 " + roomName + " 토론 채팅방에 입장하였습니다.");
         ArrayList<Chat> chats = chatRepository.findChatHistory(room);

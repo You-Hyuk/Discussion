@@ -1,8 +1,9 @@
 package server.domain;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 
-public class User {
+public class User implements Serializable {
     public String userName;
     public PrintWriter printWriter;
 
