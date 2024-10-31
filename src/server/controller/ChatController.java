@@ -79,8 +79,8 @@ public class ChatController {
     }
 
     //상태에 따른 구분 필요
-    public void chat(Room room, User user, Status status, String message){
-        ArrayList<User> userList = room.getUserList();
+    public void chat(Room room, User user, HashMap userMap, Status status, String message){
+        List<PrintWriter> userList = (List<PrintWriter>) userMap.get(room.getRoomName());
         String selectStatus = "";
         if (status == Status.STATUS1){
             selectStatus = room.getFirstStatus();
@@ -90,16 +90,20 @@ public class ChatController {
         }
 
         String chat = selectStatus + " : " + message;
-        synchronized (userList){
-            Collection<PrintWriter> collection = new ArrayList<>();
-            for (User user1 : userList) {
-                collection.add(user1.getPrintWriter());
-            }
-            Iterator iter = collection.iterator();
-            while (iter.hasNext()) {
-                PrintWriter pw = (PrintWriter) iter.next();
-                pw.println(chat);
-                pw.flush();
+//        synchronized (userList){
+//            Collection<PrintWriter> collection = new ArrayList<>();
+//
+//            Iterator iter = collection.iterator();
+//            while (iter.hasNext()) {
+//                PrintWriter pw = (PrintWriter) iter.next();
+//                pw.println(chat);
+//                pw.flush();
+//            }
+//        }
+        synchronized (userList) {
+            for (PrintWriter pw : userList) {
+                pw.println(chat); // 메시지 출력
+                pw.flush();       // 버퍼 비우기
             }
         }
         String userName = user.getUserName();
