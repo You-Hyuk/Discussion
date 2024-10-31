@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class ChatThread extends Thread {
     private Socket sock;
@@ -17,10 +18,11 @@ public class ChatThread extends Thread {
     private PrintWriter pw;  //println() 사용 용도
     private User user;
     private Room room;
+    private Status status;
+    private HashMap<Room, User> userMap;
 
     private ChatController chatController = new ChatController();
     private boolean inRoom = false;
-    private Status status = Status.STATUS1; //변경 필요
     private boolean hasStatus = false;
 
     public ChatThread(Socket sock) {
@@ -61,8 +63,7 @@ public class ChatThread extends Thread {
                 }
 
                 if(inRoom && hasStatus){
-                    String message = line;
-                    chatController.chat(room, user, status, message);
+                    chatController.chat(room, user, status, line);
                 }
 
                 //Status 선택 메소드 추가 필요

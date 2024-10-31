@@ -4,8 +4,8 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 
 public class User implements Serializable {
-    public String userName;
-    public PrintWriter printWriter;
+    private String userName;
+    private PrintWriter printWriter;
 
     public User(String userName, PrintWriter printWriter) {
         this.userName = userName;
