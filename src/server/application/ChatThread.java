@@ -71,7 +71,7 @@ public class ChatThread extends Thread {
                 }
 
                 if(inRoom && hasStatus){
-                    chatController.chat(room, user, status, line);
+                    chatController.chat(room, user, userMap, status, line);
                 }
 
                 //Status 선택 메소드 추가 필요
@@ -95,6 +95,7 @@ public class ChatThread extends Thread {
                     roomController.addUserToRoom(roomName, user.getPrintWriter());
                     inRoom = true;
                     room = enteredRoom;
+                    System.out.println(userMap.toString());
 
                 }
 
