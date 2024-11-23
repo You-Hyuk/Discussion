@@ -103,4 +103,34 @@ public class RoomRepository {
         }
         return rooms;
     }
+
+    public void deleteExpiredRooms() {
+        try {
+            ArrayList<Room> rooms = readRoom();
+            ArrayList<Room> updatedRooms = new ArrayList<>();
+            long currentTime = System.currentTimeMillis();
+
+            for (Room room : rooms) {
+                // 방의 Timestamp 확인
+                if (currentTime - room.getTimestamp().getTime() >= 24 * 60 * 60 * 1000) {
+                    System.out.println(room.getRoomName() + " 방이 삭제되었습니다 (24시간 초과).");
+                    ChatRepository chatRepository = new ChatRepository();
+                    chatRepository.deleteChatLog(room.getRoomName());
+                } else {
+                    // 24시간이 지나지 않은 방은 유지
+                    updatedRooms.add(room);
+                }
+            }
+
+            // 업데이트된 방 목록 저장
+            fos = new FileOutputStream(ROOM_FILE);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(updatedRooms);
+            oos.close();
+            fos.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
