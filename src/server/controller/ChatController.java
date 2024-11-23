@@ -29,7 +29,13 @@ public class ChatController {
     public void printRoomList(User user){
         ArrayList<Room> rooms = roomRepository.getRoomList();
         synchronized (user) {
+            System.out.println("printRoomList called with user: " + user);
+            if (user == null) {
+                throw new IllegalArgumentException("User is null.");
+            }
             PrintWriter pw = user.getPrintWriter();
+            System.out.println("PrintWriter: " + pw);
+            System.out.println("Room List: " + rooms);
             pw.println("------------- 토론 채팅방 리스트 -------------");
             pw.flush();
             for (Room room : rooms) {
@@ -44,7 +50,10 @@ public class ChatController {
     // 채팅방 입장
     public Room enterRoom(String roomName, User user){
         Room room = roomRepository.findRoomByName(roomName);
-        System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 에 입장하였습니다.");
+        if (room == null) {
+            throw new IllegalArgumentException("Room not found: " + roomName);
+        }
+        room = roomRepository.addUserToRoom(roomName, user); // addUserToRoom 호출
         sendToClient(user,user.getUserName() + " 님이 " + roomName + " 토론 채팅방에 입장하였습니다.");
         ArrayList<Chat> chats = chatRepository.findChatHistory(room);
         synchronized (user) {
@@ -79,13 +88,29 @@ public class ChatController {
     }
 
     //상태에 따른 구분 필요
-    public void chat(Room room, User user, HashMap userMap, Status status, String message){
+    public void chat(Room room, User user, HashMap userMap, String status, String message){
+        // 디버깅 출력
+        System.out.println("Room: " + room);
+        System.out.println("User: " + user);
+        System.out.println("User Map: " + userMap);
+        System.out.println("User Status: " + status);
+        System.out.println("Message: " + message);
+        if (room == null) {
+            throw new IllegalArgumentException("Room is null.");
+        }
         List<PrintWriter> userList = (List<PrintWriter>) userMap.get(room.getRoomName());
+        if (userList == null) {
+            userList = new ArrayList<>(); // 빈 리스트로 초기화
+            userMap.put(room.getRoomName(), userList); // userMap에 추가
+            System.out.println("User list was null. Initialized and added to userMap.");
+        }
+
+        System.out.println("Room User List: " + userList);
         String selectStatus = "";
-        if (status == Status.STATUS1){
+        if (status.equals(room.getFirstStatus())){
             selectStatus = room.getFirstStatus();
         }
-        if (status == Status.STATUS2){
+        if (status.equals(room.getSecondStatus())){
             selectStatus = room.getSecondStatus();
         }
 

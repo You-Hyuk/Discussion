@@ -21,7 +21,7 @@ public class ChatThread extends Thread {
     private PrintWriter pw;  //println() 사용 용도
     private User user;
     private Room room;
-    private Status status;
+    private String status;
     private HashMap<String, List<PrintWriter>> userMap;
 
     private ChatController chatController;
@@ -61,6 +61,7 @@ public class ChatThread extends Thread {
                     Room room = new Room(roomName, firstStatus, secondStatus, userName);
                     chatController.createRoom(room);
                     chatController.sendToClient(user, user.getUserName() + " 님이 " + roomName + " 토론 채팅방을 생성하였습니다.");
+                    System.out.println("Room Created: " + room);
                 }
 
                 if(line.split(" ")[0].equals("/exit") && inRoom) {
@@ -81,22 +82,21 @@ public class ChatThread extends Thread {
                     chatController.selectStatus(roomName, user);
                     String selectStatus = br.readLine();
                     if (selectStatus.equals("1")){
-                        status = Status.STATUS1;
+                        status = "찬성";
                         this.hasStatus = true;
                     }
                     if (selectStatus.equals("2")){
-                        status = Status.STATUS2;
+                        status = "반대";
                         this.hasStatus = true;
                     }
                     if (selectStatus.equals("3")){
-                        status = Status.NONE;
+                        status = "중립";
                     }
                     Room enteredRoom = chatController.enterRoom(roomName, user);
-                    roomController.addUserToRoom(roomName, user.getPrintWriter());
+                    //roomController.addUserToRoom(roomName, user.getPrintWriter());
                     inRoom = true;
                     room = enteredRoom;
                     System.out.println(userMap.toString());
-
                 }
 
 
