@@ -6,11 +6,11 @@ import java.sql.Timestamp;
 public class Chat implements Serializable {
     private String userName;
     private String message;
-    private Status status;
+    private String status;
     private Timestamp timestamp;
     private Integer like;
 
-    public Chat(String userName, String message, Status status) {
+    public Chat(String userName, String message, String status) {
         this.userName = userName;
         this.message = message;
         this.status = status;
@@ -36,11 +36,11 @@ public class Chat implements Serializable {
         this.message = message;
     }
 
-    public Status getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

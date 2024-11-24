@@ -16,9 +16,9 @@ public class ChatRepository {
     public void createChatFile(Room room){
         // roomName을 안전한 이름으로 변환
 //        String roomName = room.getRoomName().replaceAll("[^a-zA-Z0-9._-]", "_");
+//        String fileName = room.getRoomName().replace("\"", "") + ".txt";
         String fileName = room.getRoomName() + ".txt";
         String path = DIRECTORY_PATH + fileName;
-
         // data 디렉토리 생성 (존재하지 않을 때만)
         File directory = new File(DIRECTORY_PATH);
         if (!directory.exists()) {
@@ -42,15 +42,38 @@ public class ChatRepository {
 
     public void saveChat(Room room, Chat chat){
         try {
+
+            if (room == null) {
+                System.err.println("Room is null. Cannot save.");
+                return;
+            }
+
+            if (chat == null) {
+                System.err.println("Chat is null. Cannot save.");
+                return;
+            }
+
             String filePath = DIRECTORY_PATH + room.getRoomName() + ".txt";
 
             ArrayList<Chat> chats = readChatHistory(room);
+
+            if (chats == null) {
+                chats = new ArrayList<>(); // 채팅 기록 초기화
+            }
+
             chats.add(chat);
             fos = new FileOutputStream(filePath); //InputThread에서 BufferedReader로 읽은 line을 저장하기 위해 Writer 사용
             oos = new ObjectOutputStream(fos);
 
             oos.writeObject(chats);
             System.out.println(room.getRoomName() + " 채팅 저장 완료");
+
+            System.out.println("Room: " + room);
+            System.out.println("Room Name: " + (room != null ? room.getRoomName() : "null"));
+            System.out.println("Chat: " + chat);
+            System.out.println("Chat History: " + chats);
+            System.out.println("File Path: " + filePath);
+
         }catch (IOException e){
             e.getMessage();
         }finally {
@@ -75,6 +98,17 @@ public class ChatRepository {
     }
 
     public ArrayList<Chat> readChatHistory(Room room) {
+
+        if (room == null) {
+            System.err.println("Room is null. Returning empty chat history.");
+            return new ArrayList<>();
+        }
+
+        if (room.getChatFileName() == null) {
+            System.err.println("Chat file name is null. Returning empty chat history.");
+            return new ArrayList<>();
+        }
+
         ArrayList<Chat> chatHistory = null;
         String chatFileName = room.getChatFileName();
         String path = DIRECTORY_PATH + chatFileName;
