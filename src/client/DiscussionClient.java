@@ -11,12 +11,12 @@ public class DiscussionClient {
         FileOutputStream fos = null;
         boolean endflag = false;
         try {
-            sock = new Socket("localhost", 10001);
-            
+            sock = new Socket("192.168.35.48", 10001);
+
             pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
-            
+
             BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
 
             System.out.print("ID를 입력하세요: ");
@@ -63,4 +63,3 @@ public class DiscussionClient {
         }
     }
 }
-

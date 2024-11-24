@@ -12,13 +12,22 @@ public class RoomRepository {
     private FileOutputStream fos;
 
     private final String ROOM_FILE = "src/server/data/room.txt";
+    private ArrayList<Room> roomList; // 메모리에 캐싱된 방 목록
+
+
+    public RoomRepository() {
+        // 클래스 초기화 시 파일에서 방 목록을 읽어 메모리에 로드
+        roomList = readRoom();
+    }
 
     public Room findRoomByName(String roomName) {
         try{
             ArrayList<Room> rooms = readRoom();
             for (Room room : rooms) {
                 if(room.getRoomName().equals(roomName))
-                    return room;
+                    System.out.println("Room found: " + room.getRoomName());
+                System.out.println("User List: " + room.getUserList());
+                return room;
             }
         }catch (Exception e){
             e.getMessage();
@@ -29,6 +38,7 @@ public class RoomRepository {
 
     public ArrayList<Room> getRoomList(){
         ArrayList<Room> rooms = readRoom();
+
         return rooms;
     }
 
@@ -48,6 +58,8 @@ public class RoomRepository {
         ArrayList<Room> rooms = readRoom();
         Room room1 = findRoomByName(roomName);
         room1.addUser(user);
+        System.out.println("User added to room: " + roomName);
+        System.out.println("Updated User List: " + room1.getUserList());
 
         for (int i = 0; i < rooms.size(); i++) {
             if (rooms.get(i).getRoomName().equals(roomName)) {
@@ -77,6 +89,12 @@ public class RoomRepository {
             fos = new FileOutputStream(ROOM_FILE);
             oos = new ObjectOutputStream(fos);
             oos.writeObject(rooms);
+
+            // 디버깅 메시지 추가
+            ArrayList<Room> updatedRooms = readRoom(); // 파일에서 다시 읽기
+            System.out.println("Room added to repository: " + room.getRoomName());
+            System.out.println("Rooms after saving to file: " + updatedRooms);
+
         }catch (Exception e){
             e.getMessage();
         }
@@ -88,7 +106,8 @@ public class RoomRepository {
             FileInputStream fis = new FileInputStream(ROOM_FILE);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
-            rooms = (ArrayList) ois.readObject();
+            rooms = (ArrayList<Room>) ois.readObject();
+            System.out.println("Rooms loaded: " + rooms);
 
         } catch (EOFException eof) {
             // EOFException 발생 시 빈 리스트로 초기화
@@ -96,7 +115,7 @@ public class RoomRepository {
             rooms = new ArrayList<>();  // 빈 리스트 반환
         } catch (FileNotFoundException fnf) {
             // 파일이 없을 경우 새로운 리스트를 생성
-            System.out.println("파일이 없습니다. 새 파일을 생성합니다.");
+            System.out.println("File not found. Creating a new room list.");
             rooms = new ArrayList<>();
         } catch (Exception e) {
             e.getMessage();
