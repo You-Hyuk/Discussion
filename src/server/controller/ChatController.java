@@ -144,4 +144,9 @@ public class ChatController {
         }
     }
 
+    public void deleteExpiredRooms() {
+        RoomRepository roomRepository = new RoomRepository();
+        roomRepository.deleteExpiredRooms(); // 만료된 방 삭제
+    }
+
 }

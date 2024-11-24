@@ -132,4 +132,13 @@ public class ChatRepository {
         }
         return chatHistory;
     }
+
+    public void deleteChatLog(String roomName) {
+        File chatLog = new File(DIRECTORY_PATH+ roomName + ".txt");
+        if (chatLog.exists()) {
+            if (!chatLog.delete()) {
+                System.out.println("채팅기록 파일 삭제 실패: " + roomName);
+            }
+        }
+    }
 }

@@ -1,5 +1,7 @@
 package server.application;
 
+import server.repository.RoomRepository;
+
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.HashMap;
@@ -13,6 +15,18 @@ public class DiscussionServer {
             ServerSocket server = new ServerSocket(10001);
             System.out.println("접속을 기다립니다.");
 
+            // 방 삭제 스케줄러 쓰레드 실행
+            new Thread(() -> {
+                RoomRepository roomRepository = new RoomRepository();
+                while (true) {
+                    try {
+                        Thread.sleep(60 * 60 * 1000); // 1시간마다 실행
+                        roomRepository.deleteExpiredRooms();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
 
             //메인스레드는 이 동작만 무한 루프를 돌린다
             while (true) {
