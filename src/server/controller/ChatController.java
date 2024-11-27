@@ -149,4 +149,34 @@ public class ChatController {
         roomRepository.deleteExpiredRooms(); // 만료된 방 삭제
     }
 
+    public void likeChat(Room room, String chatId) {
+        // 좋아요 수를 업데이트
+        chatRepository.updateLikeCount(room, chatId);
+
+        // 좋아요 수가 변경된 메시지를 클라이언트들에게 브로드캐스트
+        ArrayList<Chat> chats = chatRepository.readChatHistory(room);
+        for (Chat chat : chats) {
+            if (chat.getId().equals(chatId)) {
+                broadcastLikeUpdate(room, chat);
+                break;
+            }
+        }
+    }
+
+    // 좋아요 업데이트 브로드캐스트
+    private void broadcastLikeUpdate(Room room, Chat chat) {
+        List<PrintWriter> userList = userMap.get(room.getRoomName());
+        if (userList == null) return;
+
+        String likeUpdateMessage = "좋아요 업데이트: " +
+                "Message ID: " + chat.getId() +
+                " | Likes: " + chat.getLike();
+
+        synchronized (userList) {
+            for (PrintWriter pw : userList) {
+                pw.println(likeUpdateMessage); // 좋아요 업데이트 메시지 전송
+                pw.flush();
+            }
+        }
+    }
 }

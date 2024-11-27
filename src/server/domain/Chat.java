@@ -2,6 +2,7 @@ package server.domain;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 public class Chat implements Serializable {
     private String userName;
@@ -9,6 +10,7 @@ public class Chat implements Serializable {
     private String status;
     private Timestamp timestamp;
     private Integer like;
+    private String id;
 
     public Chat(String userName, String message, String status) {
         this.userName = userName;
@@ -16,6 +18,7 @@ public class Chat implements Serializable {
         this.status = status;
         this.timestamp = new Timestamp(System.currentTimeMillis());
         this.like = 0;
+        this.id = UUID.randomUUID().toString();
     }
 
 
@@ -60,6 +63,13 @@ public class Chat implements Serializable {
         this.like = like;
     }
 
+    public void incrementLike() {
+        this.like++;
+    }//좋아요 증가
+
+    public String getId() {
+        return id;
+    }
     @Override
     public String toString(){
         return this.userName + "\t" + this.message + "\t" + this.status + "\t" + this.timestamp + "\t" + this.like;
