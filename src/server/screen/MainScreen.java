@@ -1,4 +1,4 @@
-package screen;
+package server.screen;
 
 import server.controller.ChatController;
 import server.domain.Room;
