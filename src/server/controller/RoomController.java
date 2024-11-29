@@ -1,4 +1,7 @@
 package server.controller;
+//getRoomList 추가
+import server.domain.Room;
+import server.repository.RoomRepository;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -28,5 +31,10 @@ public class RoomController {
                 userMap.remove(roomName);  // 방에 유저가 없으면 방 제거
             }
         }
+    }
+
+    public List<Room> getRoomList() {
+        RoomRepository repository = new RoomRepository();
+        return repository.readRoom(); // room.txt에서 방 목록 읽기
     }
 }

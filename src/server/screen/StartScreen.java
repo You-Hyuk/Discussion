@@ -1,4 +1,4 @@
-package server.screen;
+package screen;
 
 import javax.swing.*;
 import java.awt.*;
@@ -93,16 +93,17 @@ public class StartScreen {
             try {
                 // 서버 연결
                 // StartScreen.java에서 서버 연결 초기화
-                Socket sock = new Socket("192.168.35.48", 10001);
+                Socket sock = new Socket("192.168.35.48", 10001); //192.168.67.228
                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()), true);
                 BufferedReader br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
                 // 서버로 닉네임 전송
                 pw.println(nickname);
+                pw.flush();
 
                 // MainScreen에 연결된 소켓 전달
                 frame.dispose();
-                MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
+                screen.MainScreen mainScreen = new screen.MainScreen(nickname, sock, pw, br);
                 mainScreen.createMainScreen();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "서버 연결에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
