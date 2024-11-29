@@ -1,4 +1,4 @@
-package server.screen;
+package screen;
 
 import server.controller.ChatController;
 import server.domain.Room;
@@ -8,10 +8,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.PrintWriter;
-import java.net.Socket;
 import java.util.*;
+import java.io.BufferedReader;
+import java.net.Socket;
 import java.util.List;
 
 public class MainScreen {
@@ -34,6 +34,8 @@ public class MainScreen {
         // 정확한 타입으로 초기화
         Map<String, List<PrintWriter>> userMap = new HashMap<>();
         this.chatController = new ChatController(userMap); // ChatController 초기화
+        //this.chatController = new ChatController(); // ChatController 초기화
+
     }
 
     public void createMainScreen() {
@@ -58,7 +60,22 @@ public class MainScreen {
         updateButton.setPreferredSize(new Dimension(200, 40)); // 버튼 크기 설정
         updateButton.addActionListener(e -> {
             // 방 리스트 갱신 로직
-            ArrayList<Room> updatedRooms = roomRepository.getRoomList(); // 파일에서 방 리스트 읽기
+            try {
+                String response;
+                // 서버에 방 리스트 요청
+                pw.println("/list");
+                pw.flush();
+                // 서버 응답 처리
+                tableModel.setRowCount(0); // 기존 데이터 초기화
+                while ((response = br.readLine()) != null) {
+                    System.out.println("클라이언트: 받은 데이터 = " + response);
+                    if (response.equals("END")) break;
+                    String[] roomData = response.split(",");
+                    tableModel.addRow(new Object[]{roomData[0], roomData[1], roomData[2], roomData[3]});
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            }
         });
         topPanel.add(updateButton);
 
@@ -88,14 +105,20 @@ public class MainScreen {
             table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
-        // RoomRepository에서 데이터 가져와 테이블에 추가
-        for (Room room : roomRepository.getRoomList()) {
-            tableModel.addRow(new Object[]{
-                    room.getRoomName(),
-                    room.getUserName(),
-                    room.getFirstStatusCount(),
-                    room.getSecondStatusCount()
-            });
+        try {
+            String response;
+            // 서버에 방 리스트 요청
+            pw.println("/list");
+            pw.flush();
+            // 서버 응답 처리
+            tableModel.setRowCount(0); // 기존 데이터 초기화
+            while ((response = br.readLine()) != null) {
+                if (response.equals("END")) break;
+                String[] roomData = response.split(",");
+                tableModel.addRow(new Object[]{roomData[0], roomData[1], roomData[2], roomData[3]});
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
 
         JScrollPane tableScrollPane = new JScrollPane(table);
@@ -106,9 +129,11 @@ public class MainScreen {
         JButton enterButton = new JButton("입장");
         enterButton.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
         enterButton.addActionListener(e -> {
+            System.out.println("입장 버튼 호출 확인");
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 String roomName = (String) table.getValueAt(selectedRow, 0);
+                System.out.println("입장 버튼 roomName 확인: " + roomName);
                 showEnterRoomPopup(roomName, frame); // 팝업 표시 후 입장
             } else {
                 JOptionPane.showMessageDialog(frame, "입장할 방을 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
@@ -169,11 +194,10 @@ public class MainScreen {
 
             try {
                 System.out.println("Sending command to server: /c " + topic + " " + status1 + " " + status2);
-//                pw.println("/c \"" + topic + "\" " + status1 + " " + status2);
                 pw.println("/c " + topic + " " + status1 + " " + status2);
                 pw.flush();
                 Room newRoom = new Room(topic, status1, status2, nickname);
-                roomRepository.createRoom(newRoom);
+                //roomRepository.createRoom(newRoom);
                 SwingUtilities.invokeLater(() -> {
                     tableModel.addRow(new Object[]{
                             newRoom.getRoomName(),
@@ -214,6 +238,9 @@ public class MainScreen {
 
         // 상태 버튼 추가
         Room room = roomRepository.findRoomByName(roomName);
+        System.out.println("showEnterRoomPopup에서 roomName 확인: " + roomName);
+        System.out.println("showEnterRoomPopup에서 room 확인: " + room);
+
         if (room == null) {
             JOptionPane.showMessageDialog(dialog, "방 정보를 찾을 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
             dialog.dispose();
@@ -277,18 +304,19 @@ public class MainScreen {
         confirmButton.addActionListener(e -> {
             if (selectedStatus[0] != null) {
                 try {
-                    System.out.println("Selected Status: " + selectedStatus[0]);
-                    System.out.println("Sending entry command to server...");
+                    System.out.println("입장 확인 명령 보내는거 확인, roomName: " + roomName);
+                    System.out.println("입장 확인 명령 보내는거 확인, selectedStatus[0]: " + selectedStatus[0]);
+                    String response;
                     pw.println("/e " + roomName + " " + selectedStatus[0]);
                     pw.flush();
                     // 채팅 내역 요청
-                    System.out.println("Requesting chat history from server...");
-                    pw.println("/getHistory " + roomName); // 채팅 내역 요청 명령
-                    pw.flush();
-                    System.out.println("Creating ChatRoomScreen...");
                     Map<String, List<PrintWriter>> userMap = new HashMap<>(); // 빈 맵 초기화
-                    ChatRoomScreen chatRoomScreen = new ChatRoomScreen(roomName, nickname, sock, pw, br, userMap, selectedStatus[0]);
-                    System.out.println("Opening chat room screen...");
+                    while ((response = br.readLine()) != null) {
+                        if (response.equals("END")) break;
+                        System.out.println("클라이언트 받은 데이터: " + response);
+                    }
+                    String enteredRoomName = response;
+                    screen.ChatRoomScreen chatRoomScreen = new screen.ChatRoomScreen(roomName, nickname, sock, pw, br, userMap, selectedStatus[0]);
                     chatRoomScreen.createChatRoomScreen();
                     dialog.dispose();
                     if (parentFrame != null) {
@@ -297,7 +325,7 @@ public class MainScreen {
                 } catch (Exception ex) {
                     System.out.println("Exception: " + ex.getMessage());
                     ex.printStackTrace();
-                    JOptionPane.showMessageDialog(dialog, "채팅방 입장 중 오류1가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, "채팅방 입장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(dialog, "상태를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);

@@ -37,7 +37,7 @@ public class ChatRepository {
             e.printStackTrace();
         }
         room.setChatFileName(file.getName());
-        System.out.println(room.getChatFileName());
+        System.out.println("생성된 채팅방 파일 이름: " + room.getChatFileName());
     }
 
     public void saveChat(Room room, Chat chat){
@@ -67,10 +67,9 @@ public class ChatRepository {
 
             oos.writeObject(chats);
             System.out.println(room.getRoomName() + " 채팅 저장 완료");
-
             System.out.println("Room: " + room);
-            System.out.println("Room Name: " + (room != null ? room.getRoomName() : "null"));
-            System.out.println("Chat: " + chat);
+            System.out.println("Room Name: " + room.getRoomName());
+            System.out.println("Chat(username, message, status): " + chat);
             System.out.println("Chat History: " + chats);
             System.out.println("File Path: " + filePath);
 
@@ -86,39 +85,35 @@ public class ChatRepository {
         }
     }
 
-    public ArrayList<Chat> findChatHistory(Room room){
-        try{
-            ArrayList<Chat> chatHistory = readChatHistory(room);
-            return chatHistory;
-        }catch (Exception e){
-            e.printStackTrace();
+    public ArrayList<Chat> findChatHistory(Room room) {
+        ArrayList<Chat> chatHistory = new ArrayList<>(); // 빈 리스트로 초기화
+        try {
+            chatHistory = readChatHistory(room); // 채팅 기록 읽기
+        } catch (Exception e) {
+            e.printStackTrace(); // 예외 스택 트레이스 출력
         }
-        System.out.println("해당 채팅방의 채팅 기록이 존재하지 않습니다.");
-        return null;
+        if (chatHistory.isEmpty()) {
+            System.out.println("해당 채팅방의 채팅 기록이 존재하지 않습니다.");
+        }
+        return chatHistory; // 항상 빈 리스트 또는 채팅 기록 반환
     }
 
     public ArrayList<Chat> readChatHistory(Room room) {
-
         if (room == null) {
             System.err.println("Room is null. Returning empty chat history.");
             return new ArrayList<>();
         }
-
         if (room.getChatFileName() == null) {
             System.err.println("Chat file name is null. Returning empty chat history.");
             return new ArrayList<>();
         }
-
         ArrayList<Chat> chatHistory = null;
         String chatFileName = room.getChatFileName();
         String path = DIRECTORY_PATH + chatFileName;
-
         try{
             FileInputStream fis = new FileInputStream(path);
             ObjectInputStream ois = new ObjectInputStream(fis);
-
             chatHistory = (ArrayList<Chat>) ois.readObject();
-
         } catch (EOFException eof) {
             // EOFException 발생 시 빈 리스트로 초기화
             System.out.println("파일이 비어 있거나 처음 생성된 상태입니다.");
@@ -132,7 +127,6 @@ public class ChatRepository {
         }
         return chatHistory;
     }
-
     private void writeChatHistory(String filePath, ArrayList<Chat> chats) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(chats);
@@ -156,20 +150,16 @@ public class ChatRepository {
                 System.err.println("Room is null. Cannot update like.");
                 return;
             }
-
             if (chatId == null) {
                 System.err.println("Chat ID is null. Cannot update like.");
                 return;
             }
-
             String filePath = DIRECTORY_PATH + room.getRoomName() + ".txt";
             ArrayList<Chat> chats = readChatHistory(room);
-
             if (chats == null) {
                 System.err.println("Chat history is null. Cannot update like count.");
                 return;
             }
-
             boolean updated = false;
             for (Chat chat : chats) {
                 if (chat.getId().equals(chat)) {
@@ -178,7 +168,6 @@ public class ChatRepository {
                     break;
                 }
             }
-
             if (updated) {
                 writeChatHistory(filePath, chats); // 업데이트된 기록 저장
                 System.out.println("좋아요 업데이트 완료: Chat ID = " + chatId);

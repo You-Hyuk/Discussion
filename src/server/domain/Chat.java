@@ -66,10 +66,10 @@ public class Chat implements Serializable {
     public void incrementLike() {
         this.like++;
     }//좋아요 증가
-
     public String getId() {
         return id;
     }
+
     @Override
     public String toString(){
         return this.userName + "\t" + this.message + "\t" + this.status + "\t" + this.timestamp + "\t" + this.like;
