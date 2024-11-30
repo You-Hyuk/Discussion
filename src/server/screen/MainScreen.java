@@ -222,6 +222,29 @@ public class MainScreen {
             System.out.println("Error: MainScreen.frame is null.");
             return;
         }
+        List<Room> rooms = new ArrayList<>();
+        try {
+            pw.println("/find " + roomName); // 서버에 방 목록 요청
+            pw.flush();
+            String response;
+            while ((response = br.readLine()) != null && !response.equals("END")) {
+                if (response.equals("END")) break;
+                else if (response.startsWith("ERROR")) {
+                    JOptionPane.showMessageDialog(parentFrame, response, "오류", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                String[] roomData = response.split(",");
+                System.out.println(roomData[0]);
+                //roomname,username,firststatuscount,secondstatusount
+                rooms.add(new Room(roomData[0], roomData[1], roomData[2], roomData[3]));
+            }
+            System.out.println("방 목록 로드 완료: " + rooms.size() + "개");
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(parentFrame, "서버와의 통신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         // 방 입장 팝업
         JDialog dialog = new JDialog(parentFrame, "토론방 입장", true);
         dialog.setSize(350, 250);
@@ -238,7 +261,6 @@ public class MainScreen {
 
         // 상태 버튼 추가
         Room room = roomRepository.findRoomByName(roomName);
-        System.out.println("showEnterRoomPopup에서 roomName 확인: " + roomName);
         System.out.println("showEnterRoomPopup에서 room 확인: " + room);
 
         if (room == null) {
