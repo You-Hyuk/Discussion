@@ -305,6 +305,7 @@ public class ChatRoomScreen {
                 System.out.println("퇴장 상태: " + selectedStatus[0]);
                 exitDialog.dispose();
                 parentFrame.dispose(); // 채팅방 창 닫기
+                System.exit(0);
             }
         });
 
