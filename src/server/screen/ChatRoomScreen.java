@@ -64,9 +64,11 @@ public class ChatRoomScreen {
         titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
         topPanel.add(titleLabel, BorderLayout.WEST);
 
-        JButton exitButton = new JButton("나가기");
-        exitButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        Icon closeIcon = UIManager.getIcon("InternalFrame.closeIcon");
+        JButton exitButton = new JButton("\uD83D\uDEAA");
+        exitButton.setFont(new Font("Arial Unicode MS", Font.BOLD, 30));
         exitButton.setFocusPainted(false); // 포커스 사각형 비활성화
+        exitButton.setPreferredSize(new Dimension(50, 50)); // 버튼 크기 설정
         exitButton.setBackground(new Color(240, 128, 128)); // 연한 빨간색
         exitButton.setForeground(Color.WHITE); // 버튼 텍스트 색상
         exitButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백
