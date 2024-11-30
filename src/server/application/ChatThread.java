@@ -113,7 +113,7 @@ public class ChatThread extends Thread {
 //                    pw.println(roomData);
                     String enteredRoomName = enteredRoom.getRoomName();
                     System.out.println("입장 enteredRoomName 확인:" + enteredRoomName);
-                    pw.println(enteredRoomName);
+                    pw.println("ROOM:" + enteredRoomName);
                     pw.flush();
                     pw.println("END"); // 응답 종료
                     pw.flush();
@@ -130,6 +130,7 @@ public class ChatThread extends Thread {
                                 String.valueOf(room.getFirstStatusCount()),
                                 String.valueOf(room.getSecondStatusCount())
                         );
+                        System.out.println("roomData확인: " + roomData);
                         pw.println(roomData);
                         pw.flush();
                     }
@@ -168,6 +169,8 @@ public class ChatThread extends Thread {
                     if (room != null) {
                         String roomData = String.join(",",
                                 room.getRoomName(),
+                                room.getFirstStatus(),
+                                room.getSecondStatus(),
                                 room.getUserName(),
                                 String.valueOf(room.getFirstStatusCount()),
                                 String.valueOf(room.getSecondStatusCount())

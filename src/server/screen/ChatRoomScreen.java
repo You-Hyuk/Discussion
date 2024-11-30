@@ -307,7 +307,9 @@ public class ChatRoomScreen {
                 System.out.println("퇴장 상태: " + selectedStatus[0]);
                 exitDialog.dispose();
                 parentFrame.dispose(); // 채팅방 창 닫기
-                System.exit(0);
+                // 메인 화면 생성
+                MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
+                mainScreen.createMainScreen();
             }
         });
 

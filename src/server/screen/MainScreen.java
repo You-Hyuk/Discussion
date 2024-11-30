@@ -272,6 +272,7 @@ public class MainScreen {
             System.out.println("Error: MainScreen.frame is null.");
             return;
         }
+        String[] roomData = null;
         List<Room> rooms = new ArrayList<>();
         try {
             pw.println("/find " + roomName); // 서버에 방 목록 요청
@@ -283,10 +284,12 @@ public class MainScreen {
                     JOptionPane.showMessageDialog(parentFrame, response, "오류", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                String[] roomData = response.split(",");
-                System.out.println(roomData[0]);
+                roomData = response.split(",");
+                System.out.println("enterRoomPopop에서 roomData[0] 확인: " + roomData[0]);
+                System.out.println("enterRoomPopop에서 roomData[1] 확인: " + roomData[1]);
                 //roomname,username,firststatuscount,secondstatusount
-                rooms.add(new Room(roomData[0], roomData[1], roomData[2], roomData[3]));
+//                rooms.add(new Room(roomData[0], roomData[3], roomData[4], roomData[5]));
+//                System.out.println("enterRoomPopup에서 rooms 확인" + rooms);
             }
             System.out.println("방 목록 로드 완료: " + rooms.size() + "개");
         } catch (Exception e) {
@@ -309,10 +312,10 @@ public class MainScreen {
         titleLabel.setForeground(Color.BLACK); // 검정색 텍스트
         dialog.add(titleLabel);
 
-        // 상태 버튼 추가
-        Room room = roomRepository.findRoomByName(roomName);
-        System.out.println("showEnterRoomPopup에서 room 확인: " + room);
+        Room room = new Room(roomData[0], roomData[1], roomData[2], roomData[3]);
+        System.out.println("enterRoomPopup에서 room 확인: " + room);
 
+        // 상태 버튼 추가
         if (room == null) {
             JOptionPane.showMessageDialog(dialog, "방 정보를 찾을 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
             dialog.dispose();
@@ -383,20 +386,43 @@ public class MainScreen {
                     System.out.println("입장 확인 명령 보내는거 확인, roomName: " + roomName);
                     System.out.println("입장 확인 명령 보내는거 확인, selectedStatus[0]: " + selectedStatus[0]);
                     String response;
+                    String enteredRoomName = null;
                     pw.println("/e " + roomName + " " + selectedStatus[0]);
                     pw.flush();
                     // 채팅 내역 요청
                     Map<String, List<PrintWriter>> userMap = new HashMap<>(); // 빈 맵 초기화
                     while ((response = br.readLine()) != null) {
-                        if (response.equals("END")) break;
-                        System.out.println("클라이언트 받은 데이터: " + response);
+                        System.out.println("클라이언트 받은 데이터:" + response);
+                        if (response.equals("END")) {
+                            break; // 메시지 끝을 나타내는 "END" 처리
+                        }
+                        // 유효한 방 이름 데이터만 처리
+                        if (response.startsWith("ROOM:")) {
+                            enteredRoomName = response.substring(5); // "ROOM:" 이후 값만 추출
+                        } else {
+                            System.out.println("무시된 데이터: " + response);
+                        }
+//                        if (enteredRoomName == null) {
+//                            enteredRoomName = response;
+//                        }
                     }
-                    String enteredRoomName = response;
-                    ChatRoomScreen chatRoomScreen = new ChatRoomScreen(roomName, nickname, sock, pw, br, userMap, selectedStatus[0]);
-                    chatRoomScreen.createChatRoomScreen();
-                    dialog.dispose();
-                    if (parentFrame != null) {
-                        parentFrame.dispose();
+                    if (enteredRoomName != null) {
+                        System.out.println("enteredRoomName 확인: " + enteredRoomName);
+
+                        // ChatRoomScreen 생성
+                        ChatRoomScreen chatRoomScreen = new ChatRoomScreen(enteredRoomName, nickname, sock, pw, br, userMap, selectedStatus[0]
+                        );
+                        chatRoomScreen.createChatRoomScreen();
+
+                        //ChatRoomScreen chatRoomScreen = new ChatRoomScreen(enteredRoomName, nickname, sock, pw, br, userMap, selectedStatus[0]);
+                        //System.out.println("enteredRoomName 확인: " + enteredRoomName);
+                        //hatRoomScreen.createChatRoomScreen();
+                        dialog.dispose();
+                        if (parentFrame != null) {
+                            parentFrame.dispose();
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(dialog, "방 이름을 확인할 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
                     System.out.println("Exception: " + ex.getMessage());
