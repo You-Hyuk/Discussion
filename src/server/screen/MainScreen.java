@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
 import java.util.*;
 import java.io.BufferedReader;
@@ -45,19 +47,25 @@ public class MainScreen {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
-        frame.getContentPane().setBackground(new Color(255, 255, 255)); // 흰색
+        //frame.getContentPane().setBackground(Color.black); // 흰색, 어디 적용되는지 모름
 
         // 상단 패널
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(new Color(255, 255, 255)); // 흰색
+        //topPanel.setBackground(new Color(190, 190, 190)); // 회색, "토론 채팅방 리스트"
         JLabel titleLabel = new JLabel("토론 채팅방 리스트");
         titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
         topPanel.add(titleLabel, BorderLayout.WEST);
 
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0)); // 오른쪽 정렬, 버튼 간 간격 10
+        //buttonPanel.setBackground(new Color(190, 190, 190)); // 버튼 영역 배경색, 회색
+
         // 업데이트 버튼
-        JButton updateButton = new JButton("업데이트");
-        updateButton.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        updateButton.setPreferredSize(new Dimension(200, 40)); // 버튼 크기 설정
+        JButton updateButton = new JButton("↻");
+        updateButton.setFont(new Font("Arial Unicode MS", Font.BOLD, 20));
+        //updateButton.setPreferredSize(new Dimension(200, 40)); // 버튼 크기 설정
+        //updateButton.setBackground(new Color(140, 140, 140)); // 업데이트 버튼 색, 회색
+        updateButton.setFocusPainted(false);
         updateButton.addActionListener(e -> {
             // 방 리스트 갱신 로직
             try {
@@ -77,26 +85,35 @@ public class MainScreen {
                 JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
             }
         });
-        topPanel.add(updateButton);
 
+        // 생성 버튼
         JButton createRoomButton = new JButton("+");
-        createRoomButton.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
-        createRoomButton.setBackground(Color.WHITE);
+        createRoomButton.setFont(new Font("Arial Unicode MS", Font.BOLD, 20));
+        //createRoomButton.setBackground(new Color(140, 140, 140)); 생성 버튼 색, 회색
         createRoomButton.setFocusPainted(false);
-        createRoomButton.addActionListener(e -> createRoom(frame)); // 채팅방 생성 팝업
-        topPanel.add(createRoomButton, BorderLayout.EAST);
+        createRoomButton.addActionListener(e -> createRoomPopup(frame)); // 채팅방 생성 팝업
+
+        buttonPanel.add(updateButton, BorderLayout.EAST);
+        buttonPanel.add(createRoomButton, BorderLayout.EAST);
+
+        topPanel.add(buttonPanel, BorderLayout.EAST);
 
         frame.add(topPanel, BorderLayout.NORTH);
 
         // 테이블 생성
         String[] columnNames = {"토론방 이름", "생성자", "찬성", "반대"};
-        tableModel = new DefaultTableModel(columnNames, 0); // 테이블 모델 초기화
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // 모든 셀 수정 불가능
+            }
+        };
         JTable table = new JTable(tableModel);
         table.setRowHeight(40);
         table.setFont(new Font("Malgun Gothic", Font.PLAIN, 16));
         table.getTableHeader().setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        table.getTableHeader().setBackground(new Color(220, 220, 220)); // 연한 회색
-        table.getTableHeader().setForeground(Color.BLACK);
+        table.getTableHeader().setBackground(new Color(210, 210, 210)); //테이블 헤더 배경색, 조금 진한 회색
+        table.getTableHeader().setForeground(Color.black); //테이블 헤더 글씨색
 
         // 테이블 셀 중앙 정렬
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -134,7 +151,7 @@ public class MainScreen {
             if (selectedRow != -1) {
                 String roomName = (String) table.getValueAt(selectedRow, 0);
                 System.out.println("입장 버튼 roomName 확인: " + roomName);
-                showEnterRoomPopup(roomName, frame); // 팝업 표시 후 입장
+                enterRoomPopup(roomName, frame); // 팝업 표시 후 입장
             } else {
                 JOptionPane.showMessageDialog(frame, "입장할 방을 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
             }
@@ -148,12 +165,12 @@ public class MainScreen {
         frame.setVisible(true);
     }
 
-    private void createRoom(JFrame parentFrame) {
+    private void createRoomPopup(JFrame parentFrame) {
         // 방 생성 팝업
         JDialog dialog = new JDialog(parentFrame, "토론방 생성", true);
         dialog.setSize(350, 300);
         dialog.setLayout(null);
-        dialog.getContentPane().setBackground(new Color(245, 245, 245)); // 연한 회색 배경
+        //dialog.getContentPane().setBackground(Color.white); // 토론방 생성 배경 색
 
         // 제목 라벨
         JLabel titleLabel = new JLabel("토론방 생성");
@@ -165,17 +182,40 @@ public class MainScreen {
         // 입력 필드
         JTextField topicField = new JTextField();
         topicField.setBounds(50, 60, 250, 30);
-        topicField.setToolTipText("주제를 입력하세요.");
+        topicField.setForeground(Color.GRAY); // 플레이스홀더 글씨 색상
+        topicField.setText("주제를 입력하세요."); // 플레이스홀더 텍스트
+        // 플레이스홀더 이벤트
+            topicField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!topicField.isFocusable()) {
+                    topicField.setFocusable(true); // 클릭 시 포커스 가능하도록 변경
+                    topicField.requestFocusInWindow(); // 포커스 요청
+                }
+                if (topicField.getText().equals("주제를 입력하세요.")) {
+                    topicField.setText(""); // 플레이스홀더 제거
+                    topicField.setForeground(Color.BLACK); // 텍스트 색상 변경
+                }
+            }
+        });
+
+        // FocusListener 추가
+        topicField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (topicField.getText().isEmpty()) {
+                    topicField.setText("주제를 입력하세요."); // 플레이스홀더 복원
+                    topicField.setForeground(Color.GRAY); // 텍스트 색상 회색으로 변경
+                }
+            }
+        });
         dialog.add(topicField);
 
         JTextField status1Field = new JTextField("찬성");
         status1Field.setBounds(50, 110, 120, 30);
-        status1Field.setToolTipText("상태1 입력 (기본값: 찬성)");
         dialog.add(status1Field);
 
         JTextField status2Field = new JTextField("반대");
         status2Field.setBounds(180, 110, 120, 30);
-        status2Field.setToolTipText("상태2 입력 (기본값: 반대)");
         dialog.add(status2Field);
 
         // 확인 버튼
@@ -187,7 +227,7 @@ public class MainScreen {
             String status1 = status1Field.getText().trim();
             String status2 = status2Field.getText().trim();
 
-            if (topic.isEmpty()) {
+            if (topic.isEmpty() || topic.equals("주제를 입력하세요.")) {
                 JOptionPane.showMessageDialog(dialog, "주제를 입력하세요.", "오류", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -214,10 +254,19 @@ public class MainScreen {
             }
         });
         dialog.add(confirmButton);
+
+        // 다이얼로그의 기본 포커스 설정 (주제 입력 필드로 기본 포커스가 가지 않도록)
+        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowOpened(java.awt.event.WindowEvent e) {
+                dialog.getContentPane().requestFocusInWindow(); // 다이얼로그 자체에 포커스 설정
+            }
+        });
+
         dialog.setVisible(true);
     }
 
-    private void showEnterRoomPopup(String roomName, JFrame parentFrame) {
+    private void enterRoomPopup(String roomName, JFrame parentFrame) {
         if (parentFrame == null) {
             System.out.println("Error: MainScreen.frame is null.");
             return;
@@ -249,7 +298,7 @@ public class MainScreen {
         JDialog dialog = new JDialog(parentFrame, "토론방 입장", true);
         dialog.setSize(350, 250);
         dialog.setLayout(null);
-        dialog.getContentPane().setBackground(new Color(230, 230, 230)); // 연한 회색 배경
+        //dialog.getContentPane().setBackground(Color.white); //입장 팝업 배경색
 
         // 제목 라벨
         JLabel titleLabel = new JLabel("토론방 입장");
@@ -287,6 +336,10 @@ public class MainScreen {
         neutralButton.setBounds(135, 80, 80, 40);
         status2Button.setBounds(220, 80, 80, 40);
 
+        status1Button.setFocusPainted(false);
+        neutralButton.setFocusPainted(false);
+        status2Button.setFocusPainted(false);
+
         dialog.add(status1Button);
         dialog.add(neutralButton);
         dialog.add(status2Button);
@@ -320,8 +373,8 @@ public class MainScreen {
         JButton confirmButton = new JButton("확인");
         confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
         confirmButton.setBounds(125, 150, 100, 40);
-        confirmButton.setBackground(new Color(200, 200, 200)); // 연한 회색 버튼
-        confirmButton.setForeground(Color.BLACK); // 검정 텍스트
+        confirmButton.setBackground(Color.white); // 입장 확인 버튼 색
+        confirmButton.setForeground(Color.BLACK); // 입장 확인 버튼 텍스트 색
 
         confirmButton.addActionListener(e -> {
             if (selectedStatus[0] != null) {
