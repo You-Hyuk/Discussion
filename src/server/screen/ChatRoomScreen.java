@@ -70,7 +70,7 @@ public class ChatRoomScreen {
         exitButton.setBackground(new Color(240, 128, 128)); // 연한 빨간색
         exitButton.setForeground(Color.WHITE); // 버튼 텍스트 색상
         exitButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백
-        exitButton.addActionListener(e -> exitPopup(frame));
+        exitButton.addActionListener(e -> exitPopup(frame, room));
 
         topPanel.add(exitButton, BorderLayout.EAST);
 
@@ -240,7 +240,7 @@ public class ChatRoomScreen {
         }
     }
 
-    private void exitPopup(JFrame parentFrame) {
+    private void exitPopup(JFrame parentFrame, Room room) {
         // 팝업 다이얼로그 생성
         JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
         exitDialog.setSize(350, 250);
@@ -251,13 +251,16 @@ public class ChatRoomScreen {
         exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
         exitDialog.add(exitTitle);
 
+        String firstStatus = room.getFirstStatus();
+        String secondStatus = room.getSecondStatus();
+
         // STATUS 버튼 패널
         JPanel statusPanel = new JPanel();
         statusPanel.setBounds(50, 60, 200, 40);
         statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
 
-        JButton status1Button = new JButton("찬성");
-        JButton status2Button = new JButton("반대");
+        JButton status1Button = new JButton(firstStatus);
+        JButton status2Button = new JButton(secondStatus);
 
         // 기본 스타일 설정
         status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
@@ -270,13 +273,13 @@ public class ChatRoomScreen {
 
         // 버튼 클릭 이벤트 (선택 상태 표시)
         status1Button.addActionListener(event -> {
-            selectedStatus[0] = "찬성";
+            selectedStatus[0] = firstStatus;
             status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
             status2Button.setBackground(Color.WHITE);
         });
 
         status2Button.addActionListener(event -> {
-            selectedStatus[0] = "반대";
+            selectedStatus[0] = secondStatus;
             status1Button.setBackground(Color.WHITE);
             status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
         });
