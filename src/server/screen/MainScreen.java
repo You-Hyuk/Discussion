@@ -161,7 +161,6 @@ public class MainScreen {
         bottomPanel.add(enterButton);
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
-
         frame.setVisible(true);
     }
 
@@ -262,6 +261,8 @@ public class MainScreen {
                 dialog.getContentPane().requestFocusInWindow(); // 다이얼로그 자체에 포커스 설정
             }
         });
+
+        dialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
 
         dialog.setVisible(true);
     }
@@ -391,7 +392,7 @@ public class MainScreen {
                         System.out.println("클라이언트 받은 데이터: " + response);
                     }
                     String enteredRoomName = response;
-                    screen.ChatRoomScreen chatRoomScreen = new screen.ChatRoomScreen(roomName, nickname, sock, pw, br, userMap, selectedStatus[0]);
+                    ChatRoomScreen chatRoomScreen = new ChatRoomScreen(roomName, nickname, sock, pw, br, userMap, selectedStatus[0]);
                     chatRoomScreen.createChatRoomScreen();
                     dialog.dispose();
                     if (parentFrame != null) {
@@ -408,6 +409,8 @@ public class MainScreen {
         });
 
         dialog.add(confirmButton);
+
+        dialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
 
         dialog.setVisible(true);
     }

@@ -1,4 +1,4 @@
-package screen;
+package server.screen;
 
 import server.controller.ChatController;
 import server.domain.Chat;
@@ -57,10 +57,24 @@ public class ChatRoomScreen {
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
 
-        // 상단 제목 표시
+        // 상단 패널
+        JPanel topPanel = new JPanel(new BorderLayout());
+
         JLabel titleLabel = new JLabel("토론 주제: " + roomName, SwingConstants.LEFT);
         titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
-        frame.add(titleLabel, BorderLayout.NORTH);
+        topPanel.add(titleLabel, BorderLayout.WEST);
+
+        JButton exitButton = new JButton("나가기");
+        exitButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        exitButton.setFocusPainted(false); // 포커스 사각형 비활성화
+        exitButton.setBackground(new Color(240, 128, 128)); // 연한 빨간색
+        exitButton.setForeground(Color.WHITE); // 버튼 텍스트 색상
+        exitButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백
+        exitButton.addActionListener(e -> exitPopup(frame));
+
+        topPanel.add(exitButton, BorderLayout.EAST);
+
+        frame.add(topPanel, BorderLayout.NORTH);
 
         // 좌우 분할 패널 생성
         JPanel chatPanel = new JPanel(new GridLayout(1, 2, 10, 0));
@@ -224,6 +238,76 @@ public class ChatRoomScreen {
         for (int i = 0; i < calculatedLines; i++) {
             textAreaToSync.append("\n");
         }
+    }
+
+    private void exitPopup(JFrame parentFrame) {
+        // 팝업 다이얼로그 생성
+        JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
+        exitDialog.setSize(350, 250);
+        exitDialog.setLayout(null);
+        JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
+        exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
+        exitTitle.setBounds(0, 10, 300, 30);
+        exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
+        exitDialog.add(exitTitle);
+
+        // STATUS 버튼 패널
+        JPanel statusPanel = new JPanel();
+        statusPanel.setBounds(50, 60, 200, 40);
+        statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
+
+        JButton status1Button = new JButton("찬성");
+        JButton status2Button = new JButton("반대");
+
+        // 기본 스타일 설정
+        status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        status2Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        status1Button.setBackground(Color.WHITE);
+        status2Button.setBackground(Color.WHITE);
+
+        // 상태 선택 추적 변수
+        final String[] selectedStatus = {null};
+
+        // 버튼 클릭 이벤트 (선택 상태 표시)
+        status1Button.addActionListener(event -> {
+            selectedStatus[0] = "찬성";
+            status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
+            status2Button.setBackground(Color.WHITE);
+        });
+
+        status2Button.addActionListener(event -> {
+            selectedStatus[0] = "반대";
+            status1Button.setBackground(Color.WHITE);
+            status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
+        });
+
+        status1Button.setFocusPainted(false);
+        status2Button.setFocusPainted(false);
+
+        statusPanel.add(status1Button);
+        statusPanel.add(status2Button);
+        exitDialog.add(statusPanel);
+
+        // 확인 버튼
+        JButton confirmButton = new JButton("확인");
+        confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        confirmButton.setBounds(100, 120, 100, 30);
+        confirmButton.setBackground(Color.WHITE);
+        confirmButton.setForeground(Color.BLACK);
+        confirmButton.addActionListener(event -> {
+            if (selectedStatus[0] == null) {
+                JOptionPane.showMessageDialog(exitDialog, "STATUS를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
+            } else {
+                // 퇴장 로직 (나가기 처리)
+                System.out.println("퇴장 상태: " + selectedStatus[0]);
+                exitDialog.dispose();
+                parentFrame.dispose(); // 채팅방 창 닫기
+            }
+        });
+
+        exitDialog.add(confirmButton);
+        exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
+        exitDialog.setVisible(true);
     }
 
 }
