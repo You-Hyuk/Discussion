@@ -38,6 +38,7 @@ public class ChatThread extends Thread {
         this.sock = sock;
         this.userMap = userMap;
         this.chatRepository = new ChatRepository();
+        this.roomRepository = new RoomRepository();
         this.roomController = new RoomController(userMap);
         this.chatController = new ChatController(userMap);
         try {
@@ -160,11 +161,10 @@ public class ChatThread extends Thread {
                         pw.flush();
                         continue;
                     }
-
                     String roomName = commandParts[1];
-                    System.out.println("Received /find command for room: " + roomName);
-
+                    System.out.println("commandParts[1]을 roomName으로 받는지 확인: " + roomName);
                     Room room = roomRepository.findRoomByName(roomName);
+                    System.out.println("room 확인: " + room);
                     if (room != null) {
                         String roomData = String.join(",",
                                 room.getRoomName(),
@@ -178,6 +178,8 @@ public class ChatThread extends Thread {
                         pw.println("ERROR"); // 방을 찾을 수 없음
                         pw.flush();
                     }
+                    pw.println("END"); // 응답 종료
+                    pw.flush();
                 }
 
             }
