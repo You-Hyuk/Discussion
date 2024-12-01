@@ -172,6 +172,8 @@ public class ChatController {
                 break;
             }
         }
+        chatRepository.updateLikeCount(room, chatId); // 좋아요 수 업데이트
+        broadcastMostLikedChat(room); // 최고 좋아요 채팅 브로드캐스트
     }
     // 좋아요 업데이트 브로드캐스트
     private void broadcastLikeUpdate(Room room, Chat chat) {
@@ -184,6 +186,25 @@ public class ChatController {
             for (PrintWriter pw : userList) {
                 pw.println(likeUpdateMessage); // 좋아요 업데이트 메시지 전송
                 pw.flush();
+            }
+        }
+    }
+    private void broadcastMostLikedChat(Room room) {
+        ArrayList<Chat> chats = chatRepository.readChatHistory(room);
+        Chat mostLikedChat = chatRepository.findMostLikedChat(chats);
+
+        if (mostLikedChat != null) {
+            List<PrintWriter> userList = userMap.get(room.getRoomName());
+            if (userList == null) return;
+
+            String popupMessage = "최고 좋아요 채팅: " + mostLikedChat.getMessage() +
+                    " | Likes: " + mostLikedChat.getLike();
+
+            synchronized (userList) {
+                for (PrintWriter pw : userList) {
+                    pw.println("POPUP: " + popupMessage); // 팝업 메시지 전송
+                    pw.flush();
+                }
             }
         }
     }
