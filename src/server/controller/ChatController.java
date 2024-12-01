@@ -189,6 +189,7 @@ public class ChatController {
             }
         }
     }
+
     private void broadcastMostLikedChat(Room room) {
         ArrayList<Chat> chats = chatRepository.readChatHistory(room);
         Chat mostLikedChat = chatRepository.findMostLikedChat(chats);
@@ -208,4 +209,55 @@ public class ChatController {
             }
         }
     }
+
+    public void updateRoomStatusCount(Room room, String status, boolean isEntering) {
+        if (room == null) return;
+
+        // 상태별 인원수 증가/감소
+        if (status.equals(room.getFirstStatus())) {
+            if (isEntering) room.incrementFirstStatusCount();
+            else room.decrementFirstStatusCount();
+        } else if (status.equals(room.getSecondStatus())) {
+            if (isEntering) room.incrementSecondStatusCount();
+            else room.decrementSecondStatusCount();
+        }
+
+        // 업데이트된 상태 브로드캐스트
+        broadcastRoomStatus(room);
+    }
+
+    private void broadcastRoomStatus(Room room) {
+        String statusUpdateMessage = "STATUS_UPDATE: " +
+                room.getRoomName() + "," +
+                room.getFirstStatusCount() + "," +
+                room.getSecondStatusCount();
+
+        List<PrintWriter> userList = userMap.get(room.getRoomName());
+        if (userList == null) return;
+
+        synchronized (userList) {
+            for (PrintWriter pw : userList) {
+                pw.println(statusUpdateMessage); // 상태 업데이트 메시지 전송
+                pw.flush();
+            }
+        }
+    }
+
+    public Room enterRoom(String roomName, User user, String status) {
+        Room room = roomRepository.findRoomByName(roomName);
+        if (room == null) throw new IllegalArgumentException("Room not found: " + roomName);
+
+        // 상태 인원수 업데이트
+        updateRoomStatusCount(room, status, true);
+        return room;
+    }
+
+    public void exitRoom(Room room, User user, String status) {
+        if (room == null) return;
+
+        // 상태 인원수 업데이트
+        updateRoomStatusCount(room, status, false);
+    }
+
+
 }

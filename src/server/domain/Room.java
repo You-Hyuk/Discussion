@@ -121,4 +121,20 @@ public class Room implements Serializable {
     public String getChatFileName() {
         return chatFileName;
     }
+
+    public void incrementFirstStatusCount() {
+        this.firstStatusCount++;
+    }
+
+    public void decrementFirstStatusCount() {
+        this.firstStatusCount = Math.max(0, this.firstStatusCount - 1);
+    }
+
+    public void incrementSecondStatusCount() {
+        this.secondStatusCount++;
+    }
+
+    public void decrementSecondStatusCount() {
+        this.secondStatusCount = Math.max(0, this.secondStatusCount - 1);
+    }
 }
