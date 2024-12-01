@@ -29,4 +29,36 @@ public class InputThread extends Thread {
             }
         }
     }
+
+    private void receiveMessages() {
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // 메시지 처리 로직
+                if (line.startsWith("STATUS_UPDATE: ")) {
+                    // 상태 업데이트 메시지 처리
+                    handleStatusUpdate(line.replace("STATUS_UPDATE: ", ""));
+                } else {
+                    // 일반 메시지 출력
+                    System.out.println(line);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleStatusUpdate(String statusMessage) {
+        String[] parts = statusMessage.split(",");
+        String roomName = parts[0];
+        int firstStatusCount = Integer.parseInt(parts[1]);
+        int secondStatusCount = Integer.parseInt(parts[2]);
+
+        System.out.println("Status Update:");
+        System.out.println("Room: " + roomName);
+        System.out.println("찬성: " + firstStatusCount);
+        System.out.println("반대: " + secondStatusCount);
+
+        // 여기서 UI 클래스 호출 또는 상태 업데이트 로직 추가 가능
+    }
 }

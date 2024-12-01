@@ -178,4 +178,18 @@ public class ChatRepository {
             e.printStackTrace();
         }
     }
+
+    public Chat findMostLikedChat(ArrayList<Chat> chats) {
+        if (chats == null || chats.isEmpty()) {
+            return null;
+        }
+        // 좋아요 수 기준으로 가장 높은 채팅 찾기
+        Chat mostLikedChat = chats.get(0);
+        for (Chat chat : chats) {
+            if (chat.getLike() > mostLikedChat.getLike()) {
+                mostLikedChat = chat;
+            }
+        }
+        return mostLikedChat;
+    }
 }
