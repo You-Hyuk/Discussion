@@ -50,7 +50,22 @@ public class ChatRoomScreen {
 
     public void createChatRoomScreen() {
         JFrame frame = new JFrame("토론 플랫폼 - " + roomName);
-        Room room = roomRepository.findRoomByName(roomName);
+        String[] roomData = null;
+        try {
+            String response;
+            // 서버에 방 리스트 요청
+            pw.println("/list");
+            pw.flush();
+            // 서버 응답 처리
+            while ((response = br.readLine()) != null) {
+                if (response.equals("LIST_END")) break;
+                roomData = response.split(",");
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+        }
+        //roomame,firststatus,secondstatus,username
+        Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
         String firstStatus = room.getFirstStatus();
         String secondStatus = room.getSecondStatus();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -125,15 +140,14 @@ public class ChatRoomScreen {
             loadChatHistory();
         });
 
-        System.out.println("ChatHistory 호출 확인");
-
         // 서버에서 메시지 수신 처리
-        new Thread(this::receiveMessages).start();
+        //new Thread(this::receiveMessages).start();
 
         // 전송 버튼 액션 리스너
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String response = null;
                 try {
                     String message = chatInput.getText(); // 사용자 입력
                     if (message.isEmpty()) {
@@ -142,8 +156,33 @@ public class ChatRoomScreen {
                     }
                     pw.println("/chat " + message + " " + userStatus); // 서버로 전송
                     pw.flush();
+
+//                    // 새로운 /broadcast 명령 전송
+//                    pw.println("/broadcast " + roomName + " " + message + " " + nickname);
+//                    System.out.println("브로드캐스트 명령 전송: " + roomName + ", " + message + ", " + nickname);
+//                    pw.flush();
+
+                    while ((response = br.readLine()) != null) {
+                        if (response.equals("CHAT_END")) break;
+                    }
                     chatInput.setText(""); // 입력 필드 초기화
-                    Room room = roomRepository.findRoomByName(roomName);
+
+                    String[] roomData = null;
+                    try {
+                        // 서버에 방 리스트 요청
+                        pw.println("/list");
+                        pw.flush();
+                        // 서버 응답 처리
+                        while ((response = br.readLine()) != null) {
+                            if (response.equals("LIST_END")) break;
+                            roomData = response.split(",");
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                    }
+                    //roomame,firststatus,secondstatus,username
+                    Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
+                    System.out.println("전송에서 room 확인: " + room);
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + nickname + " : " + message;
                     // 메시지를 상태에 따라 출력
@@ -172,11 +211,31 @@ public class ChatRoomScreen {
         try {
             String line;
             while ((line = br.readLine()) != null) {
-                Room room = roomRepository.findRoomByName(roomName);
-                if (room == null) {
-                    System.out.println("Room not found: " + roomName);
-                    continue;
+                String[] roomData = null;
+                try {
+                    String response;
+                    pw.println("/list");
+                    pw.flush();
+                    // 서버 응답 처리
+                    while ((response = br.readLine()) != null) {
+                        System.out.println("receiveMessages에서 클라이언트 받은 데이터 = " + response);
+                        if (response.equals("LIST_END")) break;
+                        //roomname,username,firststatuscount,secondstatuscount,firststatus,secondstatus
+                        roomData = response.split(",");
+                    }
+                } catch (Exception ex) {
+                    System.out.println("loadChatHistory 오류: " + ex);
                 }
+
+                // roomData가 null인지 확인
+                if (roomData == null || roomData.length < 6) {
+                    System.out.println("receiveMessage에서 roomData 확인: " + roomData);
+                    System.out.println("유효한 roomData를 찾을 수 없습니다.");
+                    continue; // 다음 반복으로 이동
+                }
+
+                Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
+
                 // 메시지 처리
                 if (line.startsWith(room.getFirstStatus() + ":")) {
                     status1ChatArea.append(line.replace(room.getFirstStatus() + ":", "") + "\n");
@@ -198,31 +257,100 @@ public class ChatRoomScreen {
     }
 
     private void loadChatHistory() {
+        String userName;
+        String timestamp;
+        String message;
+        String status;
+        String likeCount;
+        String[] roomData = null;
+        String response;
+        Room room = null;
         try {
-            Room room = roomRepository.findRoomByName(roomName);
-            List<Chat> chatHistory = chatRepository.findChatHistory(room);
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+            // 서버에 방 리스트 요청
+            pw.println("/list");
+            pw.flush();
+            // 서버 응답 처리
+            while ((response = br.readLine()) != null) {
+                if (response.equals("LIST_END")) break;
+                roomData = response.split(",");
+            }
+            //Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+        room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
+        try {
+            pw.println("/history " + room.getRoomName()); // 방 이름 예: "토론1"
+            pw.flush();
 
-            for (Chat chat : chatHistory) {
-                String formattedTimestamp = timeFormat.format(chat.getTimestamp()); // 타임스탬프 변환
-                String formattedMessage = "[" + formattedTimestamp + "] " + chat.getUserName() + " : " + chat.getMessage();
-                if (chat.getStatus().equals(room.getFirstStatus())) {
-                    status1ChatArea.append(formattedMessage + "\n");
-                    int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
-                    syncLineCounts(status2ChatArea, lineCount);
-                } else if (chat.getStatus().equals(room.getSecondStatus())) {
-                    status2ChatArea.append(formattedMessage + "\n");
-                    int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
-                    syncLineCounts(status1ChatArea, lineCount);
-                } else {
-                    // 상태가 없는 메시지 처리
-                    System.out.println("Unrecognized Status: " + chat.getMessage());
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); // 입력 포맷
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm"); // 출력 포맷 (시간)
+
+            // 서버 응답 처리
+            while ((response = br.readLine()) != null) {
+                // 맨 앞의 "[" 제거
+                if (response.startsWith("[")) {
+                    response = response.replaceFirst("\\[", " ");
+                }
+                if (response.equals("HISTORY_END")) break;
+
+                if (response.contains("해당 방의 채팅 기록이 없습니다.")) {
+                    System.out.println("채팅 기록 없음: " + response);
+                    break; // 기록 없음 메시지는 무시하고 다음으로 진행
+                }
+
+                // 쉼표로 채팅 기록 분리
+                String[] chatEntries = response.split(",");
+                for (String chatEntry : chatEntries) {
+                    // 공백으로 세부 데이터 분리
+                    String[] chatData = chatEntry.split("\t");
+//                    if (chatData.length < 5) {
+//                        System.out.println("Invalid chat data: " + chatEntry);
+//                        continue; // 유효하지 않은 데이터 무시
+//                    }
+
+                    userName = chatData[0];
+                    timestamp = chatData[3];
+                    message = chatData[1];
+                    status = chatData[2];
+                    likeCount = chatData[4];
+
+                    String formattedTimestamp = "";
+                    try {
+                        // 타임스탬프 문자열을 Date로 변환 후 포맷
+                        Date date = inputFormat.parse(timestamp);
+                        formattedTimestamp = timeFormat.format(date);
+                    } catch (Exception ex) {
+                        System.out.println("타임스탬프 변환 중 오류: " + ex.getMessage());
+                        formattedTimestamp = "알 수 없음"; // 오류 발생 시 기본값
+                    }
+                    // 포맷된 메시지 생성
+                    String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
+
+                    // 메시지 상태에 따라 화면에 표시
+                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
+                        status1ChatArea.append(formattedMessage + "\n");
+                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
+                        syncLineCounts(status2ChatArea, lineCount);
+                    } else if (status2ChatArea != null && status.equals(room.getSecondStatus())) {
+                        status2ChatArea.append(formattedMessage + "\n");
+                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
+                        syncLineCounts(status1ChatArea, lineCount);
+                    } else {
+                        // 상태가 없는 메시지 처리 (중립 상태)
+                        System.out.println("Unrecognized Status: " + message);
+                    }
                 }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
+
+
+
 
     private int calculateLineCount(String message, JTextArea textArea) {
         int areaWidth = textArea.getWidth();

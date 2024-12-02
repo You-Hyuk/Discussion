@@ -76,8 +76,7 @@ public class MainScreen {
                 // 서버 응답 처리
                 tableModel.setRowCount(0); // 기존 데이터 초기화
                 while ((response = br.readLine()) != null) {
-                    System.out.println("클라이언트: 받은 데이터 = " + response);
-                    if (response.equals("END")) break;
+                    if (response.equals("LIST_END")) break;
                     String[] roomData = response.split(",");
                     tableModel.addRow(new Object[]{roomData[0], roomData[1], roomData[2], roomData[3]});
                 }
@@ -130,7 +129,7 @@ public class MainScreen {
             // 서버 응답 처리
             tableModel.setRowCount(0); // 기존 데이터 초기화
             while ((response = br.readLine()) != null) {
-                if (response.equals("END")) break;
+                if (response.equals("LIST_END")) break;
                 String[] roomData = response.split(",");
                 tableModel.addRow(new Object[]{roomData[0], roomData[1], roomData[2], roomData[3]});
             }
@@ -146,11 +145,9 @@ public class MainScreen {
         JButton enterButton = new JButton("입장");
         enterButton.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
         enterButton.addActionListener(e -> {
-            System.out.println("입장 버튼 호출 확인");
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 String roomName = (String) table.getValueAt(selectedRow, 0);
-                System.out.println("입장 버튼 roomName 확인: " + roomName);
                 enterRoomPopup(roomName, frame); // 팝업 표시 후 입장
             } else {
                 JOptionPane.showMessageDialog(frame, "입장할 방을 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
@@ -279,19 +276,13 @@ public class MainScreen {
             pw.flush();
             String response;
             while ((response = br.readLine()) != null && !response.equals("END")) {
-                if (response.equals("END")) break;
+                if (response.equals("FIND_END")) break;
                 else if (response.startsWith("ERROR")) {
                     JOptionPane.showMessageDialog(parentFrame, response, "오류", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 roomData = response.split(",");
-                System.out.println("enterRoomPopop에서 roomData[0] 확인: " + roomData[0]);
-                System.out.println("enterRoomPopop에서 roomData[1] 확인: " + roomData[1]);
-                //roomname,username,firststatuscount,secondstatusount
-//                rooms.add(new Room(roomData[0], roomData[3], roomData[4], roomData[5]));
-//                System.out.println("enterRoomPopup에서 rooms 확인" + rooms);
             }
-            System.out.println("방 목록 로드 완료: " + rooms.size() + "개");
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parentFrame, "서버와의 통신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
@@ -313,7 +304,6 @@ public class MainScreen {
         dialog.add(titleLabel);
 
         Room room = new Room(roomData[0], roomData[1], roomData[2], roomData[3]);
-        System.out.println("enterRoomPopup에서 room 확인: " + room);
 
         // 상태 버튼 추가
         if (room == null) {
@@ -383,31 +373,30 @@ public class MainScreen {
         confirmButton.addActionListener(e -> {
             if (selectedStatus[0] != null) {
                 try {
-                    System.out.println("입장 확인 명령 보내는거 확인, roomName: " + roomName);
-                    System.out.println("입장 확인 명령 보내는거 확인, selectedStatus[0]: " + selectedStatus[0]);
                     String response;
                     String enteredRoomName = null;
+                    List<String> chatHistory = new ArrayList<>(); // 채팅 내역 저장
                     pw.println("/e " + roomName + " " + selectedStatus[0]);
                     pw.flush();
                     // 채팅 내역 요청
                     Map<String, List<PrintWriter>> userMap = new HashMap<>(); // 빈 맵 초기화
                     while ((response = br.readLine()) != null) {
                         System.out.println("클라이언트 받은 데이터:" + response);
-                        if (response.equals("END")) {
+                        if (response.equals("ENTER_END")) {
                             break; // 메시지 끝을 나타내는 "END" 처리
                         }
                         // 유효한 방 이름 데이터만 처리
                         if (response.startsWith("ROOM:")) {
                             enteredRoomName = response.substring(5); // "ROOM:" 이후 값만 추출
                         } else {
-                            System.out.println("무시된 데이터: " + response);
+                            chatHistory.add(response); // 나머지 데이터를 채팅 내역으로 저장
+                            System.out.println("채팅 내역: " + response);
                         }
 //                        if (enteredRoomName == null) {
 //                            enteredRoomName = response;
 //                        }
                     }
                     if (enteredRoomName != null) {
-                        System.out.println("enteredRoomName 확인: " + enteredRoomName);
 
                         // ChatRoomScreen 생성
                         ChatRoomScreen chatRoomScreen = new ChatRoomScreen(enteredRoomName, nickname, sock, pw, br, userMap, selectedStatus[0]
