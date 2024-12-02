@@ -40,6 +40,32 @@ public class MainScreen {
 
     }
 
+    // 방 리스트 갱신 로직
+    private void refreshRoomTable() {
+        try {
+            pw.println("/list"); // 방 리스트 요청
+            pw.flush();
+
+            // 서버 응답 처리
+            tableModel.setRowCount(0); // 기존 데이터 초기화
+            String response;
+            while ((response = br.readLine()) != null) {
+                if (response.equals("LIST_END")) break; // 응답 종료
+                String[] roomData = response.split(","); // 방 데이터 분리
+                tableModel.addRow(new Object[]{
+                        roomData[0], // 방 이름
+                        roomData[1], // 생성자
+                        roomData[2], // 찬성 수
+                        roomData[3]  // 반대 수
+                });
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
+
+
     public void createMainScreen() {
         if (this.frame == null) {
             this.frame = new JFrame("토론 플랫폼 - 메인 화면");
@@ -68,21 +94,7 @@ public class MainScreen {
         updateButton.setFocusPainted(false);
         updateButton.addActionListener(e -> {
             // 방 리스트 갱신 로직
-            try {
-                String response;
-                // 서버에 방 리스트 요청
-                pw.println("/list");
-                pw.flush();
-                // 서버 응답 처리
-                tableModel.setRowCount(0); // 기존 데이터 초기화
-                while ((response = br.readLine()) != null) {
-                    if (response.equals("LIST_END")) break;
-                    String[] roomData = response.split(",");
-                    tableModel.addRow(new Object[]{roomData[0], roomData[1], roomData[2], roomData[3]});
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-            }
+            refreshRoomTable();
         });
 
         // 생성 버튼
@@ -158,6 +170,7 @@ public class MainScreen {
         bottomPanel.add(enterButton);
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
+        refreshRoomTable();
         frame.setVisible(true);
     }
 
@@ -282,7 +295,10 @@ public class MainScreen {
                     return;
                 }
                 roomData = response.split(",");
+                System.out.println("enterRoomPopop에서 roomData[0] 확인: " + roomData[0]);
+                System.out.println("enterRoomPopop에서 roomData[1] 확인: " + roomData[1]);
             }
+            System.out.println("방 목록 로드 완료: " + rooms.size() + "개");
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parentFrame, "서버와의 통신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
@@ -409,6 +425,7 @@ public class MainScreen {
                         dialog.dispose();
                         if (parentFrame != null) {
                             parentFrame.dispose();
+                            refreshRoomTable();
                         }
                     } else {
                         JOptionPane.showMessageDialog(dialog, "방 이름을 확인할 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
