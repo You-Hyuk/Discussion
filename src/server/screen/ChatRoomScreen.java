@@ -206,7 +206,6 @@ public class ChatRoomScreen {
         frame.setVisible(true);
     }
 
-
     private void receiveMessages() {
         try {
             String line;
@@ -428,16 +427,20 @@ public class ChatRoomScreen {
         confirmButton.setBackground(Color.WHITE);
         confirmButton.setForeground(Color.BLACK);
         confirmButton.addActionListener(event -> {
-            if (selectedStatus[0] == null) {
-                JOptionPane.showMessageDialog(exitDialog, "STATUS를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
-            } else {
-                // 퇴장 로직 (나가기 처리)
-                System.out.println("퇴장 상태: " + selectedStatus[0]);
+            try {
+                pw.println("/exit " + room.getRoomName()); // 퇴장 명령 전송
+                pw.flush();
+
+                // 팝업 및 현재 창 닫기
                 exitDialog.dispose();
-                parentFrame.dispose(); // 채팅방 창 닫기
-                // 메인 화면 생성
+                parentFrame.dispose();
+
+                // MainScreen 생성 및 테이블 갱신
                 MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
-                mainScreen.createMainScreen();
+                mainScreen.createMainScreen(); // MainScreen을 다시 열면 refreshRoomTable()이 호출됩니다.
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(exitDialog, "퇴장 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         });
 
