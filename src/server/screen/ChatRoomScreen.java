@@ -131,6 +131,12 @@ public class ChatRoomScreen {
         chatInput = new JTextField();
         JButton sendButton = new JButton("전송");
 
+        if (userStatus.equals("중립")) {
+            chatInput.setEnabled(false);
+            chatInput.setText("중립 상태에서는 채팅을 보낼 수 없습니다.");
+            sendButton.setEnabled(false);
+        }
+
         inputPanel.add(chatInput, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
         frame.add(inputPanel, BorderLayout.SOUTH);
