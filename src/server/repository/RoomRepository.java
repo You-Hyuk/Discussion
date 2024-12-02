@@ -48,22 +48,49 @@ public class RoomRepository {
     }
 
     public Room addUserToRoom(String roomName, User user){
-        ArrayList<Room> rooms = readRoom();
-        Room room1 = findRoomByName(roomName);
+        ArrayList<Room> rooms = readRoom(); // 파일에서 Room 리스트 읽기
+        Room room1 = findRoomByName(roomName); // Room 객체 찾기
+        if (room1 == null) {
+            System.out.println("Room not found: " + roomName);
+            return null; // 방이 존재하지 않으면 null 반환
+        }
+
+        // 사용자 상태에 따라 찬성/반대 수 증가
+        if (user.getStatus() != null) {
+            if (user.getStatus().equals(room1.getFirstStatus())) {
+                room1.incrementFirstStatusCount(); // 찬성 수 증가
+            } else if (user.getStatus().equals(room1.getSecondStatus())) {
+                room1.incrementSecondStatusCount(); // 반대 수 증가
+            }
+        }
+
+        // 방에 사용자 추가
         room1.addUser(user);
+
+        // Room 리스트를 업데이트
         for (int i = 0; i < rooms.size(); i++) {
             if (rooms.get(i).getRoomName().equals(roomName)) {
-                rooms.set(i, room1);  // 업데이트된 Room 객체로 교체
+                rooms.set(i, room1); // 업데이트된 Room 객체로 교체
                 break;
             }
         }
+
+        // 파일에 저장
         try {
             fos = new FileOutputStream(ROOM_FILE);
             oos = new ObjectOutputStream(fos);
             oos.writeObject(rooms);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (oos != null) oos.close();
+                if (fos != null) fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
         return room1;
     }
 

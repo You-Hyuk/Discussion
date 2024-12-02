@@ -71,7 +71,8 @@ public class ChatThread extends Thread {
                 if(line.split(" ")[0].equals("/exit") && inRoom) {
                     chatController.exitRoom(room, user);
                     roomController.removeUserFromRoom(room.getRoomName(), user.getPrintWriter());
-                    //chatController.sendToClient(user, user.getUserName() + " 님이 " + room.getRoomName() + "방을 퇴장하였습니다.");
+                    pw.println("EXIT_END"); // 종료 신호 전송
+                    pw.flush();
                     inRoom = false;
                 }
 
@@ -80,44 +81,40 @@ public class ChatThread extends Thread {
                 }
 
                 //Status 선택 메소드 추가 필요
-                if(line.split(" ")[0].equals("/e")){
+                if(line.split(" ")[0].equals("/e")) {
                     System.out.println("입장 명령 받음");
                     String[] s = line.split(" ");
                     String roomName = s[1];
                     String selectedStatus = s[2];
-//                    chatController.selectStatus(roomName, user);
-//                    String selectStatus = br.readLine();
-//                    if (selectStatus.equals("1")){
-//                        status = "찬성";
-//                        this.hasStatus = true;
-//                    }
-//                    if (selectStatus.equals("2")){
-//                        status = "반대";
-//                        this.hasStatus = true;
-//                    }
-//                    if (selectStatus.equals("3")){
-//                        status = "중립";
-//                    }
                     System.out.println("입장 roomName 확인: " + roomName);
+                    System.out.println("선택된 상태 확인: " + selectedStatus);
+
+                    // 유저 상태 설정
+                    user.setStatus(selectedStatus);
+
+                    // 방 정보 업데이트
                     Room enteredRoom = chatController.enterRoom(roomName, user);
-                    room = enteredRoom;
-//                    String roomData = String.join(" ",
-//                            enteredRoom.getRoomName(),
-//                            enteredRoom.getUserName(),
-//                            String.valueOf(enteredRoom.getFirstStatusCount()),
-//                            String.valueOf(enteredRoom.getSecondStatusCount())
-//                    );
-//                    pw.println(roomData);
-                    String enteredRoomName = enteredRoom.getRoomName();
-                    System.out.println("입장 enteredRoomName 확인:" + enteredRoomName);
-                    pw.println("ROOM:" + enteredRoomName);
-                    pw.flush();
-                    pw.println("ENTER_END"); // 응답 종료
-                    pw.flush();
-                    inRoom = true;
-                    //room = enteredRoom;
-                    System.out.println("chatThread, 입장, userMap.toString(): " + userMap.toString());
+                    if (enteredRoom != null) {
+                        room = roomRepository.addUserToRoom(roomName, user); // 상태별 카운트 업데이트
+                        pw.println("ROOM:" + enteredRoom.getRoomName());
+                        pw.flush();
+
+                        // 채팅 기록 전송
+                        List<Chat> chatHistory = chatRepository.readChatHistory(enteredRoom);
+                        for (Chat chat : chatHistory) {
+                            pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
+                            pw.flush();
+                        }
+                        pw.println("ENTER_END"); // 종료 신호
+                        pw.flush();
+                        inRoom = true;
+                        System.out.println("chatThread, 입장, userMap.toString(): " + userMap.toString());
+                    } else {
+                        pw.println("ERROR: 방을 찾을 수 없습니다.");
+                        pw.flush();
+                    }
                 }
+
                 if (line.contains("/list")) {
                     List<Room> roomList = roomController.getRoomList();
                     for (Room room : roomList) {
@@ -138,24 +135,36 @@ public class ChatThread extends Thread {
                 }
 
                 if (line.startsWith("/chat")) {
-                    if (line.length() <= 6) { // "/chat " 이후 내용이 없는 경우
+                    if (line.length() <= 6) {
                         pw.println("Error: 메시지가 비어 있습니다.");
                         pw.flush();
                         continue;
                     }
-                    String content = line.substring(6).trim(); // 메시지 내용 추출
+                    String content = line.substring(6).trim();
                     System.out.println("content 확인: " + content);
+
                     int lastIndex = content.lastIndexOf(" ");
-                    String message;
-                    String status;
-                    message = content.substring(0, lastIndex).trim(); // 마지막 단어 전까지를 메시지로 설정
-                    status = content.substring(lastIndex + 1).trim();
+                    if (lastIndex == -1) {
+                        pw.println("Error: 메시지 형식이 잘못되었습니다.");
+                        pw.flush();
+                        continue;
+                    }
+
+                    String message = content.substring(0, lastIndex).trim();
+                    String status = content.substring(lastIndex + 1).trim();
+
+                    if (status == null || status.isEmpty()) {
+                        status = "중립";
+                    }
+
                     Chat chat = new Chat(user.getUserName(), message, status);
-                    if (status == null) status = "중립"; // 기본값 설정
                     chatRepository.saveChat(room, chat);
-                    pw.println("CHAT_END"); // 응답 종료
+
+                    // 클라이언트로 확인 메시지 전송
+                    pw.println("CHAT_SAVED");
                     pw.flush();
                 }
+
 
                 if (line.startsWith("/find")) {
                     String[] commandParts = line.split(" ");
@@ -214,11 +223,11 @@ public class ChatThread extends Thread {
                         continue;
                     }
 
-                    // 채팅 기록 클라이언트로 전송
-                    pw.println(chatHistory);
-                    pw.flush();
-
-                    pw.println("HISTORY_END"); // 전송 완료 표시
+                    for (Chat chat : chatHistory) {
+                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
+                        pw.flush();
+                    }
+                    pw.println("HISTORY_END"); // 종료 신호
                     pw.flush();
                 }
 
@@ -233,7 +242,5 @@ public class ChatThread extends Thread {
                 e.printStackTrace();
             }
         }
-
-
     }
 }
