@@ -9,10 +9,7 @@ import server.domain.Room;
 import server.domain.Status;
 import server.domain.User;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
@@ -115,7 +112,7 @@ public class ChatThread extends Thread {
                     System.out.println("입장 enteredRoomName 확인:" + enteredRoomName);
                     pw.println("ROOM:" + enteredRoomName);
                     pw.flush();
-                    pw.println("END"); // 응답 종료
+                    pw.println("ENTER_END"); // 응답 종료
                     pw.flush();
                     inRoom = true;
                     //room = enteredRoom;
@@ -128,13 +125,15 @@ public class ChatThread extends Thread {
                                 room.getRoomName(),
                                 room.getUserName(),
                                 String.valueOf(room.getFirstStatusCount()),
-                                String.valueOf(room.getSecondStatusCount())
+                                String.valueOf(room.getSecondStatusCount()),
+                                room.getFirstStatus(),
+                                room.getSecondStatus()
                         );
                         System.out.println("roomData확인: " + roomData);
                         pw.println(roomData);
                         pw.flush();
                     }
-                    pw.println("END"); // 응답 종료
+                    pw.println("LIST_END"); // 응답 종료
                     pw.flush();
                 }
 
@@ -145,6 +144,7 @@ public class ChatThread extends Thread {
                         continue;
                     }
                     String content = line.substring(6).trim(); // 메시지 내용 추출
+                    System.out.println("content 확인: " + content);
                     int lastIndex = content.lastIndexOf(" ");
                     String message;
                     String status;
@@ -153,6 +153,8 @@ public class ChatThread extends Thread {
                     Chat chat = new Chat(user.getUserName(), message, status);
                     if (status == null) status = "중립"; // 기본값 설정
                     chatRepository.saveChat(room, chat);
+                    pw.println("CHAT_END"); // 응답 종료
+                    pw.flush();
                 }
 
                 if (line.startsWith("/find")) {
@@ -181,7 +183,42 @@ public class ChatThread extends Thread {
                         pw.println("ERROR"); // 방을 찾을 수 없음
                         pw.flush();
                     }
-                    pw.println("END"); // 응답 종료
+                    pw.println("FIND_END"); // 응답 종료
+                    pw.flush();
+                }
+
+                if (line.startsWith("/history")) {
+                    String[] commandParts = line.split(" ");
+                    if (commandParts.length < 2) {
+                        pw.println("ERROR: 방 이름을 입력하세요.");
+                        pw.flush();
+                        continue;
+                    }
+                    String roomName = commandParts[1];
+                    System.out.println("/chatHistory 요청, 방 이름: " + roomName);
+
+                    // Room 객체를 통해 채팅 기록 가져오기
+                    Room room = roomRepository.findRoomByName(roomName);
+                    System.out.println("/chatHistory에서 room 확인: " + room);
+                    if (room == null) {
+                        pw.println("ERROR: 해당 방을 찾을 수 없습니다.");
+                        pw.flush();
+                        continue;
+                    }
+
+                    List<Chat> chatHistory = chatRepository.readChatHistory(room);
+                    System.out.println("chathistory확인: " + chatHistory);
+                    if (chatHistory == null || chatHistory.isEmpty()) {
+                        pw.println("해당 방의 채팅 기록이 없습니다.");
+                        pw.flush();
+                        continue;
+                    }
+
+                    // 채팅 기록 클라이언트로 전송
+                    pw.println(chatHistory);
+                    pw.flush();
+
+                    pw.println("HISTORY_END"); // 전송 완료 표시
                     pw.flush();
                 }
 
@@ -196,5 +233,7 @@ public class ChatThread extends Thread {
                 e.printStackTrace();
             }
         }
+
+
     }
 }

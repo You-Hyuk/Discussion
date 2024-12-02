@@ -89,6 +89,7 @@ public class ChatRepository {
         ArrayList<Chat> chatHistory = new ArrayList<>(); // 빈 리스트로 초기화
         try {
             chatHistory = readChatHistory(room); // 채팅 기록 읽기
+            System.out.println("findChatHistory에서 readChatHistory 결과 확인:" + chatHistory);
         } catch (Exception e) {
             e.printStackTrace(); // 예외 스택 트레이스 출력
         }
@@ -108,6 +109,7 @@ public class ChatRepository {
             return new ArrayList<>();
         }
         ArrayList<Chat> chatHistory = null;
+        System.out.println("readChatHistory에서 room 확인: " + room);
         String chatFileName = room.getChatFileName();
         String path = DIRECTORY_PATH + chatFileName;
         try{
@@ -120,7 +122,7 @@ public class ChatRepository {
             chatHistory = new ArrayList<>();  // 빈 리스트 반환
         } catch (FileNotFoundException fnf) {
             // 파일이 없을 경우 새로운 리스트를 생성
-            System.out.println("파일이 없습니다. 새 파일을 생성합니다.");
+            System.out.println("chatrepository에서 출력: 파일이 없습니다. 새 파일을 생성합니다.");
             chatHistory = new ArrayList<>();
         } catch (Exception e) {
             e.printStackTrace();
