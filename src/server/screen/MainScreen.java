@@ -295,10 +295,7 @@ public class MainScreen {
                     return;
                 }
                 roomData = response.split(",");
-                System.out.println("enterRoomPopop에서 roomData[0] 확인: " + roomData[0]);
-                System.out.println("enterRoomPopop에서 roomData[1] 확인: " + roomData[1]);
             }
-            System.out.println("방 목록 로드 완료: " + rooms.size() + "개");
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parentFrame, "서버와의 통신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
