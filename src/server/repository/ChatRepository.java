@@ -164,7 +164,7 @@ public class ChatRepository {
             }
             boolean updated = false;
             for (Chat chat : chats) {
-                if (chat.getId().equals(chat)) {
+                if (chat.getId().equals(chatId)) {
                     chat.incrementLike(); // 좋아요 수 증가
                     updated = true;
                     break;

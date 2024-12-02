@@ -159,9 +159,17 @@ public class ChatThread extends Thread {
 
                     Chat chat = new Chat(user.getUserName(), message, status);
                     chatRepository.saveChat(room, chat);
-
+                    List<PrintWriter> userWriters = userMap.get(room.getRoomName());
+                    if (userWriters != null) {
+                        for (PrintWriter writer : userWriters) {
+                            writer.println("CHAT:" + chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
+                            writer.flush();
+                        }
+                    }
                     // 클라이언트로 확인 메시지 전송
                     pw.println("CHAT_SAVED");
+                    pw.flush();
+                    pw.println("CHAT_END");
                     pw.flush();
                 }
 
