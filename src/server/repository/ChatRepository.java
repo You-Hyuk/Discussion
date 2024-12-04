@@ -14,11 +14,9 @@ public class ChatRepository {
     private final String DIRECTORY_PATH = "src/server/data/";
 
     public void createChatFile(Room room){
-        // roomName을 안전한 이름으로 변환
-//        String roomName = room.getRoomName().replaceAll("[^a-zA-Z0-9._-]", "_");
-//        String fileName = room.getRoomName().replace("\"", "") + ".txt";
         String fileName = room.getRoomName() + ".txt";
         String path = DIRECTORY_PATH + fileName;
+
         // data 디렉토리 생성 (존재하지 않을 때만)
         File directory = new File(DIRECTORY_PATH);
         if (!directory.exists()) {
@@ -129,6 +127,7 @@ public class ChatRepository {
         }
         return chatHistory;
     }
+
     private void writeChatHistory(String filePath, ArrayList<Chat> chats) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(chats);

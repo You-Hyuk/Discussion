@@ -182,7 +182,7 @@ public class ChatThread extends Thread {
                         continue;
                     }
                     String roomName = commandParts[1];
-                    System.out.println("commandParts[1]을 roomName으로 받는지 확인: " + roomName);
+//                    System.out.println("commandParts[1]을 roomName으로 받는지 확인: " + roomName);
                     Room room = roomRepository.findRoomByName(roomName);
                     System.out.println("room 확인: " + room);
                     if (room != null) {

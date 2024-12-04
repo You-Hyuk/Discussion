@@ -30,22 +30,6 @@ public class RoomRepository {
         return null;
     }
 
-    public ArrayList<Room> getRoomList(){
-        ArrayList<Room> rooms = readRoom();
-        return rooms;
-    }
-
-    // 채팅방 안의 User를 반환
-    public User findUserByName(Room room, String userName){
-        ArrayList<User> userList = room.getUserList();
-        for (User user : userList) {
-            if (user.getUserName().equals(userName)){
-                return user;
-            }
-        }
-        System.out.println(userName + " 에 일치하는 User가 존재하지 않습니다");
-        return null;
-    }
 
     public Room addUserToRoom(String roomName, User user){
         ArrayList<Room> rooms = readRoom(); // 파일에서 Room 리스트 읽기

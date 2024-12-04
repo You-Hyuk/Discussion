@@ -36,8 +36,6 @@ public class MainScreen {
         // 정확한 타입으로 초기화
         Map<String, List<PrintWriter>> userMap = new HashMap<>();
         this.chatController = new ChatController(userMap); // ChatController 초기화
-        //this.chatController = new ChatController(); // ChatController 초기화
-
     }
 
     // 방 리스트 갱신 로직
@@ -391,6 +389,7 @@ public class MainScreen {
                     List<String> chatHistory = new ArrayList<>(); // 채팅 내역 저장
                     pw.println("/e " + roomName + " " + selectedStatus[0]);
                     pw.flush();
+
                     // 채팅 내역 요청
                     Map<String, List<PrintWriter>> userMap = new HashMap<>(); // 빈 맵 초기화
                     while ((response = br.readLine()) != null) {

@@ -26,34 +26,6 @@ public class ChatController {
         System.out.println(room.getRoomName() + " 생성 완료");
     }
 
-    public void printRoomList(User user){
-        ArrayList<Room> rooms = roomRepository.getRoomList();
-        synchronized (user) {
-            System.out.println("printRoomList called with user: " + user);
-            if (user == null) {
-                throw new IllegalArgumentException("User is null.");
-            }
-            PrintWriter pw = user.getPrintWriter();
-            System.out.println("PrintWriter: " + pw);
-            System.out.println("Room List: " + rooms);
-            //pw.println("------------- 토론 채팅방 리스트 -------------");
-            //pw.flush();
-            for (Room room : rooms) {
-                String roomData = String.join(",",
-                        room.getRoomName(),
-                        room.getUserName(),
-                        String.valueOf(room.getFirstStatusCount()),
-                        String.valueOf(room.getSecondStatusCount())
-                );
-                pw.println(roomData);
-            }
-            pw.println("END");
-            pw.flush();
-            //pw.println("----------------------------------------------");
-            //pw.flush();
-        }
-    }
-
 
     // 채팅방 입장
     public Room enterRoom(String roomName, User user){
@@ -63,7 +35,6 @@ public class ChatController {
             throw new IllegalArgumentException("Room not found: " + roomName);
         }
         // room = roomRepository.addUserToRoom(roomName, user); // addUserToRoom 호출
-        //sendToClient(user,user.getUserName() + " 님이 " + roomName + " 토론 채팅방에 입장하였습니다.");
         ArrayList<Chat> chats = chatRepository.findChatHistory(room);
         synchronized (user) {
             PrintWriter pw = user.getPrintWriter();
@@ -85,10 +56,10 @@ public class ChatController {
         String secondStatus = room.getSecondStatus();
 
         synchronized (user){
-            //PrintWriter printWriter = user.getPrintWriter();
-            //printWriter.println("Status 선택");
-            //printWriter.println(firstStatus + "\t\t\t" + "NONE" + "\t\t\t" + secondStatus);
-            //printWriter.flush();
+            PrintWriter printWriter = user.getPrintWriter();
+            printWriter.println("Status 선택");
+            printWriter.println(firstStatus + "\t\t\t" + "NONE" + "\t\t\t" + secondStatus);
+            printWriter.flush();
         }
     }
 
@@ -127,16 +98,6 @@ public class ChatController {
 
         String chat = selectStatus + " : " + message;
         System.out.println("chatcontroller 117번 라인 확인: " + chat);
-//        synchronized (userList){
-//            Collection<PrintWriter> collection = new ArrayList<>();
-//
-//            Iterator iter = collection.iterator();
-//            while (iter.hasNext()) {
-//                PrintWriter pw = (PrintWriter) iter.next();
-//                pw.println(chat);
-//                pw.flush();
-//            }
-//        }
         synchronized (userList) {
             for (PrintWriter pw : userList) {
                 pw.println(chat); // 메시지 출력
@@ -146,14 +107,6 @@ public class ChatController {
         String userName = user.getUserName();
         Chat chatHistory = new Chat(userName, chat, status);
         chatRepository.saveChat(room, chatHistory);
-    }
-
-    public void sendToClient(User user, String msg){
-        synchronized (user) {
-            PrintWriter pw = user.getPrintWriter();
-            pw.println(msg);
-            pw.flush();
-        }
     }
 
     public void deleteExpiredRooms() {
@@ -175,6 +128,7 @@ public class ChatController {
         chatRepository.updateLikeCount(room, chatId); // 좋아요 수 업데이트
         broadcastMostLikedChat(room); // 최고 좋아요 채팅 브로드캐스트
     }
+
     // 좋아요 업데이트 브로드캐스트
     private void broadcastLikeUpdate(Room room, Chat chat) {
         List<PrintWriter> userList = userMap.get(room.getRoomName());
@@ -241,22 +195,6 @@ public class ChatController {
                 pw.flush();
             }
         }
-    }
-
-    public Room enterRoom(String roomName, User user, String status) {
-        Room room = roomRepository.findRoomByName(roomName);
-        if (room == null) throw new IllegalArgumentException("Room not found: " + roomName);
-
-        // 상태 인원수 업데이트
-        updateRoomStatusCount(room, status, true);
-        return room;
-    }
-
-    public void exitRoom(Room room, User user, String status) {
-        if (room == null) return;
-
-        // 상태 인원수 업데이트
-        updateRoomStatusCount(room, status, false);
     }
 
 
