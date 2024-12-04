@@ -381,7 +381,7 @@ public class ChatRoomScreen {
         confirmButton.setForeground(Color.BLACK);
         confirmButton.addActionListener(event -> {
             try {
-                pw.println("/exit " + room.getRoomName()); // 퇴장 명령 전송
+                pw.println("/exit " + room.getRoomName()+" "+ selectedStatus[0]); // 퇴장 명령 전송
                 pw.flush();
 
                 // 팝업 및 현재 창 닫기

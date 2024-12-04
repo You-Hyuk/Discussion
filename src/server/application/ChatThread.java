@@ -6,7 +6,6 @@ import server.repository.ChatRepository;
 import server.repository.RoomRepository;
 import server.domain.Chat;
 import server.domain.Room;
-import server.domain.Status;
 import server.domain.User;
 
 import java.io.*;
@@ -69,15 +68,26 @@ public class ChatThread extends Thread {
                 }
 
                 if(line.split(" ")[0].equals("/exit") && inRoom) {
+                    String[] s = line.split(" ");
+                    String roomName = s[1];
+                    String selectedStatus = s[2];// 선택된 상태
+
+                    if ("중립".equals(user.getStatus())) {
+                        user.setStatus(selectedStatus);
+                        System.out.println("중립 상태로 입장 후 상태 업데이트: " + selectedStatus);
+
+                        // 상태별 카운트 업데이트
+                        room = roomRepository.addUserToRoom(roomName, user);
+                        roomRepository.saveSingleRoom(room);
+                    }
+
+                    // 퇴장 처리
+
                     chatController.exitRoom(room, user);
                     roomController.removeUserFromRoom(room.getRoomName(), user.getPrintWriter());
+                    inRoom = false;
                     pw.println("EXIT_END"); // 종료 신호 전송
                     pw.flush();
-                    inRoom = false;
-                }
-
-                if(inRoom && hasStatus){
-                    chatController.chat(room, user, userMap, status, line);
                 }
 
                 //Status 선택 메소드 추가 필요
@@ -250,5 +260,24 @@ public class ChatThread extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    private User findUserByNickname(HashMap<String, List<PrintWriter>> userMap, String userName) {
+        if (userMap == null || userMap.isEmpty()) {
+            System.out.println("User map is empty or null.");
+            return null;
+        }
+
+        for (String roomName : userMap.keySet()) {
+            List<PrintWriter> writers = userMap.get(roomName);
+            for (PrintWriter writer : writers){
+                if (writer.equals(user.getPrintWriter()) && user.getUserName().equals(userName)) {
+                    return user; // 찾은 User 객체 반환
+                }
+            }
+        }
+
+        System.out.println("User not found for nickname: " + userName);
+        return null; // 해당 닉네임의 사용자를 찾을 수 없음
     }
 }
