@@ -241,13 +241,13 @@ public class ChatThread extends Thread {
                         continue;
                     }
 
+
 //                    for (Chat chat : chatHistory) {
 //                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
 //                        pw.flush();
 //                    }
                     pw.println(chatHistory);
                     pw.flush();
-
                     pw.println("HISTORY_END"); // 종료 신호
                     pw.flush();
                 }
