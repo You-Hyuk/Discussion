@@ -93,7 +93,7 @@ public class StartScreen {
             try {
                 // 서버 연결
                 // StartScreen.java에서 서버 연결 초기화
-                Socket sock = new Socket("192.168.172.225", 10001); //192.168.67.228
+                Socket sock = new Socket("192.168.88.29", 10001); //192.168.67.228
                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()), true);
                 BufferedReader br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
