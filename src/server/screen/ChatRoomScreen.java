@@ -88,12 +88,12 @@ public class ChatRoomScreen {
         exitButton.setForeground(Color.WHITE); // 버튼 텍스트 색상
         exitButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백
         exitButton.addActionListener(e -> {
-                if(userStatus == "중립") {exitPopup(frame, room);}
-                else {
-                    frame.dispose();
-                    MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
-                    mainScreen.createMainScreen();
-                }
+            if(userStatus == "중립") {exitPopup(frame, room);}
+            else {
+                frame.dispose();
+                MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
+                mainScreen.createMainScreen();
+            }
         });
 
         topPanel.add(exitButton, BorderLayout.EAST);
@@ -219,7 +219,6 @@ public class ChatRoomScreen {
         frame.setVisible(true);
     }
 
-
     private void receiveMessages() {
         try {
             String line;
@@ -269,6 +268,45 @@ public class ChatRoomScreen {
         }
     }
 
+//    private void loadChatHistory() {
+//        try {
+//            Room room = roomRepository.findRoomByName(roomName);
+//            if (room == null) {
+//                System.err.println("Room not found: " + roomName);
+//                return;
+//            }
+//
+//            List<Chat> chatHistory = chatRepository.readChatHistory(room);
+//            if (chatHistory == null || chatHistory.isEmpty()) {
+//                System.out.println("채팅 기록이 없습니다.");
+//                return;
+//            }
+//
+//            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+//            for (Chat chat : chatHistory) {
+//                try {
+//                    String formattedTimestamp = timeFormat.format(chat.getTimestamp()); // 타임스탬프 변환
+//                    String formattedMessage = "[" + formattedTimestamp + "] " + chat.getUserName() + " : " + chat.getMessage();
+//
+//                    if (chat.getStatus().equals(room.getFirstStatus())) {
+//                        status1ChatArea.append(formattedMessage + "\n");
+//                    } else if (chat.getStatus().equals(room.getSecondStatus())) {
+//                        status2ChatArea.append(formattedMessage + "\n");
+//                    } else {
+//                        System.out.println("Unrecognized status: " + chat.getStatus());
+//                    }
+//                } catch (Exception e) {
+//                    System.err.println("채팅 데이터 처리 중 오류 발생: " + e.getMessage());
+//                    e.printStackTrace();
+//                }
+//            }
+//        } catch (Exception ex) {
+//            System.err.println("채팅 기록 불러오기 중 오류 발생: " + ex.getMessage());
+//            ex.printStackTrace();
+//            JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+//        }
+//    }
+
     private void loadChatHistory() {
         String userName;
         String timestamp;
@@ -296,10 +334,8 @@ public class ChatRoomScreen {
         try {
             pw.println("/history " + room.getRoomName()); // 방 이름 예: "토론1"
             pw.flush();
-
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); // 입력 포맷
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm"); // 출력 포맷 (시간)
-
             // 서버 응답 처리
             while ((response = br.readLine()) != null) {
                 // 맨 앞의 "[" 제거
@@ -307,12 +343,10 @@ public class ChatRoomScreen {
                     response = response.replaceFirst("\\[", " ");
                 }
                 if (response.equals("HISTORY_END")) break;
-
                 if (response.contains("해당 방의 채팅 기록이 없습니다.")) {
                     System.out.println("채팅 기록 없음: " + response);
                     break; // 기록 없음 메시지는 무시하고 다음으로 진행
                 }
-
                 // 쉼표로 채팅 기록 분리
                 String[] chatEntries = response.split(",");
                 for (String chatEntry : chatEntries) {
@@ -322,13 +356,11 @@ public class ChatRoomScreen {
 //                        System.out.println("Invalid chat data: " + chatEntry);
 //                        continue; // 유효하지 않은 데이터 무시
 //                    }
-
                     userName = chatData[0];
                     timestamp = chatData[3];
                     message = chatData[1];
                     status = chatData[2];
                     likeCount = chatData[4];
-
                     String formattedTimestamp = "";
                     try {
                         // 타임스탬프 문자열을 Date로 변환 후 포맷
@@ -340,7 +372,6 @@ public class ChatRoomScreen {
                     }
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
-
                     // 메시지 상태에 따라 화면에 표시
                     if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
                         status1ChatArea.append(formattedMessage + "\n");
@@ -362,10 +393,6 @@ public class ChatRoomScreen {
         }
     }
 
-
-
-
-
     private int calculateLineCount(String message, JTextArea textArea) {
         int areaWidth = textArea.getWidth();
         if (areaWidth <= 0) {
@@ -385,55 +412,55 @@ public class ChatRoomScreen {
     }
 
     private void exitPopup(JFrame parentFrame, Room room) {
-            // 팝업 다이얼로그 생성
-            JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
-            exitDialog.setSize(350, 250);
-            exitDialog.setLayout(null);
-            JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
-            exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-            exitTitle.setBounds(0, 10, 300, 30);
-            exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
-            exitDialog.add(exitTitle);
+        // 팝업 다이얼로그 생성
+        JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
+        exitDialog.setSize(350, 250);
+        exitDialog.setLayout(null);
+        JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
+        exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
+        exitTitle.setBounds(0, 10, 300, 30);
+        exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
+        exitDialog.add(exitTitle);
 
-            String firstStatus = room.getFirstStatus();
-            String secondStatus = room.getSecondStatus();
+        String firstStatus = room.getFirstStatus();
+        String secondStatus = room.getSecondStatus();
 
-            // STATUS 버튼 패널
-            JPanel statusPanel = new JPanel();
-            statusPanel.setBounds(50, 60, 200, 40);
-            statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
+        // STATUS 버튼 패널
+        JPanel statusPanel = new JPanel();
+        statusPanel.setBounds(50, 60, 200, 40);
+        statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
 
-            JButton status1Button = new JButton(firstStatus);
-            JButton status2Button = new JButton(secondStatus);
+        JButton status1Button = new JButton(firstStatus);
+        JButton status2Button = new JButton(secondStatus);
 
-            // 기본 스타일 설정
-            status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-            status2Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-            status1Button.setBackground(Color.WHITE);
+        // 기본 스타일 설정
+        status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        status2Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        status1Button.setBackground(Color.WHITE);
+        status2Button.setBackground(Color.WHITE);
+
+        // 상태 선택 추적 변수
+        final String[] selectedStatus = {null};
+
+        // 버튼 클릭 이벤트 (선택 상태 표시)
+        status1Button.addActionListener(event -> {
+            selectedStatus[0] = firstStatus;
+            status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
             status2Button.setBackground(Color.WHITE);
+        });
 
-            // 상태 선택 추적 변수
-            final String[] selectedStatus = {null};
+        status2Button.addActionListener(event -> {
+            selectedStatus[0] = secondStatus;
+            status1Button.setBackground(Color.WHITE);
+            status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
+        });
 
-            // 버튼 클릭 이벤트 (선택 상태 표시)
-            status1Button.addActionListener(event -> {
-                selectedStatus[0] = firstStatus;
-                status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
-                status2Button.setBackground(Color.WHITE);
-            });
+        status1Button.setFocusPainted(false);
+        status2Button.setFocusPainted(false);
 
-            status2Button.addActionListener(event -> {
-                selectedStatus[0] = secondStatus;
-                status1Button.setBackground(Color.WHITE);
-                status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
-            });
-
-            status1Button.setFocusPainted(false);
-            status2Button.setFocusPainted(false);
-
-            statusPanel.add(status1Button);
-            statusPanel.add(status2Button);
-            exitDialog.add(statusPanel);
+        statusPanel.add(status1Button);
+        statusPanel.add(status2Button);
+        exitDialog.add(statusPanel);
 
         // 확인 버튼
         JButton confirmButton = new JButton("확인");
@@ -442,22 +469,26 @@ public class ChatRoomScreen {
         confirmButton.setBackground(Color.WHITE);
         confirmButton.setForeground(Color.BLACK);
         confirmButton.addActionListener(event -> {
-            if (selectedStatus[0] == null) {
-                JOptionPane.showMessageDialog(exitDialog, "STATUS를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
-            } else {
-                // 퇴장 로직 (나가기 처리)
-                System.out.println("퇴장 상태: " + selectedStatus[0]);
+            try {
+                pw.println("/exit " + room.getRoomName() + " " + selectedStatus[0]); // 퇴장 명령 전송
+                pw.flush();
+
+                // 팝업 및 현재 창 닫기
                 exitDialog.dispose();
-                parentFrame.dispose(); // 채팅방 창 닫기
-                // 메인 화면 생성
+                parentFrame.dispose();
+
+                // MainScreen 생성 및 테이블 갱신
                 MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
                 mainScreen.createMainScreen();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(exitDialog, "퇴장 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         });
 
-            exitDialog.add(confirmButton);
-            exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
-            exitDialog.setVisible(true);
+        exitDialog.add(confirmButton);
+        exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
+        exitDialog.setVisible(true);
     }
 
 }
