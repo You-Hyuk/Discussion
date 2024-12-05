@@ -1,12 +1,11 @@
 package server.application;
-//senttoclient삭제
+
 import server.controller.ChatController;
 import server.controller.RoomController;
 import server.repository.ChatRepository;
 import server.repository.RoomRepository;
 import server.domain.Chat;
 import server.domain.Room;
-import server.domain.Status;
 import server.domain.User;
 
 import java.io.*;
@@ -65,7 +64,6 @@ public class ChatThread extends Thread {
 
                     Room room = new Room(roomName, firstStatus, secondStatus, userName);
                     chatController.createRoom(room);
-                    //chatController.sendToClient(user, user.getUserName() + " 님이 " + roomName + " 토론 채팅방을 생성하였습니다.");
                 }
 
                 if(line.split(" ")[0].equals("/exit") && inRoom) {
