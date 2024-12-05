@@ -242,7 +242,8 @@ public class ChatThread extends Thread {
                     }
 
                     for (Chat chat : chatHistory) {
-                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
+
+                        pw.println(chat.getTimestamp() + "\t" + chat.getUserName() + "\t" + chat.getStatus() + "\t" + chat.getMessage() + "\t" + chat.getLike());
                         pw.flush();
                     }
                     pw.println("HISTORY_END"); // 종료 신호
