@@ -1,10 +1,8 @@
-package server.screen;
+package client.screen;
 
 import server.controller.ChatController;
 import server.domain.Chat;
 import server.domain.Room;
-import server.domain.Status;
-import server.domain.User;
 import server.repository.ChatRepository;
 import server.repository.RoomRepository;
 
@@ -64,7 +62,7 @@ public class ChatRoomScreen {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
-        //roomame,firststatus,secondstatus,username
+        //roomname,firststatus,secondstatus,username
         Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
         String firstStatus = room.getFirstStatus();
         String secondStatus = room.getSecondStatus();
@@ -146,9 +144,6 @@ public class ChatRoomScreen {
             loadChatHistory();
         });
 
-        // 서버에서 메시지 수신 처리
-        //new Thread(this::receiveMessages).start();
-
         // 전송 버튼 액션 리스너
         sendButton.addActionListener(new ActionListener() {
             @Override
@@ -162,11 +157,6 @@ public class ChatRoomScreen {
                     }
                     pw.println("/chat " + message + " " + userStatus); // 서버로 전송
                     pw.flush();
-
-//                    // 새로운 /broadcast 명령 전송
-//                    pw.println("/broadcast " + roomName + " " + message + " " + nickname);
-//                    System.out.println("브로드캐스트 명령 전송: " + roomName + ", " + message + ", " + nickname);
-//                    pw.flush();
 
                     while ((response = br.readLine()) != null) {
                         if (response.equals("CHAT_END")) break;
@@ -186,7 +176,7 @@ public class ChatRoomScreen {
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     }
-                    //roomame,firststatus,secondstatus,username
+                    //roomname,firststatus,secondstatus,username
                     Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
                     System.out.println("전송에서 room 확인: " + room);
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
@@ -299,10 +289,6 @@ public class ChatRoomScreen {
             JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-
-
-
 
     private int calculateLineCount(String message, JTextArea textArea) {
         int areaWidth = textArea.getWidth();
