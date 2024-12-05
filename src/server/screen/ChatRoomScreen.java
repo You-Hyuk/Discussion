@@ -88,7 +88,7 @@ public class ChatRoomScreen {
         exitButton.setForeground(Color.WHITE); // 버튼 텍스트 색상
         exitButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백
         exitButton.addActionListener(e -> {
-                if(userStatus == "중립") {exitPopup(frame, room);}
+                if(userStatus.equals("중립")) {exitPopup(frame, room);}
                 else {
                     frame.dispose();
                     MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
@@ -456,7 +456,8 @@ public class ChatRoomScreen {
                 JOptionPane.showMessageDialog(exitDialog, "STATUS를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
             } else {
                 // 퇴장 로직 (나가기 처리)
-                System.out.println("퇴장 상태: " + selectedStatus[0]);
+                pw.println("/exit " + room.getRoomName() + " " + selectedStatus[0]);
+                pw.flush();
                 exitDialog.dispose();
                 parentFrame.dispose(); // 채팅방 창 닫기
                 // 메인 화면 생성
