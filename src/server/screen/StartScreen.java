@@ -81,7 +81,7 @@ public class StartScreen {
 
         nicknamePanel.add(nicknameField);
 
-        JButton confirmButton = new JButton("확인뿌엥");
+        JButton confirmButton = new JButton("확인");
         confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         confirmButton.setBounds(150, 130, 100, 40); // Absolute position
         confirmButton.addActionListener(e -> {
@@ -93,7 +93,7 @@ public class StartScreen {
             try {
                 // 서버 연결
                 // StartScreen.java에서 서버 연결 초기화
-                Socket sock = new Socket("192.168.173.32", 10001); //192.168.67.228
+                Socket sock = new Socket("192.168.0.2", 10001); //192.168.67.228
                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()), true);
                 BufferedReader br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
