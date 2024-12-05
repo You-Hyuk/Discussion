@@ -219,6 +219,7 @@ public class ChatRoomScreen {
         frame.setVisible(true);
     }
 
+
     private void receiveMessages() {
         try {
             String line;
@@ -269,41 +270,95 @@ public class ChatRoomScreen {
     }
 
     private void loadChatHistory() {
+        String userName;
+        String timestamp;
+        String message;
+        String status;
+        String likeCount;
+        String[] roomData = null;
+        String response;
+        Room room = null;
         try {
-            Room room = roomRepository.findRoomByName(roomName);
-            if (room == null) {
-                System.err.println("Room not found: " + roomName);
-                return;
+            // 서버에 방 리스트 요청
+            pw.println("/list");
+            pw.flush();
+            // 서버 응답 처리
+            while ((response = br.readLine()) != null) {
+                if (response.equals("LIST_END")) break;
+                roomData = response.split(",");
             }
+            //Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+        room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
+        try {
+            pw.println("/history " + room.getRoomName()); // 방 이름 예: "토론1"
+            pw.flush();
 
-            List<Chat> chatHistory = chatRepository.readChatHistory(room);
-            if (chatHistory == null || chatHistory.isEmpty()) {
-                System.out.println("채팅 기록이 없습니다.");
-                return;
-            }
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); // 입력 포맷
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm"); // 출력 포맷 (시간)
 
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
-            for (Chat chat : chatHistory) {
-                try {
-                    String formattedTimestamp = timeFormat.format(chat.getTimestamp()); // 타임스탬프 변환
-                    String formattedMessage = "[" + formattedTimestamp + "] " + chat.getUserName() + " : " + chat.getMessage();
+            // 서버 응답 처리
+            while ((response = br.readLine()) != null) {
+                // 맨 앞의 "[" 제거
+                if (response.startsWith("[")) {
+                    response = response.replaceFirst("\\[", " ");
+                }
+                if (response.equals("HISTORY_END")) break;
 
-                    if (chat.getStatus().equals(room.getFirstStatus())) {
-                        status1ChatArea.append(formattedMessage + "\n");
-                    } else if (chat.getStatus().equals(room.getSecondStatus())) {
-                        status2ChatArea.append(formattedMessage + "\n");
-                    } else {
-                        System.out.println("Unrecognized status: " + chat.getStatus());
+                if (response.contains("해당 방의 채팅 기록이 없습니다.")) {
+                    System.out.println("채팅 기록 없음: " + response);
+                    break; // 기록 없음 메시지는 무시하고 다음으로 진행
+                }
+
+                // 쉼표로 채팅 기록 분리
+                String[] chatEntries = response.split(",");
+                for (String chatEntry : chatEntries) {
+                    // 공백으로 세부 데이터 분리
+                    String[] chatData = chatEntry.split("\t");
+//                    if (chatData.length < 5) {
+//                        System.out.println("Invalid chat data: " + chatEntry);
+//                        continue; // 유효하지 않은 데이터 무시
+//                    }
+
+                    userName = chatData[0];
+                    timestamp = chatData[3];
+                    message = chatData[1];
+                    status = chatData[2];
+                    likeCount = chatData[4];
+
+                    String formattedTimestamp = "";
+                    try {
+                        // 타임스탬프 문자열을 Date로 변환 후 포맷
+                        Date date = inputFormat.parse(timestamp);
+                        formattedTimestamp = timeFormat.format(date);
+                    } catch (Exception ex) {
+                        System.out.println("타임스탬프 변환 중 오류: " + ex.getMessage());
+                        formattedTimestamp = "알 수 없음"; // 오류 발생 시 기본값
                     }
-                } catch (Exception e) {
-                    System.err.println("채팅 데이터 처리 중 오류 발생: " + e.getMessage());
-                    e.printStackTrace();
+                    // 포맷된 메시지 생성
+                    String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
+
+                    // 메시지 상태에 따라 화면에 표시
+                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
+                        status1ChatArea.append(formattedMessage + "\n");
+                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
+                        syncLineCounts(status2ChatArea, lineCount);
+                    } else if (status2ChatArea != null && status.equals(room.getSecondStatus())) {
+                        status2ChatArea.append(formattedMessage + "\n");
+                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
+                        syncLineCounts(status1ChatArea, lineCount);
+                    } else {
+                        // 상태가 없는 메시지 처리 (중립 상태)
+                        System.out.println("Unrecognized Status: " + message);
+                    }
                 }
             }
         } catch (Exception ex) {
-            System.err.println("채팅 기록 불러오기 중 오류 발생: " + ex.getMessage());
-            ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
 
@@ -380,29 +435,25 @@ public class ChatRoomScreen {
             statusPanel.add(status2Button);
             exitDialog.add(statusPanel);
 
-            // 확인 버튼
-            JButton confirmButton = new JButton("확인");
-            confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-            confirmButton.setBounds(100, 120, 100, 30);
-            confirmButton.setBackground(Color.WHITE);
-            confirmButton.setForeground(Color.BLACK);
-            confirmButton.addActionListener(event -> {
-                try {
-                    pw.println("/exit " + room.getRoomName() + " " + selectedStatus[0]); // 퇴장 명령 전송
-                    pw.flush();
-
-                    // 팝업 및 현재 창 닫기
-                    exitDialog.dispose();
-                    parentFrame.dispose();
-
-                    // MainScreen 생성 및 테이블 갱신
-                    MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
-                    mainScreen.createMainScreen();
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(exitDialog, "퇴장 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
-                }
-            });
+        // 확인 버튼
+        JButton confirmButton = new JButton("확인");
+        confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        confirmButton.setBounds(100, 120, 100, 30);
+        confirmButton.setBackground(Color.WHITE);
+        confirmButton.setForeground(Color.BLACK);
+        confirmButton.addActionListener(event -> {
+            if (selectedStatus[0] == null) {
+                JOptionPane.showMessageDialog(exitDialog, "STATUS를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
+            } else {
+                // 퇴장 로직 (나가기 처리)
+                System.out.println("퇴장 상태: " + selectedStatus[0]);
+                exitDialog.dispose();
+                parentFrame.dispose(); // 채팅방 창 닫기
+                // 메인 화면 생성
+                MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
+                mainScreen.createMainScreen();
+            }
+        });
 
             exitDialog.add(confirmButton);
             exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
