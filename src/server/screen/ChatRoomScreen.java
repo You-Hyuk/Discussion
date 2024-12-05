@@ -87,7 +87,14 @@ public class ChatRoomScreen {
         exitButton.setBackground(new Color(240, 128, 128)); // 연한 빨간색
         exitButton.setForeground(Color.WHITE); // 버튼 텍스트 색상
         exitButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백
-        exitButton.addActionListener(e -> exitPopup(frame, room));
+        exitButton.addActionListener(e -> {
+                if(userStatus == "중립") {exitPopup(frame, room);}
+                else {
+                    frame.dispose();
+                    MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
+                    mainScreen.createMainScreen();
+                }
+        });
 
         topPanel.add(exitButton, BorderLayout.EAST);
 
@@ -323,83 +330,83 @@ public class ChatRoomScreen {
     }
 
     private void exitPopup(JFrame parentFrame, Room room) {
-        // 팝업 다이얼로그 생성
-        JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
-        exitDialog.setSize(350, 250);
-        exitDialog.setLayout(null);
-        JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
-        exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        exitTitle.setBounds(0, 10, 300, 30);
-        exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
-        exitDialog.add(exitTitle);
+            // 팝업 다이얼로그 생성
+            JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
+            exitDialog.setSize(350, 250);
+            exitDialog.setLayout(null);
+            JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
+            exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
+            exitTitle.setBounds(0, 10, 300, 30);
+            exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
+            exitDialog.add(exitTitle);
 
-        String firstStatus = room.getFirstStatus();
-        String secondStatus = room.getSecondStatus();
+            String firstStatus = room.getFirstStatus();
+            String secondStatus = room.getSecondStatus();
 
-        // STATUS 버튼 패널
-        JPanel statusPanel = new JPanel();
-        statusPanel.setBounds(50, 60, 200, 40);
-        statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
+            // STATUS 버튼 패널
+            JPanel statusPanel = new JPanel();
+            statusPanel.setBounds(50, 60, 200, 40);
+            statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
 
-        JButton status1Button = new JButton(firstStatus);
-        JButton status2Button = new JButton(secondStatus);
+            JButton status1Button = new JButton(firstStatus);
+            JButton status2Button = new JButton(secondStatus);
 
-        // 기본 스타일 설정
-        status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-        status2Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-        status1Button.setBackground(Color.WHITE);
-        status2Button.setBackground(Color.WHITE);
-
-        // 상태 선택 추적 변수
-        final String[] selectedStatus = {null};
-
-        // 버튼 클릭 이벤트 (선택 상태 표시)
-        status1Button.addActionListener(event -> {
-            selectedStatus[0] = firstStatus;
-            status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
-            status2Button.setBackground(Color.WHITE);
-        });
-
-        status2Button.addActionListener(event -> {
-            selectedStatus[0] = secondStatus;
+            // 기본 스타일 설정
+            status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+            status2Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
             status1Button.setBackground(Color.WHITE);
-            status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
-        });
+            status2Button.setBackground(Color.WHITE);
 
-        status1Button.setFocusPainted(false);
-        status2Button.setFocusPainted(false);
+            // 상태 선택 추적 변수
+            final String[] selectedStatus = {null};
 
-        statusPanel.add(status1Button);
-        statusPanel.add(status2Button);
-        exitDialog.add(statusPanel);
+            // 버튼 클릭 이벤트 (선택 상태 표시)
+            status1Button.addActionListener(event -> {
+                selectedStatus[0] = firstStatus;
+                status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
+                status2Button.setBackground(Color.WHITE);
+            });
 
-        // 확인 버튼
-        JButton confirmButton = new JButton("확인");
-        confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-        confirmButton.setBounds(100, 120, 100, 30);
-        confirmButton.setBackground(Color.WHITE);
-        confirmButton.setForeground(Color.BLACK);
-        confirmButton.addActionListener(event -> {
-            try {
-                pw.println("/exit " + room.getRoomName()+" "+ selectedStatus[0]); // 퇴장 명령 전송
-                pw.flush();
+            status2Button.addActionListener(event -> {
+                selectedStatus[0] = secondStatus;
+                status1Button.setBackground(Color.WHITE);
+                status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
+            });
 
-                // 팝업 및 현재 창 닫기
-                exitDialog.dispose();
-                parentFrame.dispose();
+            status1Button.setFocusPainted(false);
+            status2Button.setFocusPainted(false);
 
-                // MainScreen 생성 및 테이블 갱신
-                MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
-                mainScreen.createMainScreen(); // MainScreen을 다시 열면 refreshRoomTable()이 호출됩니다.
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(exitDialog, "퇴장 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        });
+            statusPanel.add(status1Button);
+            statusPanel.add(status2Button);
+            exitDialog.add(statusPanel);
 
-        exitDialog.add(confirmButton);
-        exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
-        exitDialog.setVisible(true);
+            // 확인 버튼
+            JButton confirmButton = new JButton("확인");
+            confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+            confirmButton.setBounds(100, 120, 100, 30);
+            confirmButton.setBackground(Color.WHITE);
+            confirmButton.setForeground(Color.BLACK);
+            confirmButton.addActionListener(event -> {
+                try {
+                    pw.println("/exit " + room.getRoomName() + " " + selectedStatus[0]); // 퇴장 명령 전송
+                    pw.flush();
+
+                    // 팝업 및 현재 창 닫기
+                    exitDialog.dispose();
+                    parentFrame.dispose();
+
+                    // MainScreen 생성 및 테이블 갱신
+                    MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
+                    mainScreen.createMainScreen();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(exitDialog, "퇴장 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            });
+
+            exitDialog.add(confirmButton);
+            exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
+            exitDialog.setVisible(true);
     }
 
 }
