@@ -25,8 +25,8 @@ public class ChatRoomScreen {
     private final String nickname;
     private final ChatController chatController;
     private final String userStatus;
-    private JTextArea status1ChatArea;
-    private JTextArea status2ChatArea;
+    private JPanel status1ChatArea;
+    private JPanel status2ChatArea;
     private JTextField chatInput;
     private Socket sock;
     private PrintWriter pw;
@@ -107,10 +107,11 @@ public class ChatRoomScreen {
         JPanel status1Panel = new JPanel(new BorderLayout());
         JLabel status1Label = new JLabel(firstStatus, SwingConstants.CENTER);
         status1Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        status1ChatArea = new JTextArea();
-        status1ChatArea.setEditable(false);
-        status1ChatArea.setLineWrap(true); // 자동 줄바꿈 설정
-        status1ChatArea.setWrapStyleWord(true); // 단어 단위로 줄바꿈
+        status1ChatArea = new JPanel();
+        status1ChatArea.setLayout(new BoxLayout(status1ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
+//        status1ChatArea.setEditable(false);
+//        status1ChatArea.setLineWrap(true); // 자동 줄바꿈 설정
+//        status1ChatArea.setWrapStyleWord(true); // 단어 단위로 줄바꿈
         JScrollPane status1ScrollPane = new JScrollPane(status1ChatArea);
         status1Panel.add(status1Label, BorderLayout.NORTH);
         status1Panel.add(status1ScrollPane, BorderLayout.CENTER);
@@ -120,10 +121,11 @@ public class ChatRoomScreen {
         JPanel status2Panel = new JPanel(new BorderLayout());
         JLabel status2Label = new JLabel(secondStatus, SwingConstants.CENTER);
         status2Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        status2ChatArea = new JTextArea();
-        status2ChatArea.setEditable(false);
-        status2ChatArea.setLineWrap(true); // 자동 줄바꿈 설정
-        status2ChatArea.setWrapStyleWord(true); // 단어 단위로 줄바꿈
+        status2ChatArea = new JPanel();
+        status2ChatArea.setLayout(new BoxLayout(status2ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
+//        status2ChatArea.setEditable(false);
+//        status2ChatArea.setLineWrap(true); // 자동 줄바꿈 설정
+//        status2ChatArea.setWrapStyleWord(true); // 단어 단위로 줄바꿈
         JScrollPane status2ScrollPane = new JScrollPane(status2ChatArea);
         status2Panel.add(status2Label, BorderLayout.NORTH);
         status2Panel.add(status2ScrollPane, BorderLayout.CENTER);
@@ -199,17 +201,7 @@ public class ChatRoomScreen {
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + nickname + " : " + message;
                     // 메시지를 상태에 따라 출력
-                    if (userStatus.equals(room.getFirstStatus())) {
-                        status1ChatArea.append(formattedMessage + "\n");
-                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
-                        syncLineCounts(status2ChatArea, lineCount);
-                    } else if (userStatus.equals(room.getSecondStatus())) {
-                        status2ChatArea.append(formattedMessage + "\n");
-                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
-                        syncLineCounts(status1ChatArea, lineCount);
-                    } else {
-                        System.out.println("User status does not match any room status.");
-                    }
+                    addMessage(formattedMessage, userStatus);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "메시지 전송 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
@@ -249,13 +241,13 @@ public class ChatRoomScreen {
                 Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
 
                 // 메시지 처리
-                if (line.startsWith(room.getFirstStatus() + ":")) {
-                    status1ChatArea.append(line.replace(room.getFirstStatus() + ":", "") + "\n");
-                } else if (line.startsWith(room.getSecondStatus() + ":")) {
-                    status2ChatArea.append(line.replace(room.getSecondStatus() + ":", "") + "\n");
-                } else {
-                    System.out.println("Unexpected message format: " + line);
-                }
+//                if (line.startsWith(room.getFirstStatus() + ":")) {
+//                    status1ChatArea.append(line.replace(room.getFirstStatus() + ":", "") + "\n");
+//                } else if (line.startsWith(room.getSecondStatus() + ":")) {
+//                    status2ChatArea.append(line.replace(room.getSecondStatus() + ":", "") + "\n");
+//                } else {
+//                    System.out.println("Unexpected message format: " + line);
+//                }
             }
         } catch (IOException ex) {
             System.out.println("Error reading message: " + ex.getMessage());
@@ -267,45 +259,6 @@ public class ChatRoomScreen {
             JOptionPane.showMessageDialog(null, "메시지 수신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-//    private void loadChatHistory() {
-//        try {
-//            Room room = roomRepository.findRoomByName(roomName);
-//            if (room == null) {
-//                System.err.println("Room not found: " + roomName);
-//                return;
-//            }
-//
-//            List<Chat> chatHistory = chatRepository.readChatHistory(room);
-//            if (chatHistory == null || chatHistory.isEmpty()) {
-//                System.out.println("채팅 기록이 없습니다.");
-//                return;
-//            }
-//
-//            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
-//            for (Chat chat : chatHistory) {
-//                try {
-//                    String formattedTimestamp = timeFormat.format(chat.getTimestamp()); // 타임스탬프 변환
-//                    String formattedMessage = "[" + formattedTimestamp + "] " + chat.getUserName() + " : " + chat.getMessage();
-//
-//                    if (chat.getStatus().equals(room.getFirstStatus())) {
-//                        status1ChatArea.append(formattedMessage + "\n");
-//                    } else if (chat.getStatus().equals(room.getSecondStatus())) {
-//                        status2ChatArea.append(formattedMessage + "\n");
-//                    } else {
-//                        System.out.println("Unrecognized status: " + chat.getStatus());
-//                    }
-//                } catch (Exception e) {
-//                    System.err.println("채팅 데이터 처리 중 오류 발생: " + e.getMessage());
-//                    e.printStackTrace();
-//                }
-//            }
-//        } catch (Exception ex) {
-//            System.err.println("채팅 기록 불러오기 중 오류 발생: " + ex.getMessage());
-//            ex.printStackTrace();
-//            JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-//        }
-//    }
 
     private void loadChatHistory() {
         String userName;
@@ -373,18 +326,19 @@ public class ChatRoomScreen {
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
                     // 메시지 상태에 따라 화면에 표시
-                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
-                        status1ChatArea.append(formattedMessage + "\n");
-                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
-                        syncLineCounts(status2ChatArea, lineCount);
-                    } else if (status2ChatArea != null && status.equals(room.getSecondStatus())) {
-                        status2ChatArea.append(formattedMessage + "\n");
-                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
-                        syncLineCounts(status1ChatArea, lineCount);
-                    } else {
-                        // 상태가 없는 메시지 처리 (중립 상태)
-                        System.out.println("Unrecognized Status: " + message);
-                    }
+                    addMessage(formattedMessage, status);
+//                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
+//                        status1ChatArea.append(formattedMessage + "\n");
+//                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
+//                        syncLineCounts(status2ChatArea, lineCount);
+//                    } else if (status2ChatArea != null && status.equals(room.getSecondStatus())) {
+//                        status2ChatArea.append(formattedMessage + "\n");
+//                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
+//                        syncLineCounts(status1ChatArea, lineCount);
+//                    } else {
+//                        // 상태가 없는 메시지 처리 (중립 상태)
+//                        System.out.println("Unrecognized Status: " + message);
+//                    }
                 }
             }
         } catch (Exception ex) {
@@ -393,21 +347,57 @@ public class ChatRoomScreen {
         }
     }
 
-    private int calculateLineCount(String message, JTextArea textArea) {
-        int areaWidth = textArea.getWidth();
-        if (areaWidth <= 0) {
-            areaWidth = 800; // 기본 너비 설정 (UI 초기화 전에도 작동 가능하도록)
+    private void addMessage(String message, String status) {
+        JLabel messageLabel = new JLabel(message);
+        messageLabel.setOpaque(true);
+        messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        messageLabel.setBackground(Color.WHITE);
+
+        // 마우스 리스너 추가
+        messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                JOptionPane.showMessageDialog(null, "클릭된 메시지: " + message, "메시지 클릭", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        int linesToSync;
+        if (status.equals(roomRepository.findRoomByName(roomName).getFirstStatus())) {
+            status1ChatArea.add(messageLabel);
+            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
+            syncLineCounts(status2ChatArea, linesToSync);
+        } else if (status.equals(roomRepository.findRoomByName(roomName).getSecondStatus())) {
+            status2ChatArea.add(messageLabel);
+            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
+            syncLineCounts(status1ChatArea, linesToSync);
         }
-        FontMetrics fontMetrics = textArea.getFontMetrics(textArea.getFont());
-        int textWidth = fontMetrics.stringWidth(message);
-        // 가로 너비 기준으로 몇 줄이 필요한지 계산
-        int lines = (int) Math.ceil((double) textWidth / areaWidth);
+
+        // UI 갱신
+        status1ChatArea.revalidate();
+        status1ChatArea.repaint();
+        status2ChatArea.revalidate();
+        status2ChatArea.repaint();
+    }
+
+    private int calculateLineCount(JLabel label) {
+        FontMetrics fontMetrics = label.getFontMetrics(label.getFont());
+        int textWidth = fontMetrics.stringWidth(label.getText()); // 텍스트의 가로 길이
+        int panelWidth = status1ChatArea.getWidth(); // 패널의 현재 너비
+
+        // 패널의 너비에 맞춰 메시지가 몇 줄로 나뉘는지 계산
+        int lines = (int) Math.ceil((double) textWidth / panelWidth);
         return Math.max(lines, 1); // 최소 1줄
     }
 
-    private void syncLineCounts(JTextArea textAreaToSync, int calculatedLines) {
-        for (int i = 0; i < calculatedLines; i++) {
-            textAreaToSync.append("\n");
+    private void syncLineCounts(JPanel targetPanel, int linesToAdd) {
+        for (int i = 0; i < linesToAdd; i++) {
+            JLabel emptyLine = new JLabel(" ");
+            emptyLine.setOpaque(true);
+            emptyLine.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+            emptyLine.setBackground(Color.WHITE);
+            emptyLine.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+            targetPanel.add(emptyLine);
         }
     }
 
