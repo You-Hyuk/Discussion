@@ -336,7 +336,6 @@ public class ChatRoomScreen {
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
                     // 메시지 상태에 따라 화면에 표시
-<<<<<<< HEAD
                     addMessage(formattedMessage, status);
 //                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
 //                        status1ChatArea.append(formattedMessage + "\n");
@@ -350,20 +349,7 @@ public class ChatRoomScreen {
 //                        // 상태가 없는 메시지 처리 (중립 상태)
 //                        System.out.println("Unrecognized Status: " + message);
 //                    }
-=======
 
-                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
-                        status1ChatArea.append(formattedMessage + "\n");
-                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
-                        syncLineCounts(status2ChatArea, lineCount);
-                    } else if (status2ChatArea != null && status.equals(room.getSecondStatus())) {
-                        status2ChatArea.append(formattedMessage + "\n");
-                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
-                        syncLineCounts(status1ChatArea, lineCount);
-                    } else {
-                        System.out.println("알 수 없는 상태: " + message);
-                    }
->>>>>>> 2f61d923dc00984524b5a20505af1910a36cdfc1
                 }
             }
         } catch (Exception ex) {
