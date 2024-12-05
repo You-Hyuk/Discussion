@@ -81,7 +81,7 @@ public class StartScreen {
 
         nicknamePanel.add(nicknameField);
 
-        JButton confirmButton = new JButton("확인");
+        JButton confirmButton = new JButton("확인뿌엥");
         confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         confirmButton.setBounds(150, 130, 100, 40); // Absolute position
         confirmButton.addActionListener(e -> {
