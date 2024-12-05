@@ -103,9 +103,9 @@ public class ChatThread extends Thread {
                     user.setStatus(selectedStatus);
 
                     // 방 정보 업데이트
-                    Room enteredRoom = roomRepository.addUserToRoom(roomName, user);
+                    Room enteredRoom = chatController.enterRoom(roomName, user);
                     if (enteredRoom != null) {
-                        room = enteredRoom;
+                        room = roomRepository.addUserToRoom(roomName, user); // 상태별 카운트 업데이트
                         pw.println("ROOM:" + enteredRoom.getRoomName());
                         pw.flush();
 
@@ -241,11 +241,13 @@ public class ChatThread extends Thread {
                         continue;
                     }
 
-                    for (Chat chat : chatHistory) {
 
-                        pw.println(chat.getTimestamp() + "\t" + chat.getUserName() + "\t" + chat.getStatus() + "\t" + chat.getMessage() + "\t" + chat.getLike());
-                        pw.flush();
-                    }
+//                    for (Chat chat : chatHistory) {
+//                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
+//                        pw.flush();
+//                    }
+                    pw.println(chatHistory);
+                    pw.flush();
                     pw.println("HISTORY_END"); // 종료 신호
                     pw.flush();
                 }
