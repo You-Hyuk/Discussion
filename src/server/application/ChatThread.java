@@ -103,9 +103,9 @@ public class ChatThread extends Thread {
                     user.setStatus(selectedStatus);
 
                     // 방 정보 업데이트
-                    Room enteredRoom = chatController.enterRoom(roomName, user);
+                    Room enteredRoom = roomRepository.addUserToRoom(roomName, user);
                     if (enteredRoom != null) {
-                        room = roomRepository.addUserToRoom(roomName, user); // 상태별 카운트 업데이트
+                        room = enteredRoom;
                         pw.println("ROOM:" + enteredRoom.getRoomName());
                         pw.flush();
 
