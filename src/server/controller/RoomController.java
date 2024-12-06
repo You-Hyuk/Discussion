@@ -1,6 +1,7 @@
 package server.controller;
 //getRoomList 추가
 import server.domain.Room;
+import server.domain.User;
 import server.repository.RoomRepository;
 
 import java.io.PrintWriter;
@@ -10,9 +11,11 @@ import java.util.Map;
 
 public class RoomController {
     private Map<String, List<PrintWriter>> userMap;
+    private RoomRepository roomRepository;
 
     public RoomController(Map<String, List<PrintWriter>> userMap) {
         this.userMap = userMap;
+        this.roomRepository = new RoomRepository();
     }
 
     // 방에 유저 추가
@@ -34,7 +37,20 @@ public class RoomController {
     }
 
     public List<Room> getRoomList() {
-        RoomRepository repository = new RoomRepository();
-        return repository.readRoom(); // room.txt에서 방 목록 읽기
+        return roomRepository.readRoom(); // room.txt에서 방 목록 읽기
+    }
+
+    public Room findRoomByName(String roomName){
+        Room room = roomRepository.findRoomByName(roomName);
+        return room;
+    }
+
+    public Room enterRoom(String roomName, User user) {
+        Room room = roomRepository.findRoomByName(roomName);
+        if (room == null) {
+            throw new IllegalArgumentException("Room not found: " + roomName);
+        }
+        room = roomRepository.addUserToRoom(roomName, user); // addUserToRoom 호출
+        return room;
     }
 }

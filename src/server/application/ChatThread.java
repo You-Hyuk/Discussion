@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static client.dto.RequestCommand.*;
+import static server.dto.ErrorResponse.FIND_ROOM_FAILED;
+import static server.dto.SuccessResponse.*;
 
 public class ChatThread extends Thread {
     private Socket sock;
@@ -63,13 +65,16 @@ public class ChatThread extends Thread {
                 String command = parts[0]; // "CREATE_ROOM"
                 String body = parts.length > 1 ? parts[1] : "";
 
+                System.out.println("Command : " + command);
+                System.out.println("Contents : " + body);
+
                 if (command.equals(GET_ROOM_LIST.name())){
-                    List<Room> roomList = roomRepository.readRoom();
-
-                }
-
-                if (command.equals(FIND_ROOM.name())){
-
+                    List<Room> roomList = roomController.getRoomList();
+                    for (Room room : roomList) {
+                        sendRoomData(room);
+                    }
+                    pw.println(GET_ROOM_LIST_SUCCESS.name());
+                    pw.flush();
                 }
 
                 if (command.equals(CREATE_ROOM.name())){
@@ -82,23 +87,45 @@ public class ChatThread extends Thread {
                     chatController.createRoom(room);
                 }
 
+                if (command.equals(FIND_ROOM.name())){
+                    String roomName = body.split(" ")[0];
+                    Room room = roomController.findRoomByName(roomName);
 
+                    if (room != null) {
+                        String roomData = String.join(",",
+                                room.getRoomName(),
+                                room.getFirstStatus(),
+                                room.getSecondStatus(),
+                                room.getUserName(),
+                                String.valueOf(room.getFirstStatusCount()),
+                                String.valueOf(room.getSecondStatusCount())
+                        );
+                        pw.println(roomData); // 방 정보 전송
+                        pw.flush();
+                    } else {
+                        pw.println(FIND_ROOM_FAILED.name()); // 방을 찾을 수 없음
+                        pw.flush();
+                    }
+                    pw.println(FIND_ROOM_SUCCESS.name()); // 응답 종료
+                    pw.flush();
+                }
 
+                if (command.equals(ENTER_ROOM.name())){
+                    String[] content = body.split(" ");
+                    String roomName = content[0];
+                    String selectedStatus = content[1];
 
+                    // 유저 상태 설정
+                    user.setStatus(selectedStatus);
 
-
-
-
-
-
-                if(line.split(" ")[0].equals("/c")){
-                    String[] s = line.split(" ");
-                    String roomName = s[1];
-                    String firstStatus = s[2];
-                    String secondStatus = s[3];
-
-                    Room room = new Room(roomName, firstStatus, secondStatus, userName);
-                    chatController.createRoom(room);
+                    // 방 정보 업데이트
+                    Room enteredRoom = roomController.enterRoom(roomName, user);
+                    chatController.sendChatHistory(room, user);
+                    inRoom = true;
+//                    else {
+//                        pw.println("ERROR: 방을 찾을 수 없습니다.");
+//                        pw.flush();
+//                    }
                 }
 
                 if(line.split(" ")[0].equals("/exit") && inRoom) {
@@ -107,64 +134,6 @@ public class ChatThread extends Thread {
                     pw.println("EXIT_END"); // 종료 신호 전송
                     pw.flush();
                     inRoom = false;
-                }
-
-                if(inRoom && hasStatus){
-                    chatController.chat(room, user, userMap, status, line);
-                }
-
-                //Status 선택 메소드 추가 필요
-                if(line.split(" ")[0].equals("/e")) {
-                    System.out.println("입장 명령 받음");
-                    String[] s = line.split(" ");
-                    String roomName = s[1];
-                    String selectedStatus = s[2];
-                    System.out.println("입장 roomName 확인: " + roomName);
-                    System.out.println("선택된 상태 확인: " + selectedStatus);
-
-                    // 유저 상태 설정
-                    user.setStatus(selectedStatus);
-
-                    // 방 정보 업데이트
-                    Room enteredRoom = chatController.enterRoom(roomName, user);
-                    if (enteredRoom != null) {
-                        room = roomRepository.addUserToRoom(roomName, user); // 상태별 카운트 업데이트
-                        pw.println("ROOM:" + enteredRoom.getRoomName());
-                        pw.flush();
-
-                        // 채팅 기록 전송
-                        List<Chat> chatHistory = chatRepository.readChatHistory(enteredRoom);
-                        for (Chat chat : chatHistory) {
-                            pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
-                            pw.flush();
-                        }
-                        pw.println("ENTER_END"); // 종료 신호
-                        pw.flush();
-                        inRoom = true;
-                        System.out.println("chatThread, 입장, userMap.toString(): " + userMap.toString());
-                    } else {
-                        pw.println("ERROR: 방을 찾을 수 없습니다.");
-                        pw.flush();
-                    }
-                }
-
-                if (line.contains("/list")) {
-                    List<Room> roomList = roomController.getRoomList();
-                    for (Room room : roomList) {
-                        String roomData = String.join(",",
-                                room.getRoomName(),
-                                room.getUserName(),
-                                String.valueOf(room.getFirstStatusCount()),
-                                String.valueOf(room.getSecondStatusCount()),
-                                room.getFirstStatus(),
-                                room.getSecondStatus()
-                        );
-                        System.out.println("roomData확인: " + roomData);
-                        pw.println(roomData);
-                        pw.flush();
-                    }
-                    pw.println("LIST_END"); // 응답 종료
-                    pw.flush();
                 }
 
                 if (line.startsWith("/chat")) {
@@ -206,36 +175,6 @@ public class ChatThread extends Thread {
                     pw.flush();
                 }
 
-
-                if (line.startsWith("/find")) {
-                    String[] commandParts = line.split(" ");
-                    if (commandParts.length < 2) {
-                        pw.println("ERROR");
-                        pw.flush();
-                        continue;
-                    }
-                    String roomName = commandParts[1];
-//                    System.out.println("commandParts[1]을 roomName으로 받는지 확인: " + roomName);
-                    Room room = roomRepository.findRoomByName(roomName);
-                    System.out.println("room 확인: " + room);
-                    if (room != null) {
-                        String roomData = String.join(",",
-                                room.getRoomName(),
-                                room.getFirstStatus(),
-                                room.getSecondStatus(),
-                                room.getUserName(),
-                                String.valueOf(room.getFirstStatusCount()),
-                                String.valueOf(room.getSecondStatusCount())
-                        );
-                        pw.println(roomData); // 방 정보 전송
-                        pw.flush();
-                    } else {
-                        pw.println("ERROR"); // 방을 찾을 수 없음
-                        pw.flush();
-                    }
-                    pw.println("FIND_END"); // 응답 종료
-                    pw.flush();
-                }
 
                 if (line.startsWith("/history")) {
                     String[] commandParts = line.split(" ");
@@ -283,5 +222,18 @@ public class ChatThread extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void sendRoomData(Room room) {
+        String roomData = String.join(",",
+                room.getRoomName(),
+                room.getUserName(),
+                String.valueOf(room.getFirstStatusCount()),
+                String.valueOf(room.getSecondStatusCount()),
+                room.getFirstStatus(),
+                room.getSecondStatus()
+        );
+        pw.println(roomData);
+        pw.flush();
     }
 }
