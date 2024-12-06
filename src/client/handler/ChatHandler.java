@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import static client.dto.RequestCommand.GET_CHAT_HISTORY;
 import static client.dto.RequestCommand.SEND_CHAT;
 
-public class ChatHandler {
+public class ChatHandler implements RequestBuilder {
     private PrintWriter pw;
 
     public ChatHandler(PrintWriter pw) {
@@ -14,15 +14,20 @@ public class ChatHandler {
     }
 
     public void getChaHistory(String roomName){
-        String request = GET_CHAT_HISTORY.name() + " " + roomName;
+        String request = buildRequest(GET_CHAT_HISTORY.name(), roomName);
         pw.println(request);
         pw.flush();
     }
 
     public void sendChat(String chat){
-        String request = SEND_CHAT.name() + " " + chat;
+        String request = buildRequest(SEND_CHAT.name(), chat)
         pw.println(request);
         pw.flush();
     }
 
+
+    @Override
+    public String buildRequest(String... params) {
+        return String.join(" ", params);
+    }
 }
