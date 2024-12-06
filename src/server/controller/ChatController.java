@@ -2,7 +2,6 @@ package server.controller;
 // selectedstatus 수정, 채팅방 입장에서 클라이언트에 보내는 메시지 삭제
 import server.domain.Chat;
 import server.domain.Room;
-import server.domain.Status;
 import server.domain.User;
 import server.repository.ChatRepository;
 import server.repository.RoomRepository;
@@ -97,7 +96,6 @@ public class ChatController {
         }
 
         String chat = selectStatus + " : " + message;
-        System.out.println("chatcontroller 117번 라인 확인: " + chat);
         synchronized (userList) {
             for (PrintWriter pw : userList) {
                 pw.println(chat); // 메시지 출력
@@ -169,11 +167,16 @@ public class ChatController {
 
         // 상태별 인원수 증가/감소
         if (status.equals(room.getFirstStatus())) {
-            if (isEntering) room.incrementFirstStatusCount();
-            else room.decrementFirstStatusCount();
-        } else if (status.equals(room.getSecondStatus())) {
-            if (isEntering) room.incrementSecondStatusCount();
-            else room.decrementSecondStatusCount();
+            if (isEntering)
+                room.incrementFirstStatusCount();
+            else
+                room.decrementFirstStatusCount();
+        }
+        else if (status.equals(room.getSecondStatus())) {
+            if (isEntering)
+                room.incrementSecondStatusCount();
+            else
+                room.decrementSecondStatusCount();
         }
 
         // 업데이트된 상태 브로드캐스트

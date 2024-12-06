@@ -106,7 +106,7 @@ public class StartScreen {
 
                 // MainScreen에 연결된 소켓 전달
                 frame.dispose();
-                client.screen.MainScreen mainScreen = new client.screen.MainScreen(nickname, sock, pw, br);
+                MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
                 mainScreen.createMainScreen();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "서버 연결에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
