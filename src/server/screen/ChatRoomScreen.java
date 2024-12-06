@@ -68,6 +68,8 @@ public class ChatRoomScreen {
         Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
         String firstStatus = room.getFirstStatus();
         String secondStatus = room.getSecondStatus();
+        String likeMost1 = "statsu1 최다 좋아요 메시지";
+        String likeMost2 = "status2 최다 좋아요 메시지";
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
@@ -105,31 +107,35 @@ public class ChatRoomScreen {
 
         // 좌측 (status1) 채팅 영역
         JPanel status1Panel = new JPanel(new BorderLayout());
+        JPanel status1Header = new JPanel(new GridLayout(2, 1));
         JLabel status1Label = new JLabel(firstStatus, SwingConstants.CENTER);
-        status1Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        JLabel status1Like = new JLabel(likeMost1, SwingConstants.CENTER);
+        status1Header.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        status1Header.add(status1Label);
+        status1Header.add(status1Like);
+
         status1ChatArea = new JPanel();
         status1ChatArea.setLayout(new BoxLayout(status1ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
-//        status1ChatArea.setEditable(false);
-//        status1ChatArea.setLineWrap(true); // 자동 줄바꿈 설정
-//        status1ChatArea.setWrapStyleWord(true); // 단어 단위로 줄바꿈
         JScrollPane status1ScrollPane = new JScrollPane(status1ChatArea);
-        status1Panel.add(status1Label, BorderLayout.NORTH);
-        status1Panel.add(status1ScrollPane, BorderLayout.CENTER);
-        //chatPanel.add(status1ScrollPane);
+
+        status1Panel.add(status1Header, BorderLayout.NORTH); // 헤더 패널 추가
+        status1Panel.add(status1ScrollPane, BorderLayout.CENTER); // 스크롤 패널 추가
 
         // 우측 (status2) 채팅 영역
         JPanel status2Panel = new JPanel(new BorderLayout());
+        JPanel status2Header = new JPanel(new GridLayout(2, 1));
         JLabel status2Label = new JLabel(secondStatus, SwingConstants.CENTER);
-        status2Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        JLabel status2Like = new JLabel(likeMost2, SwingConstants.CENTER);
+        status2Header.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        status2Header.add(status2Label);
+        status2Header.add(status2Like);
+
         status2ChatArea = new JPanel();
         status2ChatArea.setLayout(new BoxLayout(status2ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
-//        status2ChatArea.setEditable(false);
-//        status2ChatArea.setLineWrap(true); // 자동 줄바꿈 설정
-//        status2ChatArea.setWrapStyleWord(true); // 단어 단위로 줄바꿈
         JScrollPane status2ScrollPane = new JScrollPane(status2ChatArea);
-        status2Panel.add(status2Label, BorderLayout.NORTH);
-        status2Panel.add(status2ScrollPane, BorderLayout.CENTER);
-        //chatPanel.add(status2ScrollPane);
+
+        status2Panel.add(status2Header, BorderLayout.NORTH); // 헤더 패널 추가
+        status2Panel.add(status2ScrollPane, BorderLayout.CENTER); // 스크롤 패널 추가
 
         chatPanel.add(status1Panel);
         chatPanel.add(status2Panel);
@@ -201,7 +207,7 @@ public class ChatRoomScreen {
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + nickname + " : " + message;
                     // 메시지를 상태에 따라 출력
-                    addMessage(formattedMessage, userStatus);
+                    addMessage(formattedMessage, userStatus, room);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "메시지 전송 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
@@ -240,14 +246,6 @@ public class ChatRoomScreen {
 
                 Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
 
-                // 메시지 처리
-//                if (line.startsWith(room.getFirstStatus() + ":")) {
-//                    status1ChatArea.append(line.replace(room.getFirstStatus() + ":", "") + "\n");
-//                } else if (line.startsWith(room.getSecondStatus() + ":")) {
-//                    status2ChatArea.append(line.replace(room.getSecondStatus() + ":", "") + "\n");
-//                } else {
-//                    System.out.println("Unexpected message format: " + line);
-//                }
             }
         } catch (IOException ex) {
             System.out.println("Error reading message: " + ex.getMessage());
@@ -315,11 +313,6 @@ public class ChatRoomScreen {
                 String[] chatEntries = response.split(",");
                 for (String chatEntry : chatEntries) {
                     String[] chatData = chatEntry.split("\t");
-//                    if (chatData.length < 5) {
-//                        System.out.println("Invalid chat data: " + chatEntry);
-//                        continue; // 유효하지 않은 데이터 무시
-//                    }
-
                     userName = chatData[0];
                     message = chatData[1];
                     status = chatData[2];
@@ -336,20 +329,7 @@ public class ChatRoomScreen {
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
                     // 메시지 상태에 따라 화면에 표시
-                    addMessage(formattedMessage, status);
-//                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
-//                        status1ChatArea.append(formattedMessage + "\n");
-//                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
-//                        syncLineCounts(status2ChatArea, lineCount);
-//                    } else if (status2ChatArea != null && status.equals(room.getSecondStatus())) {
-//                        status2ChatArea.append(formattedMessage + "\n");
-//                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
-//                        syncLineCounts(status1ChatArea, lineCount);
-//                    } else {
-//                        // 상태가 없는 메시지 처리 (중립 상태)
-//                        System.out.println("Unrecognized Status: " + message);
-//                    }
-
+                    addMessage(formattedMessage, status, room);
                 }
             }
         } catch (Exception ex) {
@@ -358,12 +338,11 @@ public class ChatRoomScreen {
         }
     }
 
-    private void addMessage(String message, String status) {
+    private void addMessage(String message, String status, Room room) {
         JLabel messageLabel = new JLabel(message);
         messageLabel.setOpaque(true);
         messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        messageLabel.setBackground(Color.WHITE);
 
         // 마우스 리스너 추가
         messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -374,11 +353,11 @@ public class ChatRoomScreen {
         });
 
         int linesToSync;
-        if (status.equals(roomRepository.findRoomByName(roomName).getFirstStatus())) {
+        if (status.equals(room.getFirstStatus())) {
             status1ChatArea.add(messageLabel);
             linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
             syncLineCounts(status2ChatArea, linesToSync);
-        } else if (status.equals(roomRepository.findRoomByName(roomName).getSecondStatus())) {
+        } else if (status.equals(room.getSecondStatus())) {
             status2ChatArea.add(messageLabel);
             linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
             syncLineCounts(status1ChatArea, linesToSync);
@@ -406,7 +385,6 @@ public class ChatRoomScreen {
             JLabel emptyLine = new JLabel(" ");
             emptyLine.setOpaque(true);
             emptyLine.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-            emptyLine.setBackground(Color.WHITE);
             emptyLine.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
             targetPanel.add(emptyLine);
         }
@@ -415,11 +393,11 @@ public class ChatRoomScreen {
     private void exitPopup(JFrame parentFrame, Room room) {
         // 팝업 다이얼로그 생성
         JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
-        exitDialog.setSize(350, 250);
+        exitDialog.setSize(350, 300);
         exitDialog.setLayout(null);
         JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
         exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        exitTitle.setBounds(0, 10, 300, 30);
+        exitTitle.setBounds(0, 10, 350, 30);
         exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
         exitDialog.add(exitTitle);
 
@@ -428,7 +406,7 @@ public class ChatRoomScreen {
 
         // STATUS 버튼 패널
         JPanel statusPanel = new JPanel();
-        statusPanel.setBounds(50, 60, 200, 40);
+        statusPanel.setBounds(70, 80, 200, 40);
         statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
 
         JButton status1Button = new JButton(firstStatus);
@@ -466,7 +444,7 @@ public class ChatRoomScreen {
         // 확인 버튼
         JButton confirmButton = new JButton("확인");
         confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-        confirmButton.setBounds(100, 120, 100, 30);
+        confirmButton.setBounds(125, 150, 100, 40);
         confirmButton.setBackground(Color.WHITE);
         confirmButton.setForeground(Color.BLACK);
         confirmButton.addActionListener(event -> {
