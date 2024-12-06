@@ -1,5 +1,7 @@
 package client.screen;
 
+import client.handler.ChatHandler;
+import client.handler.RoomHandler;
 import server.domain.Room;
 
 import javax.swing.*;
@@ -13,6 +15,8 @@ import java.net.Socket;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
+import static server.dto.SuccessResponse.*;
+
 public class ChatRoomScreen {
     private final String roomName;
     private final String nickname;
@@ -23,6 +27,8 @@ public class ChatRoomScreen {
     private Socket sock;
     private PrintWriter pw;
     private BufferedReader br;
+    private RoomHandler roomHandler;
+    private ChatHandler chatHandler;
 
 
     public ChatRoomScreen(String roomName, String nickname, Socket sock, PrintWriter pw, BufferedReader br, String userStatus) {
@@ -32,29 +38,40 @@ public class ChatRoomScreen {
         this.pw = pw;
         this.br = br;
         this.userStatus = userStatus;
+
+        this.roomHandler = new RoomHandler(pw);
+        this.chatHandler = new ChatHandler(pw);
     }
 
     public void createChatRoomScreen() {
         JFrame frame = new JFrame("토론 플랫폼 - " + roomName);
         String[] roomData = null;
+        String response;
+
         try {
-            String response;
-            // 서버에 방 리스트 요청
-            pw.println("/list");
-            pw.flush();
+            roomHandler.findRoom(this.roomName);
             // 서버 응답 처리
             while ((response = br.readLine()) != null) {
-                if (response.equals("LIST_END")) break;
+                if (response.equals(FIND_ROOM_SUCCESS.name()))
+                    break;
                 roomData = response.split(",");
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
+
         //roomname,firststatus,secondstatus,username
+        String roomName = roomData[0];
+        String firstStatus = roomData[4];
+        String secondStatus = roomData[5];
+        String userName = roomData[1];
         Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
-        String firstStatus = room.getFirstStatus();
-        String secondStatus = room.getSecondStatus();
-        String likeMost1 = "statsu1 최다 좋아요 메시지";
+//        String firstStatus = room.getFirstStatus();
+//        String secondStatus = room.getSecondStatus();
+//        String firstStatus = roomData[4];
+//        String secondStatus = roomData[5];
+
+        String likeMost1 = "status1 최다 좋아요 메시지";
         String likeMost2 = "status2 최다 좋아요 메시지";
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
@@ -76,11 +93,14 @@ public class ChatRoomScreen {
         exitButton.setForeground(Color.WHITE); // 버튼 텍스트 색상
         exitButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // 여백
         exitButton.addActionListener(e -> {
-            if(userStatus == "중립") {exitPopup(frame, room);}
+            if(userStatus == "중립") {
+                exitPopup(frame, room);
+            }
             else {
                 frame.dispose();
                 MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
                 mainScreen.createMainScreen();
+                roomHandler.exitRoom(roomName);
             }
         });
 
@@ -247,20 +267,12 @@ public class ChatRoomScreen {
         Room room = null;
 
         try {
-            // 서버에 방 리스트 요청
-            pw.println("/list");
-            pw.flush();
+            roomHandler.getRoomList();
 
             // 서버 응답 처리
             while ((response = br.readLine()) != null) {
-                if (response.equals("LIST_END")) break;
+                if (response.equals(GET_ROOM_LIST_SUCCESS.name())) break;
                 roomData = response.split(",");
-
-                // 배열 길이 확인
-                if (roomData.length < 6) {
-                    System.out.println("유효하지 않은 데이터: " + Arrays.toString(roomData));
-                    continue; // 데이터 무효시 다음 데이터로 넘어감
-                }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
@@ -276,13 +288,13 @@ public class ChatRoomScreen {
         room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
 
         try {
-            pw.println("/history " + room.getRoomName()); // 방 이름 예: "토론1"
-            pw.flush();
+            chatHandler.getChaHistory(roomName);
+
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); // 입력 포맷
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm"); // 출력 포맷 (시간)
             // 서버 응답 처리
             while ((response = br.readLine()) != null) {
-                if (response.equals("HISTORY_END"))
+                if (response.equals(GET_CHAT_HISTORY_SUCCESS.name()))
                     break;
                 // 쉼표로 채팅 기록 분리
                 String[] chatEntries = response.split(",");

@@ -17,19 +17,25 @@ public class RoomHandler implements RequestBuilder {
     }
 
     public void findRoom(String roomName){
-        String request = buildRequest(FIND_ROOM.name() + roomName);
+        String request = buildRequest(FIND_ROOM.name(), roomName);
         pw.println(request);
         pw.flush();
     }
 
     public void createRoom(String topic, String firstStatus, String secondStatus, String nickname){
-        String request = buildRequest(CREATE_ROOM.name() + topic + firstStatus + secondStatus + nickname);
+        String request = buildRequest(CREATE_ROOM.name(), topic, firstStatus, secondStatus, nickname);
         pw.println(request);
         pw.flush();
     }
 
     public void enterRoom(String roomName, String status){
-        String request = buildRequest(ENTER_ROOM.name() + roomName, status);
+        String request = buildRequest(ENTER_ROOM.name(), roomName, status);
+        pw.println(request);
+        pw.flush();
+    }
+
+    public void exitRoom(String roomName){
+        String request = buildRequest(EXIT_ROOM.name(), roomName);
         pw.println(request);
         pw.flush();
     }

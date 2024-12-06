@@ -173,7 +173,7 @@ public class MainScreen {
         bottomPanel.add(enterButton);
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
-        refreshRoomTable();
+//        refreshRoomTable();
         frame.setVisible(true);
     }
 
@@ -316,19 +316,20 @@ public class MainScreen {
         titleLabel.setForeground(Color.BLACK); // 검정색 텍스트
         dialog.add(titleLabel);
 
-        Room room = new Room(roomData[0], roomData[1], roomData[2], roomData[3]);
+        String firstStatus = roomData[4];
+        String secondStatus = roomData[5];
 
-        // 상태 버튼 추가
-        if (room == null) {
-            JOptionPane.showMessageDialog(dialog, "방 정보를 찾을 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-            dialog.dispose();
-            return;
-        }
+//        // 상태 버튼 추가
+//        if (room == null) {
+//            JOptionPane.showMessageDialog(dialog, "방 정보를 찾을 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+//            dialog.dispose();
+//            return;
+//        }
 
         // 상태 버튼 생성
-        JButton status1Button = new JButton(room.getFirstStatus());
+        JButton status1Button = new JButton(roomData[4]);
         JButton neutralButton = new JButton("중립");
-        JButton status2Button = new JButton(room.getSecondStatus());
+        JButton status2Button = new JButton(roomData[5]);
 
         // 버튼 초기 스타일
         status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
@@ -356,7 +357,7 @@ public class MainScreen {
 
         // 버튼 클릭 이벤트 (색상 변경)
         status1Button.addActionListener(e -> {
-            selectedStatus[0] = room.getFirstStatus();
+            selectedStatus[0] = firstStatus;
             status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
             neutralButton.setBackground(Color.WHITE); // 다른 버튼은 흰색
             status2Button.setBackground(Color.WHITE); // 다른 버튼은 흰색
@@ -370,7 +371,7 @@ public class MainScreen {
         });
 
         status2Button.addActionListener(e -> {
-            selectedStatus[0] = room.getSecondStatus();
+            selectedStatus[0] = secondStatus;
             status1Button.setBackground(Color.WHITE); // 다른 버튼은 흰색
             neutralButton.setBackground(Color.WHITE); // 다른 버튼은 흰색
             status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
@@ -387,18 +388,13 @@ public class MainScreen {
             if (selectedStatus[0] != null) {
                 try {
                     String response;
-                    List<String> chatHistory = new ArrayList<>(); // 채팅 내역 저장
                     roomHandler.enterRoom(roomName, selectedStatus[0]);
 
                     // 채팅 내역 요청
                     while ((response = br.readLine()) != null) {
-                        System.out.println("클라이언트 받은 데이터:" + response);
                         if (response.equals(ENTER_ROOM_SUCCESS.name())) {
                             break;
                         }
-
-                        chatHistory.add(response); // 나머지 데이터를 채팅 내역으로 저장
-                        System.out.println("채팅 내역: " + response);
                     }
                     if (roomName != null) {
 
@@ -406,14 +402,11 @@ public class MainScreen {
                         ChatRoomScreen chatRoomScreen = new ChatRoomScreen(roomName, nickname, sock, pw, br, selectedStatus[0]);
                         chatRoomScreen.createChatRoomScreen();
 
-                        //ChatRoomScreen chatRoomScreen = new ChatRoomScreen(enteredRoomName, nickname, sock, pw, br, userMap, selectedStatus[0]);
-                        //System.out.println("enteredRoomName 확인: " + enteredRoomName);
-                        //hatRoomScreen.createChatRoomScreen();
                         dialog.dispose();
-                        if (parentFrame != null) {
-                            parentFrame.dispose();
-                            refreshRoomTable();
-                        }
+//                        if (parentFrame != null) {
+//                            parentFrame.dispose();
+//                            refreshRoomTable();
+//                        }
                     } else {
                         JOptionPane.showMessageDialog(dialog, "방 이름을 확인할 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     }

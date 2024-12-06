@@ -1,5 +1,5 @@
 package server.controller;
-//getRoomList 추가
+
 import server.domain.Room;
 import server.domain.User;
 import server.repository.RoomRepository;
@@ -47,9 +47,6 @@ public class RoomController {
 
     public Room enterRoom(String roomName, User user) {
         Room room = roomRepository.findRoomByName(roomName);
-        if (room == null) {
-            throw new IllegalArgumentException("Room not found: " + roomName);
-        }
         room = roomRepository.addUserToRoom(roomName, user); // addUserToRoom 호출
         return room;
     }

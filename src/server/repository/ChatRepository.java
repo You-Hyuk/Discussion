@@ -74,18 +74,16 @@ public class ChatRepository {
 
 
     public ArrayList<Chat> readChatHistory(Room room) {
-        if (room == null) {
-            System.err.println("Room is null. Returning empty chat history.");
-            return new ArrayList<>();
-        }
         if (room.getChatFileName() == null) {
             System.err.println("Chat file name is null. Returning empty chat history.");
             return new ArrayList<>();
         }
+
         ArrayList<Chat> chatHistory = null;
         System.out.println("readChatHistory에서 room 확인: " + room);
         String chatFileName = room.getChatFileName();
         String path = DIRECTORY_PATH + chatFileName;
+
         try{
             FileInputStream fis = new FileInputStream(path);
             ObjectInputStream ois = new ObjectInputStream(fis);

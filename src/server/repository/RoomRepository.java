@@ -15,9 +15,7 @@ public class RoomRepository {
 
     public Room findRoomByName(String roomName) {
         try{
-            System.out.println("findroombyname 호출");
             ArrayList<Room> rooms = readRoom();
-            System.out.println("roomrepository.findroombyname에서 readroom 확인: " + rooms);
             for (Room room : rooms) {
                 if(room.getRoomName().equals(roomName)) {
                     return room;
@@ -77,7 +75,6 @@ public class RoomRepository {
 
         return room1;
     }
-
 
     public void createRoom(Room room){
         try{

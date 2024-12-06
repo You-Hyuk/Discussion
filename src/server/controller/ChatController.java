@@ -1,5 +1,5 @@
 package server.controller;
-// selectedstatus 수정, 채팅방 입장에서 클라이언트에 보내는 메시지 삭제
+
 import server.domain.Chat;
 import server.domain.Room;
 import server.domain.User;
@@ -29,18 +29,9 @@ public class ChatController {
 
 
     // 채팅방 입장
-    public void sendChatHistory(Room room, User user){
+    public ArrayList<Chat> sendChatHistory(Room room, User user){
         ArrayList<Chat> chats = chatRepository.readChatHistory(room);
-        synchronized (user) {
-            PrintWriter pw = user.getPrintWriter();
-            for (Chat chat : chats) {
-                pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
-                pw.flush();
-            }
-            pw.println(ENTER_ROOM_SUCCESS.name()); // 종료 신호
-            pw.flush();
-        }
-        return;
+        return chats;
     }
 
     // 채팅방 Status 선택
