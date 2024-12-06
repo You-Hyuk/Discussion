@@ -40,17 +40,6 @@ public class ChatRepository {
 
     public void saveChat(Room room, Chat chat){
         try {
-
-            if (room == null) {
-                System.err.println("Room is null. Cannot save.");
-                return;
-            }
-
-            if (chat == null) {
-                System.err.println("Chat is null. Cannot save.");
-                return;
-            }
-
             String filePath = DIRECTORY_PATH + room.getRoomName() + ".txt";
 
             ArrayList<Chat> chats = readChatHistory(room);
@@ -83,19 +72,6 @@ public class ChatRepository {
         }
     }
 
-    public ArrayList<Chat> findChatHistory(Room room) {
-        ArrayList<Chat> chatHistory = new ArrayList<>(); // 빈 리스트로 초기화
-        try {
-            chatHistory = readChatHistory(room); // 채팅 기록 읽기
-            System.out.println("findChatHistory에서 readChatHistory 결과 확인:" + chatHistory);
-        } catch (Exception e) {
-            e.printStackTrace(); // 예외 스택 트레이스 출력
-        }
-        if (chatHistory.isEmpty()) {
-            System.out.println("해당 채팅방의 채팅 기록이 존재하지 않습니다.");
-        }
-        return chatHistory; // 항상 빈 리스트 또는 채팅 기록 반환
-    }
 
     public ArrayList<Chat> readChatHistory(Room room) {
         if (room == null) {

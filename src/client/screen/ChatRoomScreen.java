@@ -1,10 +1,6 @@
 package client.screen;
 
-import server.controller.ChatController;
-import server.domain.Chat;
 import server.domain.Room;
-import server.repository.ChatRepository;
-import server.repository.RoomRepository;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,12 +12,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 public class ChatRoomScreen {
     private final String roomName;
     private final String nickname;
-    private final ChatController chatController;
     private final String userStatus;
     private JPanel status1ChatArea;
     private JPanel status2ChatArea;
@@ -29,20 +23,14 @@ public class ChatRoomScreen {
     private Socket sock;
     private PrintWriter pw;
     private BufferedReader br;
-    private RoomRepository roomRepository;
-    private ChatRepository chatRepository;
-    private Map<String, List<PrintWriter>> userMap;
 
-    public ChatRoomScreen(String roomName, String nickname, Socket sock, PrintWriter pw, BufferedReader br, Map<String, List<PrintWriter>> userMap, String userStatus) {
+
+    public ChatRoomScreen(String roomName, String nickname, Socket sock, PrintWriter pw, BufferedReader br, String userStatus) {
         this.roomName = roomName;
         this.nickname = nickname;
         this.sock = sock;
         this.pw = pw;
         this.br = br;
-        this.roomRepository = new RoomRepository();
-        this.chatRepository = new ChatRepository();
-        this.chatController = new ChatController(userMap);
-        this.userMap = userMap;
         this.userStatus = userStatus;
     }
 
@@ -294,11 +282,8 @@ public class ChatRoomScreen {
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm"); // 출력 포맷 (시간)
             // 서버 응답 처리
             while ((response = br.readLine()) != null) {
-                if (response.equals("HISTORY_END")) break;
-                if (response.contains("해당 방의 채팅 기록이 없습니다.")) {
-                    System.out.println("채팅 기록 없음: " + response);
-                    break; // 기록 없음 메시지는 무시하고 다음으로 진행
-                }
+                if (response.equals("HISTORY_END"))
+                    break;
                 // 쉼표로 채팅 기록 분리
                 String[] chatEntries = response.split(",");
                 for (String chatEntry : chatEntries) {

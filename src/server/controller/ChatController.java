@@ -9,6 +9,8 @@ import server.repository.RoomRepository;
 import java.io.PrintWriter;
 import java.util.*;
 
+import static server.dto.SuccessResponse.ENTER_ROOM_SUCCESS;
+
 public class ChatController {
     private RoomRepository roomRepository = new RoomRepository();
     private ChatRepository chatRepository = new ChatRepository();
@@ -27,24 +29,18 @@ public class ChatController {
 
 
     // 채팅방 입장
-    public Room enterRoom(String roomName, User user){
-        System.out.println("ChatController.enterRoom 호출");
-        Room room = roomRepository.findRoomByName(roomName);
-        if (room == null) {
-            throw new IllegalArgumentException("Room not found: " + roomName);
-        }
-        // room = roomRepository.addUserToRoom(roomName, user); // addUserToRoom 호출
-        ArrayList<Chat> chats = chatRepository.findChatHistory(room);
+    public void sendChatHistory(Room room, User user){
+        ArrayList<Chat> chats = chatRepository.readChatHistory(room);
         synchronized (user) {
             PrintWriter pw = user.getPrintWriter();
             for (Chat chat : chats) {
-                String message = chat.getMessage();
-                pw.println(message);
+                pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
                 pw.flush();
             }
+            pw.println(ENTER_ROOM_SUCCESS.name()); // 종료 신호
+            pw.flush();
         }
-        System.out.println("ChatController에서 enterRoom에서 확인: " + room);
-        return room;
+        return;
     }
 
     // 채팅방 Status 선택
@@ -70,23 +66,13 @@ public class ChatController {
 
     //상태에 따른 구분 필요
     public void chat(Room room, User user, HashMap userMap, String status, String message){
-        // 디버깅 출력
-        System.out.println("Room: " + room);
-        System.out.println("User: " + user);
-        System.out.println("User Map: " + userMap);
-        System.out.println("User Status: " + status);
-        System.out.println("Message: " + message);
-        if (room == null) {
-            throw new IllegalArgumentException("Room is null.");
-        }
+
         List<PrintWriter> userList = (List<PrintWriter>) userMap.get(room.getRoomName());
         if (userList == null) {
             userList = new ArrayList<>(); // 빈 리스트로 초기화
             userMap.put(room.getRoomName(), userList); // userMap에 추가
-            System.out.println("User list was null. Initialized and added to userMap.");
         }
 
-        System.out.println("Room User List: " + userList);
         String selectStatus = "";
         if (status.equals(room.getFirstStatus())){
             selectStatus = room.getFirstStatus();
