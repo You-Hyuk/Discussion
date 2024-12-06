@@ -110,6 +110,7 @@ public class StartScreen {
                 mainScreen.createMainScreen();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "서버 연결에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                System.out.println(ex);
             }
         });
         nicknamePanel.add(confirmButton);
