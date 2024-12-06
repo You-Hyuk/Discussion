@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
 
+import static client.dto.RequestCommand.*;
+
 public class ChatThread extends Thread {
     private Socket sock;
     private String userName;
@@ -56,6 +58,39 @@ public class ChatThread extends Thread {
         try {
             String line = null;
             while ((line = br.readLine()) != null) {
+                String[] parts = line.split(" ", 2); // 최대 두 부분으로 나누기
+
+                String command = parts[0]; // "CREATE_ROOM"
+                String body = parts.length > 1 ? parts[1] : "";
+
+                if (command.equals(GET_ROOM_LIST.name())){
+                    List<Room> roomList = roomRepository.readRoom();
+
+                }
+
+                if (command.equals(FIND_ROOM.name())){
+
+                }
+
+                if (command.equals(CREATE_ROOM.name())){
+                    String[] createRoomInfo = body.split(" ");
+                    String roomName = createRoomInfo[1];
+                    String firstStatus = createRoomInfo[2];
+                    String secondStatus = createRoomInfo[3];
+
+                    Room room = new Room(roomName, firstStatus, secondStatus, userName);
+                    chatController.createRoom(room);
+                }
+
+
+
+
+
+
+
+
+
+
                 if(line.split(" ")[0].equals("/c")){
                     String[] s = line.split(" ");
                     String roomName = s[1];

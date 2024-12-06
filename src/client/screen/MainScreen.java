@@ -1,5 +1,6 @@
 package client.screen;
 
+import client.handler.RoomHandler;
 import server.controller.ChatController;
 import server.domain.Room;
 import server.repository.RoomRepository;
@@ -18,13 +19,14 @@ import java.util.List;
 
 public class MainScreen {
     private final RoomRepository roomRepository;
-    private final ChatController chatController;
+//    private final ChatController chatController;
     private final String nickname; // 사용자 닉네임
     private JFrame frame;
     private DefaultTableModel tableModel; // 테이블 모델
     private Socket sock;
     private PrintWriter pw;
     private BufferedReader br;
+    private RoomHandler roomHandler;
 
     public MainScreen(String nickname, Socket sock, PrintWriter pw, BufferedReader br) {
         this.sock = sock;
@@ -35,8 +37,10 @@ public class MainScreen {
 
         // 정확한 타입으로 초기화
         Map<String, List<PrintWriter>> userMap = new HashMap<>();
-        this.chatController = new ChatController(userMap); // ChatController 초기화
+//        this.chatController = new ChatController(userMap); // ChatController 초기화
+        this.roomHandler = new RoomHandler(pw);
     }
+
 
     // 방 리스트 갱신 로직
     private void refreshRoomTable() {
