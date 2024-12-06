@@ -46,24 +46,31 @@ public class MainScreen {
             pw.println("/list"); // 방 리스트 요청
             pw.flush();
 
-            // 서버 응답 처리
-            tableModel.setRowCount(0); // 기존 데이터 초기화
+            tableModel.setRowCount(0); // 기존 테이블 데이터 초기화
             String response;
             while ((response = br.readLine()) != null) {
                 if (response.equals("LIST_END")) break; // 응답 종료
-                String[] roomData = response.split(","); // 방 데이터 분리
-                tableModel.addRow(new Object[]{
-                        roomData[0], // 방 이름
-                        roomData[1], // 생성자
-                        roomData[2], // 찬성 수
-                        roomData[3]  // 반대 수
-                });
+                System.out.println("Client received roomData: " + response);
+                String[] roomData = response.split(",");
+                if (roomData.length == 6) { // 6개의 항목이 모두 있는지 확인
+                    tableModel.addRow(new Object[]{
+                            roomData[0], // 방 이름
+                            roomData[1], // 생성자
+                            roomData[2], // 찬성 수
+                            roomData[3], // 반대 수
+                            roomData[4], // 첫 번째 상태
+                            roomData[5]  // 두 번째 상태
+                    });
+                } else {
+                    System.out.println("Invalid room data: " + response);
+                }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
     }
+
 
 
     public void createMainScreen() {
