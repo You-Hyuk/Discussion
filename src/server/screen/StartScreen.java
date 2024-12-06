@@ -93,7 +93,7 @@ public class StartScreen {
             try {
                 // 서버 연결
                 // StartScreen.java에서 서버 연결 초기화
-                Socket sock = new Socket("192.168.88.29", 10001); //192.168.67.228
+                Socket sock = new Socket("172.20.10.13", 10001); //192.168.67.228
                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()), true);
                 BufferedReader br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
@@ -107,6 +107,7 @@ public class StartScreen {
                 mainScreen.createMainScreen();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "서버 연결에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                System.out.println(ex);
             }
         });
         nicknamePanel.add(confirmButton);
