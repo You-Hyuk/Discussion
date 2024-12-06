@@ -20,7 +20,7 @@ public class ChatHandler implements RequestBuilder {
     }
 
     public void sendChat(String chat){
-        String request = buildRequest(SEND_CHAT.name(), chat)
+        String request = buildRequest(SEND_CHAT.name(), chat);
         pw.println(request);
         pw.flush();
     }
