@@ -150,10 +150,14 @@ public class MainScreen {
             while ((response = br.readLine()) != null) {
                 if (response.equals("LIST_END")) break;
                 String[] roomData = response.split(",");
+                if (roomData.length < 4) {
+                    continue; // 다음 데이터로 넘어감
+                }
                 tableModel.addRow(new Object[]{roomData[0], roomData[1], roomData[2], roomData[3]});
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "MAINSCREEN에서 방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            System.out.println(ex);
         }
 
         JScrollPane tableScrollPane = new JScrollPane(table);
@@ -311,7 +315,7 @@ public class MainScreen {
 
         // 방 입장 팝업
         JDialog dialog = new JDialog(parentFrame, "토론방 입장", true);
-        dialog.setSize(350, 250);
+        dialog.setSize(350, 300);
         dialog.setLayout(null);
         //dialog.getContentPane().setBackground(Color.white); //입장 팝업 배경색
 
