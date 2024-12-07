@@ -149,6 +149,32 @@ public class ChatThread extends Thread {
                     pw.println(VOTE_DISCUSSION_SUCCESS.name());
                     pw.flush();
                 }
+
+//                if (line.startsWith("/like")) {
+//                    String[] parts = line.split(" ", 3);
+//                    if (parts.length < 3) {
+//                        pw.println("ERROR: 올바르지 않은 좋아요 요청 형식입니다.");
+//                        pw.flush();
+//                        continue;
+//                    }
+//                    String roomName = parts[1];
+//                    String chatId = parts[2];
+//
+//                    Room room = roomRepository.findRoomByName(roomName);
+//                    if (room == null) {
+//                        pw.println("ERROR: 방을 찾을 수 없습니다.");
+//                        pw.flush();
+//                        continue;
+//                    }
+//
+//                    chatRepository.updateLikeCount(room,chatId); // 좋아요 수 증가
+//
+//                    // 클라이언트에 성공 응답 전송
+//                    pw.println("LIKE_SUCCESS ");
+//                    pw.flush();
+//                }
+
+
             }
         } catch (Exception ex) {
             System.out.println(ex);

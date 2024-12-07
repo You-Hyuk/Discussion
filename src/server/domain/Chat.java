@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.UUID;
 
 public class Chat implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String userName;
     private String message;
     private String status;
@@ -75,6 +77,9 @@ public class Chat implements Serializable {
     }//좋아요 증가
     public String getId() {
         return id;
+    }
+    public void setId(String Id) {
+        this.id=id;
     }
 
     @Override
