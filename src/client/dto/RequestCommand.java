@@ -5,7 +5,5 @@ public enum RequestCommand {
     GET_ROOM_LIST, FIND_ROOM, CREATE_ROOM, ENTER_ROOM, EXIT_ROOM, VOTE_DISCUSSION,
 
     // Chat Command
-    GET_CHAT_HISTORY, SEND_CHAT
-
-    ;
+    GET_CHAT_HISTORY, SEND_CHAT, LIKE_CHAT
 }

@@ -19,8 +19,9 @@ public class ChatHandler implements RequestBuilder {
         pw.flush();
     }
 
-    public void sendChat(String roomName, String chat, String status){
-        String request = buildRequest(SEND_CHAT.name(), roomName, chat, status);
+    public void likeChat(String roomName, String chatId){
+        String body = "RoomName :" + roomName + " ChatId :" + chatId;
+        String request = buildRequest(userName, LIKE_CHAT.name(), body);
         pw.println(request);
         pw.flush();
     }

@@ -61,19 +61,9 @@ public class ChatController {
         roomRepository.deleteExpiredRooms(); // 만료된 방 삭제
     }
 
-    public void likeChat(Room room, String chatId) {
-        // 좋아요 수를 업데이트
-        chatRepository.updateLikeCount(room, chatId);
-        // 좋아요 수가 변경된 메시지를 클라이언트들에게 브로드캐스트
-        ArrayList<Chat> chats = chatRepository.readChatHistory(room);
-        for (Chat chat : chats) {
-            if (chat.getId().equals(chatId)) {
-                broadcastLikeUpdate(room, chat);
-                break;
-            }
-        }
-        chatRepository.updateLikeCount(room, chatId); // 좋아요 수 업데이트
-        broadcastMostLikedChat(room); // 최고 좋아요 채팅 브로드캐스트
+    public Integer likeChat(Room room, String chatId) {
+        Integer likeCount = chatRepository.updateLikeCount(room, chatId);
+        return likeCount;
     }
 
     // 좋아요 업데이트 브로드캐스트
@@ -107,44 +97,6 @@ public class ChatController {
                     pw.println("POPUP: " + popupMessage); // 팝업 메시지 전송
                     pw.flush();
                 }
-            }
-        }
-    }
-
-    public void updateRoomStatusCount(Room room, String status, boolean isEntering) {
-        if (room == null) return;
-
-        // 상태별 인원수 증가/감소
-        if (status.equals(room.getFirstStatus())) {
-            if (isEntering)
-                room.incrementFirstStatusCount();
-            else
-                room.decrementFirstStatusCount();
-        }
-        else if (status.equals(room.getSecondStatus())) {
-            if (isEntering)
-                room.incrementSecondStatusCount();
-            else
-                room.decrementSecondStatusCount();
-        }
-
-        // 업데이트된 상태 브로드캐스트
-        broadcastRoomStatus(room);
-    }
-
-    private void broadcastRoomStatus(Room room) {
-        String statusUpdateMessage = "STATUS_UPDATE: " +
-                room.getRoomName() + "," +
-                room.getFirstStatusCount() + "," +
-                room.getSecondStatusCount();
-
-        List<PrintWriter> userList = userMap.get(room.getRoomName());
-        if (userList == null) return;
-
-        synchronized (userList) {
-            for (PrintWriter pw : userList) {
-                pw.println(statusUpdateMessage); // 상태 업데이트 메시지 전송
-                pw.flush();
             }
         }
     }

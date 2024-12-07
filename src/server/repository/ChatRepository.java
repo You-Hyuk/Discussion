@@ -110,39 +110,24 @@ public class ChatRepository {
         }
     }
 
-    public void updateLikeCount(Room room, String chatId) {
+    public Integer updateLikeCount(Room room, String chatId) {
         try {
-            if (room == null) {
-                System.err.println("Room is null. Cannot update like.");
-                return;
-            }
-            if (chatId == null) {
-                System.err.println("Chat ID is null. Cannot update like.");
-                return;
-            }
+            Integer likeCount = 0;
             String filePath = DIRECTORY_PATH + room.getRoomName() + ".txt";
             ArrayList<Chat> chats = readChatHistory(room);
-            if (chats == null) {
-                System.err.println("Chat history is null. Cannot update like count.");
-                return;
-            }
-            boolean updated = false;
             for (Chat chat : chats) {
                 if (chat.getId().equals(chatId)) {
                     chat.incrementLike(); // 좋아요 수 증가
-                    updated = true;
+                    likeCount = chat.getLike();
                     break;
                 }
             }
-            if (updated) {
-                writeChatHistory(filePath, chats); // 업데이트된 기록 저장
-                System.out.println("좋아요 업데이트 완료: Chat ID = " + chatId);
-            } else {
-                System.err.println("Chat ID not found: " + chatId);
-            }
+            writeChatHistory(filePath, chats); // 업데이트된 기록 저장
+            return likeCount;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("좋아요 업데이트 실패");
         }
+        return 0;
     }
 
     public Chat findMostLikedChat(ArrayList<Chat> chats) {

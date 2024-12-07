@@ -343,44 +343,33 @@ public class ChatRoomScreen {
         messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-//        likeButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
-//        likeButton.setFocusPainted(false);
-//        likeButton.setBackground(new Color(230, 230, 230));
+        likeButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+        likeButton.setFocusPainted(false);
+        likeButton.setBackground(new Color(230, 230, 230));
 
-        // 마우스 리스너 추가
-//        likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
-//            @Override
-//            public void mouseClicked(java.awt.event.MouseEvent e) {
-//                try {
-//                    // 서버에 좋아요 요청
-//                    pw.println("/like " + roomName + " " + chat.getId());
-//                    pw.flush();
-//
-//                    // 서버 응답 처리
-//                    String response;
-//                    while ((response = br.readLine()) != null) {
-//                        if (response.equals("LIKE_SUCCESS")) {
-//                            chat.incrementLike(); // 로컬 Chat 객체에 좋아요 수 증가
-//                            chatRepository.updateLikeCount(roomRepository.findRoomByName(roomName), chat.getId()); // 저장소 업데이트
-//
-//                            likeButton.setText(" 좋아요 " + chat.getLike());
-//                            break;
-//                        } else if (response.startsWith("ERROR")) {
-//                            JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다: " + response, "오류", JOptionPane.ERROR_MESSAGE);
-//                            break;
-//                        }
-//
-//                    }
-//                } catch (Exception ex) {
-//                    JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-//                    ex.printStackTrace();
-//                }
-//            }
-//        });
+        likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                try {
+                    chatHandler.likeChat(roomName, chatId);
+
+                    String likeResponse;
+                    while ((likeResponse = br.readLine()) != null) {
+                        if (likeResponse.equals(LIKE_CHAT_SUCCESS.name())) {
+                            Integer likeCount = Integer.parseInt(likeResponse.split(" ")[1]);
+                            likeButton.setText(" 좋아요 " + (likeCount + 1));
+                            break;
+                        }
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
         messagePanel.add(messageLabel);
         messagePanel.add(Box.createHorizontalStrut(10));
-//        messagePanel.add(likeButton);
+        messagePanel.add(likeButton);
         messagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // 최대 크기 설정
         messagePanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
         messagePanel.setPreferredSize(new Dimension(0, 50));
@@ -394,14 +383,18 @@ public class ChatRoomScreen {
         emptyPanel.setPreferredSize(new Dimension(0, 50));
 
         int linesToSync;
-        if (status.equals(room.getFirstStatus())) {
-            status1ChatArea.add(messageLabel);
-            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-            syncLineCounts(status2ChatArea, linesToSync);
-        } else if (status.equals(room.getSecondStatus())) {
-            status2ChatArea.add(messageLabel);
-            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-            syncLineCounts(status1ChatArea, linesToSync);
+        if (status.equals(firstStatus)) {
+//            status1ChatArea.add(messagePanel);
+//            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
+//            syncLineCounts(status2ChatArea, linesToSync);
+            status1ChatArea.add(messagePanel); // 메시지 추가
+            status2ChatArea.add(emptyPanel);
+        } else if (status.equals(secondStatus)) {
+            status2ChatArea.add(messagePanel); // 메시지 추가
+            status1ChatArea.add(emptyPanel);
+//            status2ChatArea.add(messagePanel);
+//            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
+//            syncLineCounts(status1ChatArea, linesToSync);
         }
 
         // UI 갱신
