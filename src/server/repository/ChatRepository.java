@@ -69,7 +69,6 @@ public class ChatRepository {
 
     public ArrayList<Chat> readChatHistory(Room room) {
         if (room.getChatFileName() == null) {
-//            System.err.println("Chat file name is null. Returning empty chat history.");
             return new ArrayList<>();
         }
 

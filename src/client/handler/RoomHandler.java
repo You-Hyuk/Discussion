@@ -6,48 +6,57 @@ import static client.dto.RequestCommand.*;
 
 public class RoomHandler implements RequestBuilder {
     private PrintWriter pw;
+    private String userName;
 
-    public RoomHandler(PrintWriter pw) {
+    public RoomHandler(PrintWriter pw, String userName) {
         this.pw = pw;
+        this.userName = userName;
     }
 
     public void getRoomList(){
-        pw.println(GET_ROOM_LIST.name());
-        pw.flush();
-    }
-
-    public void findRoom(String roomName){
-        String request = buildRequest(FIND_ROOM.name(), roomName);
+        String body = " ";
+        String request = buildRequest(userName, GET_ROOM_LIST.name(), body);
         pw.println(request);
         pw.flush();
     }
 
-    public void createRoom(String topic, String firstStatus, String secondStatus, String nickname){
-        String request = buildRequest(CREATE_ROOM.name(), topic, firstStatus, secondStatus, nickname);
+    public void findRoom(String roomName){
+        String body = "RoomName :" + roomName;
+        String request = buildRequest(userName, FIND_ROOM.name(), body);
+        pw.println(request);
+        pw.flush();
+    }
+
+    public void createRoom(String roomName, String firstStatus, String secondStatus){
+        String body = "RoomName :" + roomName + " FirstStatus :" + firstStatus + " SecondStatus :" + secondStatus;
+        String request = buildRequest(userName, CREATE_ROOM.name(), body);
         pw.println(request);
         pw.flush();
     }
 
     public void enterRoom(String roomName, String status){
-        String request = buildRequest(ENTER_ROOM.name(), roomName, status);
+        String body = "RoomName :" + roomName + " Status :" + status;
+        String request = buildRequest(userName, ENTER_ROOM.name(), body);
         pw.println(request);
         pw.flush();
     }
 
     public void exitRoom(String roomName){
-        String request = buildRequest(EXIT_ROOM.name(), roomName);
+        String body = "RoomName :" + roomName;
+        String request = buildRequest(userName, EXIT_ROOM.name(), body);
         pw.println(request);
         pw.flush();
     }
 
     public void voteDiscussion(String roomName, String status){
-        String request = buildRequest(VOTE_DISCUSSION.name(), roomName, status);
+        String body = "RoomName :" + roomName + " Status :" + status;
+        String request = buildRequest(userName, VOTE_DISCUSSION.name(), body);
         pw.println(request);
         pw.flush();
     }
 
     @Override
-    public String buildRequest(String... params) {
-        return String.join(" ", params);
+    public String buildRequest(String userName, String command, String body) {
+        return  "[REQUEST]" + "UserName :" + userName + " Command :" + command + " Body :" + body;
     }
 }

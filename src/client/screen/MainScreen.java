@@ -21,7 +21,7 @@ import static server.dto.SuccessResponse.*;
 
 public class MainScreen {
     private final RoomRepository roomRepository;
-    private final String nickname; // 사용자 닉네임
+    private final String userName; // 사용자 닉네임
     private JFrame frame;
     private DefaultTableModel tableModel; // 테이블 모델
     private Socket sock;
@@ -29,13 +29,13 @@ public class MainScreen {
     private BufferedReader br;
     private RoomHandler roomHandler;
 
-    public MainScreen(String nickname, Socket sock, PrintWriter pw, BufferedReader br) {
+    public MainScreen(String userName, Socket sock, PrintWriter pw, BufferedReader br) {
         this.sock = sock;
         this.pw = pw;
         this.br = br;
-        this.nickname = nickname;
+        this.userName = userName;
         this.roomRepository = new RoomRepository();
-        this.roomHandler = new RoomHandler(pw);
+        this.roomHandler = new RoomHandler(pw, userName);
     }
 
 
@@ -226,11 +226,11 @@ public class MainScreen {
             }
 
             try {
-                roomHandler.createRoom(topic, status1, status2, nickname);
+                roomHandler.createRoom(topic, status1, status2);
 
                 SwingUtilities.invokeLater(() -> {
                     tableModel.addRow(new Object[]{
-                            topic, nickname, status1 + " : " + 0 + " vs " + status2 + " : " + 0
+                            topic, userName, status1 + " : " + 0 + " vs " + status2 + " : " + 0
                     });
                 });
 
@@ -275,7 +275,6 @@ public class MainScreen {
                 roomData = response.split(",");
             }
         } catch (Exception e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(parentFrame, "서버와의 통신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -296,13 +295,6 @@ public class MainScreen {
 
         String firstStatus = roomData[4];
         String secondStatus = roomData[5];
-
-//        // 상태 버튼 추가
-//        if (room == null) {
-//            JOptionPane.showMessageDialog(dialog, "방 정보를 찾을 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-//            dialog.dispose();
-//            return;
-//        }
 
         // 상태 버튼 생성
         JButton status1Button = new JButton(firstStatus);
@@ -375,16 +367,14 @@ public class MainScreen {
                         }
                     }
                     if (roomName != null) {
-
                         // ChatRoomScreen 생성
-                        ChatRoomScreen chatRoomScreen = new ChatRoomScreen(roomName, nickname, sock, pw, br, selectedStatus[0]);
+                        ChatRoomScreen chatRoomScreen = new ChatRoomScreen(roomName, userName, sock, pw, br, selectedStatus[0]);
                         chatRoomScreen.createChatRoomScreen();
 
                         dialog.dispose();
-                        if (parentFrame != null) {
-                            parentFrame.dispose();
-                            refreshRoomTable();
-                        }
+                        parentFrame.dispose();
+                        refreshRoomTable();
+
                     } else {
                         JOptionPane.showMessageDialog(dialog, "방 이름을 확인할 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     }

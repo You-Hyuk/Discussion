@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static client.dto.RequestCommand.*;
 import static server.dto.ErrorResponse.FIND_ROOM_FAILED;
@@ -49,12 +51,13 @@ public class ChatThread extends Thread {
         try {
             String line = null;
             while ((line = br.readLine()) != null) {
-                String[] parts = line.split(" ", 2); // 최대 두 부분으로 나누기
+                System.out.println(line);
+                HashMap<String, String> parseRequest = parseRequest(line);
+                String userName = parseRequest.get("UserName");
+                String command = parseRequest.get("Command");
+                String body = parseRequest.get("Body");
 
-                String command = parts[0];
-                String body = parts.length > 1 ? parts[1] : "";
-
-                System.out.println("Command : " + command + ", Contents : " + body);
+                HashMap<String, String> parsedBody = parseBody(body);
 
                 if (command.equals(GET_ROOM_LIST.name())){
                     List<Room> roomList = roomController.getRoomList();
@@ -66,17 +69,16 @@ public class ChatThread extends Thread {
                 }
 
                 if (command.equals(CREATE_ROOM.name())){
-                    String[] createRoomInfo = body.split(" ");
-                    String roomName = createRoomInfo[0];
-                    String firstStatus = createRoomInfo[1];
-                    String secondStatus = createRoomInfo[2];
+                    String roomName = parsedBody.get("RoomName");
+                    String firstStatus = parsedBody.get("FirstStatus");
+                    String secondStatus = parsedBody.get("SecondStatus");
 
                     Room room = new Room(roomName, firstStatus, secondStatus, userName);
                     chatController.createRoom(room);
                 }
 
                 if (command.equals(FIND_ROOM.name())){
-                    String roomName = body.split(" ")[0];
+                    String roomName = parsedBody.get("RoomName");
                     Room room = roomController.findRoomByName(roomName);
 
                     if (room != null) {
@@ -90,18 +92,17 @@ public class ChatThread extends Thread {
                 }
 
                 if (command.equals(ENTER_ROOM.name())){
-                    String[] content = body.split(" ");
-                    String roomName = content[0];
-                    String selectedStatus = content[1];
+                    String roomName = parsedBody.get("RoomName");
+                    String status = parsedBody.get("Stauts");
 
                     // 유저 상태 설정
-                    user.setStatus(selectedStatus);
+                    user.setStatus(status);
 
                     // 방 정보 업데이트
                     Room enteredRoom = roomController.enterRoom(roomName, user);
                     ArrayList<Chat> chats = chatController.sendChatHistory(enteredRoom, user);
                     for (Chat chat : chats) {
-                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
+                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
                         pw.flush();
                     }
                     pw.println(ENTER_ROOM_SUCCESS.name()); // 종료 신호
@@ -109,12 +110,12 @@ public class ChatThread extends Thread {
                 }
 
                 if (command.equals(GET_CHAT_HISTORY.name())){
-                    String roomName = body.split(" ")[0];
+                    String roomName = parsedBody.get("RoomName");
                     Room room = roomController.findRoomByName(roomName);
                     ArrayList<Chat> chatHistory = chatController.sendChatHistory(room, user);
 
                     for (Chat chat : chatHistory) {
-                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike());
+                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
                         pw.flush();
                     }
                     pw.println(GET_CHAT_HISTORY_SUCCESS.name()); // 종료 신호
@@ -122,28 +123,28 @@ public class ChatThread extends Thread {
                 }
 
                 if (command.equals(EXIT_ROOM.name())){
-                    String roomName = body.split(" ")[0];
+                    String roomName = parsedBody.get("RoomName");
                     roomController.removeUserFromRoom(roomName, user);
                     pw.println(EXIT_ROOM_SUCCESS.name()); // 종료 신호 전송
                     pw.flush();
                 }
 
                 if (command.equals(SEND_CHAT.name())){
-                    String roomName = body.split(" ")[0];
-                    String content = body.split(" ")[1];
-                    String status = body.split(" ")[2];
+                    String roomName = parsedBody.get("RoomName");
+                    String content = parsedBody.get("Content");
+                    String status = parsedBody.get("Status");
 
                     Room room = roomController.findRoomByName(roomName);
 
-                    chatController.chat(room, user, userMap, status, content);
+                    Chat chat = chatController.chat(room, user, userMap, status, content);
 
-                    pw.println(SEND_CHAT_SUCCESS.name());
+                    pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike());
                     pw.flush();
                 }
 
                 if (command.equals(VOTE_DISCUSSION.name())){
-                    String roomName = body.split(" ")[0];
-                    String status = body.split(" ")[1];
+                    String roomName = parsedBody.get("RoomName");
+                    String status = parsedBody.get("Status");
 
                     roomController.vote(roomName, status);
                     pw.println(VOTE_DISCUSSION_SUCCESS.name());
@@ -187,5 +188,39 @@ public class ChatThread extends Thread {
         );
         pw.println(roomData);
         pw.flush();
+    }
+
+    private HashMap<String, String> parseRequest(String request) {
+        HashMap<String, String> result = new HashMap<>();
+
+        // 정규 표현식: Command 뒤의 모든 내용을 Body로 처리
+        Pattern pattern = Pattern.compile("(?:\\[REQUEST\\])?UserName\\s*:\\s*(\\S+)\\s*Command\\s*:\\s*(\\S+)\\s*Body\\s*:\\s*(.*)");
+        Matcher matcher = pattern.matcher(request);
+
+        if (matcher.find()) {
+            // 매칭된 값을 HashMap에 저장
+            result.put("UserName", matcher.group(1).trim());
+            result.put("Command", matcher.group(2).trim());
+            result.put("Body", matcher.group(3).trim());
+        }
+
+        return result;
+    }
+
+
+    private HashMap<String, String> parseBody(String body) {
+        HashMap<String, String> parsedData = new HashMap<>();
+
+        // 정규 표현식 수정
+        Pattern pattern = Pattern.compile("(\\w+)\\s*:\\s*(.*?)(?=\\s*\\w+\\s*:\\s*|$)");
+        Matcher matcher = pattern.matcher(body);
+
+        while (matcher.find()) {
+            String key = matcher.group(1).trim();  // Key
+            String value = matcher.group(2).trim(); // Value
+            parsedData.put(key, value);
+        }
+
+        return parsedData;
     }
 }

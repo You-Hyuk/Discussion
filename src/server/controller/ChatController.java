@@ -33,7 +33,7 @@ public class ChatController {
     }
 
     //상태에 따른 구분 필요
-    public void chat(Room room, User user, HashMap userMap, String status, String content){
+    public Chat chat(Room room, User user, HashMap userMap, String status, String content){
 
         String userName = user.getUserName();
         Chat chat = new Chat(userName, content, status);
@@ -53,7 +53,7 @@ public class ChatController {
             }
         }
         chatRepository.saveChat(room, chat);
-        return;
+        return chat;
     }
 
     public void deleteExpiredRooms() {

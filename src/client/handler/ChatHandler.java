@@ -3,18 +3,27 @@ package client.handler;
 
 import java.io.PrintWriter;
 
-import static client.dto.RequestCommand.GET_CHAT_HISTORY;
-import static client.dto.RequestCommand.SEND_CHAT;
+import static client.dto.RequestCommand.*;
 
 public class ChatHandler implements RequestBuilder {
     private PrintWriter pw;
+    private String userName;
 
-    public ChatHandler(PrintWriter pw) {
+    public ChatHandler(PrintWriter pw, String userName) {
         this.pw = pw;
+        this.userName = userName;
     }
 
     public void getChaHistory(String roomName){
-        String request = buildRequest(GET_CHAT_HISTORY.name(), roomName);
+        String body = "RoomName :" + roomName;
+        String request = buildRequest(userName, GET_CHAT_HISTORY.name(), body);
+        pw.println(request);
+        pw.flush();
+    }
+
+    public void sendChat(String roomName, String content, String status){
+        String body = "RoomName :" + roomName + " Content :" + content + " Status :" + status;
+        String request = buildRequest(userName, SEND_CHAT.name(), body);
         pw.println(request);
         pw.flush();
     }
@@ -28,7 +37,7 @@ public class ChatHandler implements RequestBuilder {
 
 
     @Override
-    public String buildRequest(String... params) {
-        return String.join(" ", params);
+    public String buildRequest(String userName, String command, String body) {
+        return  "[REQUEST]" + "UserName :" + userName + " Command :" + command + " Body :" + body;
     }
 }

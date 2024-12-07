@@ -1,5 +1,5 @@
 package client.handler;
 
 public interface RequestBuilder {
-    String buildRequest(String... params);
+    String buildRequest(String userName, String command, String body);
 }
