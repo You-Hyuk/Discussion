@@ -37,12 +37,9 @@ public class ChatThread extends Thread {
             pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
-            //클라이언트가 접속 되면 id를 전송한다는 프로토콜을 정의했기 때문에 readLine()을 통해 id를 받는다
             userName = br.readLine();
             user = new User(userName, pw);
             System.out.println("userName = " + userName);
-
-            //chatController.printRoomList(user);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -54,11 +51,10 @@ public class ChatThread extends Thread {
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(" ", 2); // 최대 두 부분으로 나누기
 
-                String command = parts[0]; // "CREATE_ROOM"
+                String command = parts[0];
                 String body = parts.length > 1 ? parts[1] : "";
 
-                System.out.println("Command : " + command);
-                System.out.println("Contents : " + body);
+                System.out.println("Command : " + command + ", Contents : " + body);
 
                 if (command.equals(GET_ROOM_LIST.name())){
                     List<Room> roomList = roomController.getRoomList();
@@ -118,7 +114,7 @@ public class ChatThread extends Thread {
                     ArrayList<Chat> chatHistory = chatController.sendChatHistory(room, user);
 
                     for (Chat chat : chatHistory) {
-                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
+                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike());
                         pw.flush();
                     }
                     pw.println(GET_CHAT_HISTORY_SUCCESS.name()); // 종료 신호
@@ -127,10 +123,8 @@ public class ChatThread extends Thread {
 
                 if (command.equals(EXIT_ROOM.name())){
                     String roomName = body.split(" ")[0];
-                    Room room = roomController.findRoomByName(roomName);
-                    chatController.exitRoom(room, user);
-                    roomController.removeUserFromRoom(room.getRoomName(), user.getPrintWriter());
-                    pw.println("EXIT_END"); // 종료 신호 전송
+                    roomController.removeUserFromRoom(roomName, user);
+                    pw.println(EXIT_ROOM_SUCCESS.name()); // 종료 신호 전송
                     pw.flush();
                 }
 
@@ -147,54 +141,14 @@ public class ChatThread extends Thread {
                     pw.flush();
                 }
 
+                if (command.equals(VOTE_DISCUSSION.name())){
+                    String roomName = body.split(" ")[0];
+                    String status = body.split(" ")[1];
 
-//                if(line.split(" ")[0].equals("/exit") && inRoom) {
-//                    chatController.exitRoom(room, user);
-//                    roomController.removeUserFromRoom(room.getRoomName(), user.getPrintWriter());
-//                    pw.println("EXIT_END"); // 종료 신호 전송
-//                    pw.flush();
-//                    inRoom = false;
-//                }
-//
-//                if (line.startsWith("/chat")) {
-//                    if (line.length() <= 6) {
-//                        pw.println("Error: 메시지가 비어 있습니다.");
-//                        pw.flush();
-//                        continue;
-//                    }
-//                    String content = line.substring(6).trim();
-//                    System.out.println("content 확인: " + content);
-//
-//                    int lastIndex = content.lastIndexOf(" ");
-//                    if (lastIndex == -1) {
-//                        pw.println("Error: 메시지 형식이 잘못되었습니다.");
-//                        pw.flush();
-//                        continue;
-//                    }
-//
-//                    String message = content.substring(0, lastIndex).trim();
-//                    String status = content.substring(lastIndex + 1).trim();
-//
-//                    if (status == null || status.isEmpty()) {
-//                        status = "중립";
-//                    }
-//
-//                    Chat chat = new Chat(user.getUserName(), message, status);
-//                    chatRepository.saveChat(room, chat);
-//                    List<PrintWriter> userWriters = userMap.get(room.getRoomName());
-//                    if (userWriters != null) {
-//                        for (PrintWriter writer : userWriters) {
-//                            writer.println("CHAT:" + chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
-//                            writer.flush();
-//                        }
-//                    }
-//                    // 클라이언트로 확인 메시지 전송
-//                    pw.println("CHAT_SAVED");
-//                    pw.flush();
-//                    pw.println("CHAT_END");
-//                    pw.flush();
-//                }
-
+                    roomController.vote(roomName, status);
+                    pw.println(VOTE_DISCUSSION_SUCCESS.name());
+                    pw.flush();
+                }
             }
         } catch (Exception ex) {
             System.out.println(ex);

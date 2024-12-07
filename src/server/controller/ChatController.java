@@ -9,8 +9,6 @@ import server.repository.RoomRepository;
 import java.io.PrintWriter;
 import java.util.*;
 
-import static server.dto.SuccessResponse.ENTER_ROOM_SUCCESS;
-
 public class ChatController {
     private RoomRepository roomRepository = new RoomRepository();
     private ChatRepository chatRepository = new ChatRepository();

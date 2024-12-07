@@ -122,6 +122,7 @@ public class MainScreen {
         table.getTableHeader().setFont(new Font("Malgun Gothic", Font.BOLD, 18));
         table.getTableHeader().setBackground(new Color(210, 210, 210)); //테이블 헤더 배경색, 조금 진한 회색
         table.getTableHeader().setForeground(Color.black); //테이블 헤더 글씨색
+        table.getTableHeader().setReorderingAllowed(false);
 
         // 테이블 셀 중앙 정렬
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -130,23 +131,7 @@ public class MainScreen {
             table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
-        try {
-            String response;
-            // 서버에 방 리스트 요청
-            roomHandler.getRoomList();
-
-            // 서버 응답 처리
-            tableModel.setRowCount(0); // 기존 데이터 초기화
-            while ((response = br.readLine()) != null) {
-                if (response.equals(GET_ROOM_LIST_SUCCESS.name()))
-                    break; // 응답 종료
-                String[] roomData = response.split(",");
-                tableModel.addRow(new Object[]{roomData[0],
-                        roomData[1],
-                        roomData[4] + " : " + roomData[2] + " vs " + roomData[5] + " : " + roomData[3]});            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-        }
+        refreshRoomTable();
 
         JScrollPane tableScrollPane = new JScrollPane(table);
         tableScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -245,9 +230,7 @@ public class MainScreen {
 
                 SwingUtilities.invokeLater(() -> {
                     tableModel.addRow(new Object[]{
-                            topic,
-                            nickname,
-                            status1 + " : " + 0 + " vs " + status2 + " : " + 0
+                            topic, nickname, status1 + " : " + 0 + " vs " + status2 + " : " + 0
                     });
                 });
 
@@ -322,9 +305,9 @@ public class MainScreen {
 //        }
 
         // 상태 버튼 생성
-        JButton status1Button = new JButton(room.getFirstStatus());
+        JButton status1Button = new JButton(firstStatus);
         JButton neutralButton = new JButton("중립");
-        JButton status2Button = new JButton(room.getSecondStatus());
+        JButton status2Button = new JButton(secondStatus);
 
         // 버튼 초기 스타일
         status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
@@ -406,8 +389,6 @@ public class MainScreen {
                         JOptionPane.showMessageDialog(dialog, "방 이름을 확인할 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
-                    System.out.println("Exception: " + ex.getMessage());
-                    ex.printStackTrace();
                     JOptionPane.showMessageDialog(dialog, "채팅방 입장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                 }
             } else {

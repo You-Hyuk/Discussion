@@ -26,14 +26,16 @@ public class RoomController {
     }
 
     // 방에서 유저 제거
-    public void removeUserFromRoom(String roomName, PrintWriter writer) {
+    public void removeUserFromRoom(String roomName, User user) {
+        Room room = roomRepository.findRoomByName(roomName);
         List<PrintWriter> writers = userMap.get(roomName);
         if (writers != null) {
-            writers.remove(writer);
+            writers.remove(user.getPrintWriter());
             if (writers.isEmpty()) {
                 userMap.remove(roomName);  // 방에 유저가 없으면 방 제거
             }
         }
+        room.removeUser(user);
     }
 
     public List<Room> getRoomList() {
@@ -49,5 +51,9 @@ public class RoomController {
         Room room = roomRepository.findRoomByName(roomName);
         room = roomRepository.addUserToRoom(roomName, user); // addUserToRoom 호출
         return room;
+    }
+
+    public void vote(String roomName, String status) {
+        roomRepository.voteDiscussion(roomName,status);
     }
 }

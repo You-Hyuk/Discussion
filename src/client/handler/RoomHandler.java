@@ -40,6 +40,12 @@ public class RoomHandler implements RequestBuilder {
         pw.flush();
     }
 
+    public void voteDiscussion(String roomName, String status){
+        String request = buildRequest(VOTE_DISCUSSION.name(), roomName, status);
+        pw.println(request);
+        pw.flush();
+    }
+
     @Override
     public String buildRequest(String... params) {
         return String.join(" ", params);
