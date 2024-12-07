@@ -48,19 +48,16 @@ public class MainScreen {
             tableModel.setRowCount(0); // 기존 데이터 초기화
             String response;
             while ((response = br.readLine()) != null) {
-
                 if (response.equals(GET_ROOM_LIST_SUCCESS.name()))
                     break; // 응답 종료
-
-                String[] roomData = response.split(","); // 방 데이터 분리
-                tableModel.addRow(new Object[]{
-                        roomData[0], // 방 이름
-                        roomData[1], // 생성자
-                        roomData[2], // 찬성 수
-                        roomData[3],  // 반대 수
-                        roomData[4],
-                        roomData[5]
-                });
+                String[] roomData = response.split(",");
+                if (roomData.length == 6) { // 6개의 항목이 모두 있는지 확인
+                    tableModel.addRow(new Object[]{
+                            roomData[0],
+                            roomData[1],
+                            roomData[4] + " : " + roomData[2] + " vs " + roomData[5] + " : " + roomData[3]
+                    });
+                }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
@@ -91,8 +88,6 @@ public class MainScreen {
         // 업데이트 버튼
         JButton updateButton = new JButton("↻");
         updateButton.setFont(new Font("Arial Unicode MS", Font.BOLD, 20));
-        //updateButton.setPreferredSize(new Dimension(200, 40)); // 버튼 크기 설정
-        //updateButton.setBackground(new Color(140, 140, 140)); // 업데이트 버튼 색, 회색
         updateButton.setFocusPainted(false);
         updateButton.addActionListener(e -> {
             // 방 리스트 갱신 로직
@@ -114,7 +109,7 @@ public class MainScreen {
         frame.add(topPanel, BorderLayout.NORTH);
 
         // 테이블 생성
-        String[] columnNames = {"토론방 이름", "생성자", "찬성", "반대"};
+        String[] columnNames = {"토론방 이름", "생성자", "투표 현황"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -146,8 +141,9 @@ public class MainScreen {
                 if (response.equals(GET_ROOM_LIST_SUCCESS.name()))
                     break; // 응답 종료
                 String[] roomData = response.split(",");
-                tableModel.addRow(new Object[]{roomData[0], roomData[1], roomData[2], roomData[3], roomData[4], roomData[5]});
-            }
+                tableModel.addRow(new Object[]{roomData[0],
+                        roomData[1],
+                        roomData[4] + " : " + roomData[2] + " vs " + roomData[5] + " : " + roomData[3]});            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
@@ -251,8 +247,7 @@ public class MainScreen {
                     tableModel.addRow(new Object[]{
                             topic,
                             nickname,
-                            0,
-                            0
+                            status1 + " : " + 0 + " vs " + status2 + " : " + 0
                     });
                 });
 
@@ -304,7 +299,7 @@ public class MainScreen {
 
         // 방 입장 팝업
         JDialog dialog = new JDialog(parentFrame, "토론방 입장", true);
-        dialog.setSize(350, 250);
+        dialog.setSize(350, 300);
         dialog.setLayout(null);
         //dialog.getContentPane().setBackground(Color.white); //입장 팝업 배경색
 
@@ -327,9 +322,9 @@ public class MainScreen {
 //        }
 
         // 상태 버튼 생성
-        JButton status1Button = new JButton(roomData[4]);
+        JButton status1Button = new JButton(room.getFirstStatus());
         JButton neutralButton = new JButton("중립");
-        JButton status2Button = new JButton(roomData[5]);
+        JButton status2Button = new JButton(room.getSecondStatus());
 
         // 버튼 초기 스타일
         status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
