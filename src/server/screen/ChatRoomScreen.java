@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.Timestamp;
 import java.util.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -175,6 +176,8 @@ public class ChatRoomScreen {
                         JOptionPane.showMessageDialog(frame, "메시지를 입력하세요.", "알림", JOptionPane.INFORMATION_MESSAGE);
                         return;
                     }
+                    Chat chat = new Chat(nickname, message, userStatus);
+                    chatRepository.saveChat(roomRepository.findRoomByName(roomName), chat);
                     pw.println("/chat " + message + " " + userStatus); // 서버로 전송
                     pw.flush();
 
@@ -207,7 +210,8 @@ public class ChatRoomScreen {
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + nickname + " : " + message;
                     // 메시지를 상태에 따라 출력
-                    addMessage(formattedMessage, userStatus, room);
+                    chat.setMessage(formattedMessage);
+                    addMessage(chat);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "메시지 전송 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
@@ -263,7 +267,7 @@ public class ChatRoomScreen {
         String timestamp;
         String message;
         String status;
-        String likeCount;
+        int likeCount;
         String[] roomData = null;
         String response;
         Room room = null;
@@ -313,12 +317,16 @@ public class ChatRoomScreen {
                 String[] chatEntries = response.split(",");
                 for (String chatEntry : chatEntries) {
                     String[] chatData = chatEntry.split("\t");
+
+
                     userName = chatData[0];
                     message = chatData[1];
                     status = chatData[2];
                     timestamp = chatData[3];
-                    likeCount = chatData[4];
+                    likeCount = Integer.parseInt(chatData[4]);
+                    String chatId = chatData[5];
                     String formattedTimestamp = "";
+
                     try {
                         Date date = inputFormat.parse(timestamp);
                         formattedTimestamp = timeFormat.format(date);
@@ -329,7 +337,12 @@ public class ChatRoomScreen {
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
                     // 메시지 상태에 따라 화면에 표시
-                    addMessage(formattedMessage, status, room);
+                    Chat chat = new Chat(userName, formattedMessage, status);
+                    chat.setTimestamp(Timestamp.valueOf(timestamp));
+                    chat.setLike(likeCount);
+                    chat.setId(chatId);
+                    addMessage(chat);
+
                 }
             }
         } catch (Exception ex) {
@@ -338,29 +351,75 @@ public class ChatRoomScreen {
         }
     }
 
-    private void addMessage(String message, String status, Room room) {
-        JLabel messageLabel = new JLabel(message);
+    private void addMessage(Chat chat) {
+        JPanel messagePanel = new JPanel(new BorderLayout());
+        JLabel messageLabel = new JLabel(chat.getMessage());
+        JButton likeButton = new JButton(" 좋아요 " + chat.getLike());
+
+        messagePanel.setBackground(Color.WHITE);
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
+
         messageLabel.setOpaque(true);
         messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
+        likeButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+        likeButton.setFocusPainted(false);
+        likeButton.setBackground(new Color(230, 230, 230));
+
         // 마우스 리스너 추가
-        messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+        likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                JOptionPane.showMessageDialog(null, "클릭된 메시지: " + message, "메시지 클릭", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    // 서버에 좋아요 요청
+                    pw.println("/like " + roomName + " " + chat.getId());
+                    pw.flush();
+
+                    // 서버 응답 처리
+                    String response;
+                    while ((response = br.readLine()) != null) {
+                        if (response.equals("LIKE_SUCCESS")) {
+                            chat.incrementLike(); // 로컬 Chat 객체에 좋아요 수 증가
+                            chatRepository.updateLikeCount(roomRepository.findRoomByName(roomName), chat.getId()); // 저장소 업데이트
+
+                            likeButton.setText(" 좋아요 " + chat.getLike());
+                            break;
+                        } else if (response.startsWith("ERROR")) {
+                            JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다: " + response, "오류", JOptionPane.ERROR_MESSAGE);
+                            break;
+                        }
+
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
             }
         });
 
+        messagePanel.add(messageLabel);
+        messagePanel.add(Box.createHorizontalStrut(10));
+        messagePanel.add(likeButton);
+        messagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // 최대 크기 설정
+        messagePanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
+        messagePanel.setPreferredSize(new Dimension(0, 50));
+
+        JPanel emptyPanel = new JPanel();
+        emptyPanel.setLayout(new BorderLayout());
+        emptyPanel.setBackground(Color.WHITE);
+        emptyPanel.add(new JLabel(" "), BorderLayout.CENTER);
+        emptyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // 최대 크기 설정
+        emptyPanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
+        emptyPanel.setPreferredSize(new Dimension(0, 50));
+
         int linesToSync;
-        if (status.equals(room.getFirstStatus())) {
-            status1ChatArea.add(messageLabel);
-            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-            syncLineCounts(status2ChatArea, linesToSync);
-        } else if (status.equals(room.getSecondStatus())) {
-            status2ChatArea.add(messageLabel);
-            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-            syncLineCounts(status1ChatArea, linesToSync);
+        if (chat.getStatus().equals(roomRepository.findRoomByName(roomName).getFirstStatus())) {
+            status1ChatArea.add(messagePanel); // 메시지 추가
+            status2ChatArea.add(emptyPanel);
+        } else if (chat.getStatus().equals(roomRepository.findRoomByName(roomName).getSecondStatus())) {
+            status2ChatArea.add(messagePanel); // 메시지 추가
+            status1ChatArea.add(emptyPanel);
         }
 
         // UI 갱신
@@ -385,6 +444,7 @@ public class ChatRoomScreen {
             JLabel emptyLine = new JLabel(" ");
             emptyLine.setOpaque(true);
             emptyLine.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+            emptyLine.setBackground(Color.WHITE);
             emptyLine.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
             targetPanel.add(emptyLine);
         }
