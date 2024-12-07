@@ -354,15 +354,24 @@ public class ChatRoomScreen {
     }
 
     private void addMessage(Chat chat) {
-        JLabel messageLabel = new JLabel();
-        messageLabel.setText(chat.getMessage() + " 좋아요 " + chat.getLike());
+        JPanel messagePanel = new JPanel(new BorderLayout());
+        JLabel messageLabel = new JLabel(chat.getMessage());
+        JButton likeButton = new JButton(" 좋아요 " + chat.getLike());
+
+        messagePanel.setBackground(Color.WHITE);
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
+
         messageLabel.setOpaque(true);
         messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         messageLabel.setBackground(Color.WHITE);
 
+        likeButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+        likeButton.setFocusPainted(false);
+        likeButton.setBackground(new Color(230, 230, 230));
+
         // 마우스 리스너 추가
-        messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+        likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 try {
@@ -376,15 +385,15 @@ public class ChatRoomScreen {
                         if (response.equals("LIKE_SUCCESS")) {
                             chat.incrementLike(); // 로컬 Chat 객체에 좋아요 수 증가
                             chatRepository.updateLikeCount(roomRepository.findRoomByName(roomName), chat.getId()); // 저장소 업데이트
+
+                            likeButton.setText(" 좋아요 " + chat.getLike());
+                            break;
                         } else if (response.startsWith("ERROR")) {
                             JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다: " + response, "오류", JOptionPane.ERROR_MESSAGE);
                             break;
                         }
-                            // UI 업데이트
-                            String updatedMessage = chat.getMessage();
-                            messageLabel.setText(updatedMessage);
-                            break;
-                        }
+
+                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
@@ -392,15 +401,28 @@ public class ChatRoomScreen {
             }
         });
 
+        messagePanel.add(messageLabel);
+        messagePanel.add(Box.createHorizontalStrut(10));
+        messagePanel.add(likeButton);
+        messagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // 최대 크기 설정
+        messagePanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
+        messagePanel.setPreferredSize(new Dimension(0, 50));
+
+        JPanel emptyPanel = new JPanel();
+        emptyPanel.setLayout(new BorderLayout());
+        emptyPanel.setBackground(Color.WHITE);
+        emptyPanel.add(new JLabel(" "), BorderLayout.CENTER);
+        emptyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // 최대 크기 설정
+        emptyPanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
+        emptyPanel.setPreferredSize(new Dimension(0, 50));
+
         int linesToSync;
         if (chat.getStatus().equals(roomRepository.findRoomByName(roomName).getFirstStatus())) {
-            status1ChatArea.add(messageLabel);
-            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-            syncLineCounts(status2ChatArea, linesToSync);
+            status1ChatArea.add(messagePanel); // 메시지 추가
+            status2ChatArea.add(emptyPanel);
         } else if (chat.getStatus().equals(roomRepository.findRoomByName(roomName).getSecondStatus())) {
-            status2ChatArea.add(messageLabel);
-            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-            syncLineCounts(status1ChatArea, linesToSync);
+            status2ChatArea.add(messagePanel); // 메시지 추가
+            status1ChatArea.add(emptyPanel);
         }
 
         // UI 갱신
