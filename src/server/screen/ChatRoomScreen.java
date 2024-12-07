@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.Timestamp;
 import java.util.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -169,6 +170,8 @@ public class ChatRoomScreen {
                         JOptionPane.showMessageDialog(frame, "메시지를 입력하세요.", "알림", JOptionPane.INFORMATION_MESSAGE);
                         return;
                     }
+                    Chat chat = new Chat(nickname, message, userStatus);
+                    chatRepository.saveChat(roomRepository.findRoomByName(roomName), chat);
                     pw.println("/chat " + message + " " + userStatus); // 서버로 전송
                     pw.flush();
 
@@ -201,7 +204,8 @@ public class ChatRoomScreen {
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + nickname + " : " + message;
                     // 메시지를 상태에 따라 출력
-                    addMessage(formattedMessage, userStatus);
+                    chat.setMessage(formattedMessage);
+                    addMessage(chat);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "메시지 전송 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
@@ -265,7 +269,7 @@ public class ChatRoomScreen {
         String timestamp;
         String message;
         String status;
-        String likeCount;
+        int likeCount;
         String[] roomData = null;
         String response;
         Room room = null;
@@ -315,17 +319,16 @@ public class ChatRoomScreen {
                 String[] chatEntries = response.split(",");
                 for (String chatEntry : chatEntries) {
                     String[] chatData = chatEntry.split("\t");
-//                    if (chatData.length < 5) {
-//                        System.out.println("Invalid chat data: " + chatEntry);
-//                        continue; // 유효하지 않은 데이터 무시
-//                    }
+
 
                     userName = chatData[0];
                     message = chatData[1];
                     status = chatData[2];
                     timestamp = chatData[3];
-                    likeCount = chatData[4];
+                    likeCount = Integer.parseInt(chatData[4]);
+                    String chatId = chatData[5];
                     String formattedTimestamp = "";
+
                     try {
                         Date date = inputFormat.parse(timestamp);
                         formattedTimestamp = timeFormat.format(date);
@@ -336,19 +339,11 @@ public class ChatRoomScreen {
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + formattedTimestamp + "]" + userName + " : " + message;
                     // 메시지 상태에 따라 화면에 표시
-                    addMessage(formattedMessage, status);
-//                    if (status1ChatArea != null && status.equals(room.getFirstStatus())) {
-//                        status1ChatArea.append(formattedMessage + "\n");
-//                        int lineCount = calculateLineCount(formattedMessage, status1ChatArea);
-//                        syncLineCounts(status2ChatArea, lineCount);
-//                    } else if (status2ChatArea != null && status.equals(room.getSecondStatus())) {
-//                        status2ChatArea.append(formattedMessage + "\n");
-//                        int lineCount = calculateLineCount(formattedMessage, status2ChatArea);
-//                        syncLineCounts(status1ChatArea, lineCount);
-//                    } else {
-//                        // 상태가 없는 메시지 처리 (중립 상태)
-//                        System.out.println("Unrecognized Status: " + message);
-//                    }
+                    Chat chat = new Chat(userName, formattedMessage, status);
+                    chat.setTimestamp(Timestamp.valueOf(timestamp));
+                    chat.setLike(likeCount);
+                    chat.setId(chatId);
+                    addMessage(chat);
 
                 }
             }
@@ -358,8 +353,9 @@ public class ChatRoomScreen {
         }
     }
 
-    private void addMessage(String message, String status) {
-        JLabel messageLabel = new JLabel(message);
+    private void addMessage(Chat chat) {
+        JLabel messageLabel = new JLabel();
+        messageLabel.setText(chat.getMessage() + " 좋아요 " + chat.getLike());
         messageLabel.setOpaque(true);
         messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
@@ -369,16 +365,39 @@ public class ChatRoomScreen {
         messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                JOptionPane.showMessageDialog(null, "클릭된 메시지: " + message, "메시지 클릭", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    // 서버에 좋아요 요청
+                    pw.println("/like " + roomName + " " + chat.getId());
+                    pw.flush();
+
+                    // 서버 응답 처리
+                    String response;
+                    while ((response = br.readLine()) != null) {
+                        if (response.equals("LIKE_SUCCESS")) {
+                            chat.incrementLike(); // 로컬 Chat 객체에 좋아요 수 증가
+                            chatRepository.updateLikeCount(roomRepository.findRoomByName(roomName), chat.getId()); // 저장소 업데이트
+                        } else if (response.startsWith("ERROR")) {
+                            JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다: " + response, "오류", JOptionPane.ERROR_MESSAGE);
+                            break;
+                        }
+                            // UI 업데이트
+                            String updatedMessage = chat.getMessage();
+                            messageLabel.setText(updatedMessage);
+                            break;
+                        }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "좋아요 처리 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
             }
         });
 
         int linesToSync;
-        if (status.equals(roomRepository.findRoomByName(roomName).getFirstStatus())) {
+        if (chat.getStatus().equals(roomRepository.findRoomByName(roomName).getFirstStatus())) {
             status1ChatArea.add(messageLabel);
             linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
             syncLineCounts(status2ChatArea, linesToSync);
-        } else if (status.equals(roomRepository.findRoomByName(roomName).getSecondStatus())) {
+        } else if (chat.getStatus().equals(roomRepository.findRoomByName(roomName).getSecondStatus())) {
             status2ChatArea.add(messageLabel);
             linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
             syncLineCounts(status1ChatArea, linesToSync);
