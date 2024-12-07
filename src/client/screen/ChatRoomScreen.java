@@ -173,13 +173,12 @@ public class ChatRoomScreen {
             public void actionPerformed(ActionEvent e) {
                 String response = null;
                 try {
-                    String message = chatInput.getText(); // 사용자 입력
-                    if (message.isEmpty()) {
+                    String chat = chatInput.getText(); // 사용자 입력
+                    if (chat.isEmpty()) {
                         JOptionPane.showMessageDialog(frame, "메시지를 입력하세요.", "알림", JOptionPane.INFORMATION_MESSAGE);
                         return;
                     }
-                    pw.println("/chat " + message + " " + userStatus); // 서버로 전송
-                    pw.flush();
+                    chatHandler.sendChat(chat, userStatus);
 
                     while ((response = br.readLine()) != null) {
                         if (response.equals("CHAT_END")) break;
@@ -203,7 +202,7 @@ public class ChatRoomScreen {
                     Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
                     System.out.println("전송에서 room 확인: " + room);
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
-                    String formattedMessage = "[" + timestamp + "] " + nickname + " : " + message;
+                    String formattedMessage = "[" + timestamp + "] " + nickname + " : " + chat;
                     // 메시지를 상태에 따라 출력
                     addMessage(formattedMessage, userStatus, room);
                 } catch (Exception ex) {
