@@ -403,10 +403,10 @@ public class MainScreen {
                         chatRoomScreen.createChatRoomScreen();
 
                         dialog.dispose();
-//                        if (parentFrame != null) {
-//                            parentFrame.dispose();
-//                            refreshRoomTable();
-//                        }
+                        if (parentFrame != null) {
+                            parentFrame.dispose();
+                            refreshRoomTable();
+                        }
                     } else {
                         JOptionPane.showMessageDialog(dialog, "방 이름을 확인할 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                     }
