@@ -34,29 +34,11 @@ public class ChatController {
         return chats;
     }
 
-    // 채팅방 Status 선택
-    public void selectStatus(String roomName, User user){
-        System.out.println("ChatController.selectStatus 호출");
-        Room room = roomRepository.findRoomByName(roomName);
-        String firstStatus = room.getFirstStatus();
-        String secondStatus = room.getSecondStatus();
-
-        synchronized (user){
-            PrintWriter printWriter = user.getPrintWriter();
-            printWriter.println("Status 선택");
-            printWriter.println(firstStatus + "\t\t\t" + "NONE" + "\t\t\t" + secondStatus);
-            printWriter.flush();
-        }
-    }
-
-    // 채팅방 퇴장
-    public void exitRoom(Room room,User user){
-        room.removeUser(user);
-        System.out.println(user.getUserName() + " 님이 " + room.getRoomName() + " 에서 퇴장하였습니다.");
-    }
-
     //상태에 따른 구분 필요
-    public void chat(Room room, User user, HashMap userMap, String status, String message){
+    public void chat(Room room, User user, HashMap userMap, String status, String content){
+
+        String userName = user.getUserName();
+        Chat chat = new Chat(userName, content, status);
 
         List<PrintWriter> userList = (List<PrintWriter>) userMap.get(room.getRoomName());
         if (userList == null) {
@@ -64,24 +46,16 @@ public class ChatController {
             userMap.put(room.getRoomName(), userList); // userMap에 추가
         }
 
-        String selectStatus = "";
-        if (status.equals(room.getFirstStatus())){
-            selectStatus = room.getFirstStatus();
-        }
-        if (status.equals(room.getSecondStatus())){
-            selectStatus = room.getSecondStatus();
-        }
-
-        String chat = selectStatus + " : " + message;
-        synchronized (userList) {
-            for (PrintWriter pw : userList) {
-                pw.println(chat); // 메시지 출력
-                pw.flush();       // 버퍼 비우기
+        if (userList != null) {
+            synchronized (userList) {
+                for (PrintWriter pw : userList) {
+                    pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike()); // 메시지 출력
+                    pw.flush();       // 버퍼 비우기
+                }
             }
         }
-        String userName = user.getUserName();
-        Chat chatHistory = new Chat(userName, chat, status);
-        chatRepository.saveChat(room, chatHistory);
+        chatRepository.saveChat(room, chat);
+        return;
     }
 
     public void deleteExpiredRooms() {

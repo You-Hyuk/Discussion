@@ -178,21 +178,21 @@ public class ChatRoomScreen {
                         JOptionPane.showMessageDialog(frame, "메시지를 입력하세요.", "알림", JOptionPane.INFORMATION_MESSAGE);
                         return;
                     }
-                    chatHandler.sendChat(chat, userStatus);
+                    chatHandler.sendChat(roomName, chat, userStatus);
 
                     while ((response = br.readLine()) != null) {
-                        if (response.equals("CHAT_END")) break;
+                        if (response.equals(SEND_CHAT_SUCCESS.name()))
+                            break;
                     }
                     chatInput.setText(""); // 입력 필드 초기화
 
                     String[] roomData = null;
                     try {
-                        // 서버에 방 리스트 요청
-                        pw.println("/list");
-                        pw.flush();
+                        roomHandler.getRoomList();
                         // 서버 응답 처리
                         while ((response = br.readLine()) != null) {
-                            if (response.equals("LIST_END")) break;
+                            if (response.equals(GET_ROOM_LIST_SUCCESS.name()))
+                                break;
                             roomData = response.split(",");
                         }
                     } catch (Exception ex) {
@@ -200,7 +200,6 @@ public class ChatRoomScreen {
                     }
                     //roomname,firststatus,secondstatus,username
                     Room room = new Room(roomData[0], roomData[4], roomData[5], roomData[1]);
-                    System.out.println("전송에서 room 확인: " + room);
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + nickname + " : " + chat;
                     // 메시지를 상태에 따라 출력

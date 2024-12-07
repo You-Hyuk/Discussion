@@ -53,12 +53,6 @@ public class ChatRepository {
             oos = new ObjectOutputStream(fos);
 
             oos.writeObject(chats);
-            System.out.println(room.getRoomName() + " 채팅 저장 완료");
-            System.out.println("Room: " + room);
-            System.out.println("Room Name: " + room.getRoomName());
-            System.out.println("Chat(username, message, status): " + chat);
-            System.out.println("Chat History: " + chats);
-            System.out.println("File Path: " + filePath);
 
         }catch (IOException e){
             e.getMessage();
@@ -75,12 +69,11 @@ public class ChatRepository {
 
     public ArrayList<Chat> readChatHistory(Room room) {
         if (room.getChatFileName() == null) {
-            System.err.println("Chat file name is null. Returning empty chat history.");
+//            System.err.println("Chat file name is null. Returning empty chat history.");
             return new ArrayList<>();
         }
 
         ArrayList<Chat> chatHistory = null;
-        System.out.println("readChatHistory에서 room 확인: " + room);
         String chatFileName = room.getChatFileName();
         String path = DIRECTORY_PATH + chatFileName;
 
@@ -90,11 +83,9 @@ public class ChatRepository {
             chatHistory = (ArrayList<Chat>) ois.readObject();
         } catch (EOFException eof) {
             // EOFException 발생 시 빈 리스트로 초기화
-            System.out.println("파일이 비어 있거나 처음 생성된 상태입니다.");
             chatHistory = new ArrayList<>();  // 빈 리스트 반환
         } catch (FileNotFoundException fnf) {
             // 파일이 없을 경우 새로운 리스트를 생성
-            System.out.println("chatrepository에서 출력: 파일이 없습니다. 새 파일을 생성합니다.");
             chatHistory = new ArrayList<>();
         } catch (Exception e) {
             e.printStackTrace();

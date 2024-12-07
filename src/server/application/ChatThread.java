@@ -135,35 +135,15 @@ public class ChatThread extends Thread {
                 }
 
                 if (command.equals(SEND_CHAT.name())){
-                    String content = line.substring(6).trim();
+                    String roomName = body.split(" ")[0];
+                    String content = body.split(" ")[1];
+                    String status = body.split(" ")[2];
 
-                    int lastIndex = content.lastIndexOf(" ");
-                    if (lastIndex == -1) {
-                        pw.println("Error: 메시지 형식이 잘못되었습니다.");
-                        pw.flush();
-                        continue;
-                    }
+                    Room room = roomController.findRoomByName(roomName);
 
-                    String message = content.substring(0, lastIndex).trim();
-                    String status = content.substring(lastIndex + 1).trim();
+                    chatController.chat(room, user, userMap, status, content);
 
-                    if (status == null || status.isEmpty()) {
-                        status = "중립";
-                    }
-
-                    Chat chat = new Chat(user.getUserName(), message, status);
-//                    chatRepository.saveChat(room, chat);
-//                    List<PrintWriter> userWriters = userMap.get(room.getRoomName());
-//                    if (userWriters != null) {
-//                        for (PrintWriter writer : userWriters) {
-//                            writer.println("CHAT:" + chat.getTimestamp() + " " + chat.getUserName() + ": " + chat.getMessage());
-//                            writer.flush();
-//                        }
-//                    }
-                    // 클라이언트로 확인 메시지 전송
-                    pw.println("CHAT_SAVED");
-                    pw.flush();
-                    pw.println("CHAT_END");
+                    pw.println(SEND_CHAT_SUCCESS.name());
                     pw.flush();
                 }
 
