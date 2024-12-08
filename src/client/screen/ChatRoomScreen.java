@@ -175,7 +175,7 @@ public class ChatRoomScreen {
                     String chatId = "";
                     Integer likeCount = 0;
                     while ((response = br.readLine()) != null) {
-                        if (response.equals(SEND_CHAT_SUCCESS.name())) {
+                        if (response.startsWith(SEND_CHAT_SUCCESS.name())) {
                             chatId = response.split(" ")[1];
                             likeCount = Integer.parseInt(response.split(" ")[2]);
                             break;
@@ -218,7 +218,7 @@ public class ChatRoomScreen {
                     break;
 
                 // 쉼표로 채팅 기록 분리
-                String[] chatEntries = response.split("\t");
+                String[] chatEntries = response.split("\n");
                 for (String chatEntry : chatEntries) {
                     String[] chatData = chatEntry.split(" ");
                     timestamp = chatData[0];
@@ -230,10 +230,10 @@ public class ChatRoomScreen {
 
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + timestamp + "]" + userName + " : " + message;
-                    // 메시지 상태에 따라 화면에 표시
-                    System.out.println("formattedMessage = " + formattedMessage);
-
-                    addMessage(formattedMessage, status, chatId, likeCount);
+                    // 메시지를 상태에 따라 UI에 표시 (EDT에서 실행)
+                    SwingUtilities.invokeLater(() -> {
+                        addMessage(formattedMessage, chatData[3], chatData[5], Integer.valueOf(chatData[4]));
+                    });
 
                 }
             }
@@ -287,9 +287,9 @@ public class ChatRoomScreen {
 
                     String likeResponse;
                     while ((likeResponse = br.readLine()) != null) {
-                        if (likeResponse.equals(LIKE_CHAT_SUCCESS.name())) {
+                        if (likeResponse.startsWith(LIKE_CHAT_SUCCESS.name())) {
                             Integer likeCount = Integer.parseInt(likeResponse.split(" ")[1]);
-                            likeButton.setText(" 좋아요 " + (likeCount + 1));
+                            likeButton.setText(" 좋아요 " + (likeCount));
                             break;
                         }
                     }
