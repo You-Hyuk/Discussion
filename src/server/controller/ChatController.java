@@ -92,17 +92,11 @@ public class ChatController {
                         chat.getStatus() + " " +
                         chat.getLike() + " " +
                         chat.getId();
-                System.out.println(response);
-                pw.println(RECEIVE_CHAT_SUCCESS.name() +
-                        chat.getTimestamp() + " " +
-                        chat.getUserName() + " " +
-                        chat.getMessage() + " " +
-                        chat.getStatus() + " " +
-                        chat.getLike() + " " +
-                        chat.getId());
+                pw.println(response);
                 pw.flush();
             }
         }
+
     }
 
     public void deleteExpiredRooms() {
