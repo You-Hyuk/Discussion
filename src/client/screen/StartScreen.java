@@ -1,4 +1,4 @@
-package server.screen;
+package client.screen;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +13,8 @@ import java.net.Socket;
 public class StartScreen {
     private String nickname;
     private JTextField nicknameField;
+    BufferedReader br = null;
+    PrintWriter pw = null;
 
     public static void main(String[] args) {
         // 인스턴스 생성 후 createStartScreen 호출
@@ -21,6 +23,7 @@ public class StartScreen {
     }
 
     public void createStartScreen() {
+
         JFrame frame = new JFrame("토론 플랫폼 - 시작 화면");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
@@ -93,9 +96,9 @@ public class StartScreen {
             try {
                 // 서버 연결
                 // StartScreen.java에서 서버 연결 초기화
-                Socket sock = new Socket("192.168.175.174", 10001); //192.168.67.228
-                PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()), true);
-                BufferedReader br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+                Socket sock = new Socket("localhost", 10001); //192.168.67.228
+                pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
+                br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
                 // 서버로 닉네임 전송
                 pw.println(nickname);
@@ -103,7 +106,7 @@ public class StartScreen {
 
                 // MainScreen에 연결된 소켓 전달
                 frame.dispose();
-                server.screen.MainScreen mainScreen = new server.screen.MainScreen(nickname, sock, pw, br);
+                MainScreen mainScreen = new MainScreen(nickname, sock, pw, br);
                 mainScreen.createMainScreen();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "서버 연결에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);

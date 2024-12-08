@@ -15,9 +15,7 @@ public class RoomRepository {
 
     public Room findRoomByName(String roomName) {
         try{
-            System.out.println("findroombyname 호출");
             ArrayList<Room> rooms = readRoom();
-            System.out.println("roomrepository.findroombyname에서 readroom 확인: " + rooms);
             for (Room room : rooms) {
                 if(room.getRoomName().equals(roomName)) {
                     return room;
@@ -30,67 +28,44 @@ public class RoomRepository {
         return null;
     }
 
-    public ArrayList<Room> getRoomList(){
-        ArrayList<Room> rooms = readRoom();
-        return rooms;
-    }
 
-    // 채팅방 안의 User를 반환
-    public User findUserByName(Room room, String userName){
-        ArrayList<User> userList = room.getUserList();
-        for (User user : userList) {
-            if (user.getUserName().equals(userName)){
-                return user;
-            }
-        }
-        System.out.println(userName + " 에 일치하는 User가 존재하지 않습니다");
-        return null;
-    }
-
-    public Room addUserToRoom(String roomName, User user) {
-        ArrayList<Room> rooms = readRoom();
-        Room room1 = findRoomByName(roomName);
-
-        if (room1 == null) {
+    public Room addUserToRoom(String roomName, User user){
+        ArrayList<Room> rooms = readRoom(); // 파일에서 Room 리스트 읽기
+        Room room = findRoomByName(roomName); // Room 객체 찾기
+        if (room == null) {
             System.out.println("Room not found: " + roomName);
-            return null;
-        }
-
-        // 사용자 상태에 따라 상태별 카운트 증가
-        if (user.getStatus() != null) {
-            if (user.getStatus().equals(room1.getFirstStatus())) {
-                room1.incrementFirstStatusCount(); // 찬성 수 증가
-                System.out.println("User added to 찬성 상태");
-            } else if (user.getStatus().equals(room1.getSecondStatus())) {
-                room1.incrementSecondStatusCount(); // 반대 수 증가
-                System.out.println("User added to 반대 상태");
-            } else {
-                System.out.println("User is in 중립 상태, 카운트 업데이트 없음");
-            }
-        } else {
-            System.out.println("User 상태가 null입니다. 업데이트를 건너뜁니다.");
+            return null; // 방이 존재하지 않으면 null 반환
         }
 
         // 방에 사용자 추가
-        room1.addUser(user);
+        room.addUser(user);
+
         // Room 리스트를 업데이트
-        boolean roomUpdated = false;
         for (int i = 0; i < rooms.size(); i++) {
             if (rooms.get(i).getRoomName().equals(roomName)) {
-                rooms.set(i, room1); // 업데이트된 Room 객체로 교체
-                roomUpdated = true;
+                rooms.set(i, room); // 업데이트된 Room 객체로 교체
                 break;
             }
         }
 
         // 파일에 저장
-        if (!saveAllRoom(rooms)) {
-            return null;
+        try {
+            fos = new FileOutputStream(ROOM_FILE);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(rooms);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (oos != null) oos.close();
+                if (fos != null) fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        return room1;
+        return room;
     }
-
 
     public void createRoom(Room room){
         try{
@@ -99,9 +74,9 @@ public class RoomRepository {
             // 새로운 Room 추가
             rooms.add(room);
 
-            if (!saveAllRoom(rooms)) {
-                System.err.println("Failed to save rooms.");
-            }
+            fos = new FileOutputStream(ROOM_FILE);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(rooms);
         }catch (Exception e){
             e.getMessage();
         }
@@ -127,6 +102,40 @@ public class RoomRepository {
             e.getMessage();
         }
         return rooms;
+    }
+
+    public void voteDiscussion(String roomName, String status){
+        ArrayList<Room> rooms = readRoom(); // 파일에서 Room 리스트 읽기
+        Room room = findRoomByName(roomName); // Room 객체 찾기
+
+        if (room.getFirstStatus().equals(status)){
+            room.incrementFirstStatusCount();
+        }else
+            room.incrementSecondStatusCount();
+
+        // Room 리스트를 업데이트
+        for (int i = 0; i < rooms.size(); i++) {
+            if (rooms.get(i).getRoomName().equals(roomName)) {
+                rooms.set(i, room); // 업데이트된 Room 객체로 교체
+                break;
+            }
+        }
+
+        // 파일에 저장
+        try {
+            fos = new FileOutputStream(ROOM_FILE);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(rooms);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (oos != null) oos.close();
+                if (fos != null) fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void deleteExpiredRooms() {
@@ -158,37 +167,4 @@ public class RoomRepository {
             e.printStackTrace();
         }
     }
-    public boolean saveAllRoom(ArrayList<Room> rooms) {
-        try (FileOutputStream fos = new FileOutputStream(ROOM_FILE);
-             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(rooms); // 방 목록 저장
-            System.out.println("Rooms saved successfully: " + rooms);
-            return true; // 저장 성공
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false; // 저장 실패
-        }
-    }
-
-    // 단일 Room 저장 메서드
-    public boolean saveSingleRoom(Room room) {
-        ArrayList<Room> rooms = readRoom();
-
-        // 기존 Room 리스트에 동일한 이름의 방이 있으면 업데이트
-        boolean updated = false;
-        for (int i = 0; i < rooms.size(); i++) {
-            if (rooms.get(i).getRoomName().equals(room.getRoomName())) {
-                rooms.set(i, room); // 기존 방 업데이트
-                updated = true;
-                break;
-            }
-        }
-
-        if (!updated) {
-            rooms.add(room);
-        }
-        // 방 목록 저장
-        return saveAllRoom(rooms);
-    }
-
 }

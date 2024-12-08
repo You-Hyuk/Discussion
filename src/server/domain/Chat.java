@@ -1,16 +1,16 @@
 package server.domain;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 public class Chat implements Serializable {
-    private static final long serialVersionUID = 1L;
 
     private String userName;
     private String message;
     private String status;
-    private Timestamp timestamp;
+    private String timestamp;
     private Integer like;
     private String id;
 
@@ -18,9 +18,15 @@ public class Chat implements Serializable {
         this.userName = userName;
         this.message = message;
         this.status = status;
-        this.timestamp = new Timestamp(System.currentTimeMillis());
+        this.timestamp = formatTimestamp(System.currentTimeMillis());;
         this.like = 0;
         this.id = UUID.randomUUID().toString();
+    }
+
+    // Timestamp를 HH:mm 형식으로 변환
+    private String formatTimestamp(long millis) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        return sdf.format(new Date(millis));
     }
 
 
@@ -49,11 +55,11 @@ public class Chat implements Serializable {
         this.status = status;
     }
 
-    public Timestamp getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -67,10 +73,12 @@ public class Chat implements Serializable {
 
     public void incrementLike() {
         this.like++;
-    }//좋아요 증가
+    }
+
     public String getId() {
         return id;
     }
+
     public void setId(String Id) {
         this.id=id;
     }
