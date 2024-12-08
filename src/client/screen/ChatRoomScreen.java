@@ -496,13 +496,13 @@ public class ChatRoomScreen {
                     String response = br.readLine();
                     if (response != null && response.startsWith(RECEIVE_CHAT_SUCCESS.name())) {
                         // 메시지 파싱
-                        String[] chatData = response.substring(6).split(" ");
-                        String timestamp = chatData[1];
-                        String sender = chatData[2];
-                        String message = chatData[3];
-                        String messageStatus = chatData[4];
-                        int likeCount = Integer.parseInt(chatData[5]);
-                        String chatId = chatData[6];
+                        String[] chatData = response.split(" ");
+                        String timestamp = chatData[0];
+                        String sender = chatData[1];
+                        String message = chatData[2];
+                        String messageStatus = chatData[3];
+                        int likeCount = Integer.parseInt(chatData[4]);
+                        String chatId = chatData[5];
 
                         String formattedMessage = "[" + timestamp + "] " + sender + " : " + message;
 

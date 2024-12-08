@@ -50,6 +50,8 @@ public class RoomController {
     public Room enterRoom(String roomName, User user) {
         Room room = roomRepository.findRoomByName(roomName);
         room = roomRepository.addUserToRoom(roomName, user); // addUserToRoom 호출
+        userMap.putIfAbsent(roomName, new ArrayList<>());
+        userMap.get(roomName).add(user.getPrintWriter());
         return room;
     }
 

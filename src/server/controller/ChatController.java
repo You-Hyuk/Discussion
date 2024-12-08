@@ -79,6 +79,7 @@ public class ChatController {
         List<PrintWriter> userList = userMap.get(room.getRoomName());
 
         if (userList == null || userList.isEmpty()) {
+            System.out.println("비어있음");
             return; // 방에 사용자가 없으면 메시지를 전송하지 않음
         }
 
