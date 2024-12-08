@@ -60,107 +60,39 @@ public class ChatThread extends Thread {
                 HashMap<String, String> parsedBody = parseBody(body);
 
                 if (command.equals(GET_ROOM_LIST.name())){
-                    List<Room> roomList = roomController.getRoomList();
-                    for (Room room : roomList) {
-                        sendRoomData(room);
-                    }
-                    pw.println(GET_ROOM_LIST_SUCCESS.name());
-                    pw.flush();
+                    getRoomList();
                 }
 
                 if (command.equals(CREATE_ROOM.name())){
-                    String roomName = parsedBody.get("RoomName");
-                    String firstStatus = parsedBody.get("FirstStatus");
-                    String secondStatus = parsedBody.get("SecondStatus");
-
-                    Room room = new Room(roomName, firstStatus, secondStatus, userName);
-                    chatController.createRoom(room);
+                    createRoom(parsedBody, userName);
                 }
 
                 if (command.equals(FIND_ROOM.name())){
-                    String roomName = parsedBody.get("RoomName");
-                    Room room = roomController.findRoomByName(roomName);
-
-                    if (room != null) {
-                        sendRoomData(room);
-                    } else {
-                        pw.println(FIND_ROOM_FAILED.name()); // 방을 찾을 수 없음
-                        pw.flush();
-                    }
-                    pw.println(FIND_ROOM_SUCCESS.name()); // 응답 종료
-                    pw.flush();
+                    findRoom(parsedBody);
                 }
 
                 if (command.equals(ENTER_ROOM.name())){
-                    String roomName = parsedBody.get("RoomName");
-                    String status = parsedBody.get("Stauts");
-
-                    // 유저 상태 설정
-                    user.setStatus(status);
-
-                    // 방 정보 업데이트
-                    Room enteredRoom = roomController.enterRoom(roomName, user);
-                    ArrayList<Chat> chats = chatController.sendChatHistory(enteredRoom, user);
-                    for (Chat chat : chats) {
-                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
-                        pw.flush();
-                    }
-                    pw.println(ENTER_ROOM_SUCCESS.name()); // 종료 신호
-                    pw.flush();
+                    enterRoom(parsedBody);
                 }
 
                 if (command.equals(GET_CHAT_HISTORY.name())){
-                    String roomName = parsedBody.get("RoomName");
-                    Room room = roomController.findRoomByName(roomName);
-                    ArrayList<Chat> chatHistory = chatController.sendChatHistory(room, user);
-
-                    for (Chat chat : chatHistory) {
-                        pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
-                        pw.flush();
-                    }
-                    pw.println(GET_CHAT_HISTORY_SUCCESS.name()); // 종료 신호
-                    pw.flush();
+                    getChatHistory(parsedBody);
                 }
 
                 if (command.equals(EXIT_ROOM.name())){
-                    String roomName = parsedBody.get("RoomName");
-                    roomController.removeUserFromRoom(roomName, user);
-                    pw.println(EXIT_ROOM_SUCCESS.name()); // 종료 신호 전송
-                    pw.flush();
+                    exitRoom(parsedBody);
                 }
 
                 if (command.equals(SEND_CHAT.name())){
-                    String roomName = parsedBody.get("RoomName");
-                    String content = parsedBody.get("Content");
-                    String status = parsedBody.get("Status");
-
-                    Room room = roomController.findRoomByName(roomName);
-
-                    Chat chat = chatController.chat(room, user, userMap, status, content);
-
-                    pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike());
-                    pw.flush();
+                    sendChat(parsedBody);
                 }
 
                 if (command.equals(VOTE_DISCUSSION.name())){
-                    String roomName = parsedBody.get("RoomName");
-                    String status = parsedBody.get("Status");
-
-                    roomController.vote(roomName, status);
-                    pw.println(VOTE_DISCUSSION_SUCCESS.name());
-                    pw.flush();
+                    voteDiscussion(parsedBody);
                 }
 
                 if (command.equals(LIKE_CHAT.name())) {
-                    String roomName = parsedBody.get("RoomName");
-                    String chatId = parsedBody.get("ChatId");
-
-                    Room room = roomController.findRoomByName(roomName);
-                    Integer likeCount = chatController.likeChat(room, chatId);
-
-                    // 클라이언트에 성공 응답 전송
-                    pw.println(LIKE_CHAT_SUCCESS.name() + " " + likeCount);
-                    pw.flush();
+                    likeChat(parsedBody);
                 }
 
 
@@ -175,6 +107,111 @@ public class ChatThread extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void likeChat(HashMap<String, String> parsedBody) {
+        String roomName = parsedBody.get("RoomName");
+        String chatId = parsedBody.get("ChatId");
+
+        Room room = roomController.findRoomByName(roomName);
+        Integer likeCount = chatController.likeChat(room, chatId);
+
+        // 클라이언트에 성공 응답 전송
+        pw.println(LIKE_CHAT_SUCCESS.name() + " " + likeCount);
+        pw.flush();
+    }
+
+    private void voteDiscussion(HashMap<String, String> parsedBody) {
+        String roomName = parsedBody.get("RoomName");
+        String status = parsedBody.get("Status");
+
+        roomController.vote(roomName, status);
+        pw.println(VOTE_DISCUSSION_SUCCESS.name());
+        pw.flush();
+    }
+
+    private void sendChat(HashMap<String, String> parsedBody) {
+        String roomName = parsedBody.get("RoomName");
+        String content = parsedBody.get("Content");
+        String status = parsedBody.get("Status");
+
+        Room room = roomController.findRoomByName(roomName);
+
+        Chat chat = chatController.chat(room, user, userMap, status, content);
+
+        pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike());
+        pw.flush();
+    }
+
+    private void exitRoom(HashMap<String, String> parsedBody) {
+        String roomName = parsedBody.get("RoomName");
+        roomController.removeUserFromRoom(roomName, user);
+        pw.println(EXIT_ROOM_SUCCESS.name()); // 종료 신호 전송
+        pw.flush();
+    }
+
+    private void getChatHistory(HashMap<String, String> parsedBody) {
+        String roomName = parsedBody.get("RoomName");
+        Room room = roomController.findRoomByName(roomName);
+        ArrayList<Chat> chatHistory = chatController.findChatHistory(room);
+
+        for (Chat chat : chatHistory) {
+            pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
+            pw.flush();
+        }
+
+        pw.println(GET_CHAT_HISTORY_SUCCESS.name()); // 종료 신호
+        pw.flush();
+    }
+
+    private void enterRoom(HashMap<String, String> parsedBody) {
+        String roomName = parsedBody.get("RoomName");
+        String status = parsedBody.get("Stauts");
+
+        // 유저 상태 설정
+        user.setStatus(status);
+
+        // 방 정보 업데이트
+        Room enteredRoom = roomController.enterRoom(roomName, user);
+        ArrayList<Chat> chatHistory = chatController.findChatHistory(enteredRoom);
+        for (Chat chat : chatHistory) {
+            pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
+            pw.flush();
+        }
+        pw.println(ENTER_ROOM_SUCCESS.name()); // 종료 신호
+        pw.flush();
+    }
+
+    private void findRoom(HashMap<String, String> parsedBody) {
+        String roomName = parsedBody.get("RoomName");
+        Room room = roomController.findRoomByName(roomName);
+
+        if (room != null) {
+            sendRoomData(room);
+        } else {
+            pw.println(FIND_ROOM_FAILED.name()); // 방을 찾을 수 없음
+            pw.flush();
+        }
+        pw.println(FIND_ROOM_SUCCESS.name()); // 응답 종료
+        pw.flush();
+    }
+
+    private void createRoom(HashMap<String, String> parsedBody, String userName) {
+        String roomName = parsedBody.get("RoomName");
+        String firstStatus = parsedBody.get("FirstStatus");
+        String secondStatus = parsedBody.get("SecondStatus");
+
+        Room room = new Room(roomName, firstStatus, secondStatus, userName);
+        chatController.createRoom(room);
+    }
+
+    private void getRoomList() {
+        List<Room> roomList = roomController.getRoomList();
+        for (Room room : roomList) {
+            sendRoomData(room);
+        }
+        pw.println(GET_ROOM_LIST_SUCCESS.name());
+        pw.flush();
     }
 
     private void sendRoomData(Room room) {

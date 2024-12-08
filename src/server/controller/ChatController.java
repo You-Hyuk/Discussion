@@ -27,7 +27,7 @@ public class ChatController {
 
 
     // 채팅방 입장
-    public ArrayList<Chat> sendChatHistory(Room room, User user){
+    public ArrayList<Chat> findChatHistory(Room room){
         ArrayList<Chat> chats = chatRepository.readChatHistory(room);
         return chats;
     }
