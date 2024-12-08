@@ -67,8 +67,52 @@ public class ChatRoomScreen {
         String firstStatus = roomData[4];
         String secondStatus = roomData[5];
 
-        String likeMost1 = "status1 최다 좋아요 메시지 status1 최다 좋아요 메시지 status1 최다 좋아요 메시지 status1 최다 좋아요 메시지";
+        String likeMost1 = "status1 최다 좋아요 메시지";
         String likeMost2 = "status2 최다 좋아요 메시지";
+        try{
+            chatHandler.getChaHistory(roomName);
+
+            String mostLikedMessage1="";
+            Integer maxLikes1=-1;
+            String mostLikedMessage2="";
+            Integer maxLikes2=-1;
+            while ((response = br.readLine()) != null) {
+                if (response.equals(GET_CHAT_HISTORY_SUCCESS.name()))
+                    break;
+                String[] chatEntries = response.split("\n");
+                for (String chatEntry : chatEntries) {
+                    String[] chatData = chatEntry.split(" ");
+
+                    // 데이터 배열 크기 검증
+                        String message = chatData[2];
+                        String status = chatData[3];
+                        Integer likeCount = Integer.parseInt(chatData[4]);
+
+                        // 최다 좋아요 메시지 찾기
+                        if (status.equals(firstStatus)) {
+                            if (likeCount > maxLikes1) {
+                                maxLikes1 = likeCount;
+                                mostLikedMessage1 = message;
+                            }
+                        } else if (status.equals(secondStatus)) {
+                            if (likeCount > maxLikes2) {
+                                maxLikes2 = likeCount;
+                                mostLikedMessage2 = message;
+                            }
+                        }
+
+                }
+            }
+
+            // 최종 업데이트
+            likeMost1 = mostLikedMessage1;
+            likeMost2 = mostLikedMessage2;
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
@@ -246,7 +290,7 @@ public class ChatRoomScreen {
                     userName = chatData[1];
                     message = chatData[2];
                     status = chatData[3];
-                    likeCount = Integer.valueOf(chatData[4]);
+//                    likeCount = Integer.valueOf(chatData[4]);
                     chatId = chatData[5];
 
                     // 포맷된 메시지 생성
