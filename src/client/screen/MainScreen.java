@@ -113,14 +113,14 @@ public class MainScreen {
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // 모든 셀 수정 불가능
+                return false;
             }
         };
         JTable table = new JTable(tableModel);
         table.setRowHeight(40);
         table.setFont(new Font("Malgun Gothic", Font.PLAIN, 16));
         table.getTableHeader().setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        table.getTableHeader().setBackground(new Color(210, 210, 210)); //테이블 헤더 배경색, 조금 진한 회색
+        table.getTableHeader().setBackground(new Color(210, 210, 210));
         table.getTableHeader().setForeground(Color.black); //테이블 헤더 글씨색
         table.getTableHeader().setReorderingAllowed(false);
 

@@ -76,8 +76,8 @@ public class StartScreen {
         nicknameField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (nicknameField.getText().isEmpty()) {
-                    nicknameField.setText("닉네임을 입력하세요."); // 플레이스홀더 복원
-                    nicknameField.setForeground(Color.GRAY); // 텍스트 색상 회색으로 변경
+                    nicknameField.setText("닉네임을 입력하세요.");
+                    nicknameField.setForeground(Color.GRAY);
                 }
             }
         });
@@ -86,7 +86,8 @@ public class StartScreen {
 
         JButton confirmButton = new JButton("확인");
         confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        confirmButton.setBounds(150, 130, 100, 40); // Absolute position
+        confirmButton.setBounds(150, 130, 100, 40);
+        confirmButton.setFocusPainted(false);
         confirmButton.addActionListener(e -> {
             nickname = nicknameField.getText().trim();
             if (nickname.isEmpty() || nickname.equals("닉네임을 입력하세요.")) {
@@ -96,7 +97,7 @@ public class StartScreen {
             try {
                 // 서버 연결
                 // StartScreen.java에서 서버 연결 초기화
-                Socket sock = new Socket("localhost", 10001); //192.168.67.228
+                Socket sock = new Socket("172.30.1.52", 10001); //192.168.67.228
                 pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
                 br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
