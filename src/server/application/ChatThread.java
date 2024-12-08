@@ -148,6 +148,9 @@ public class ChatThread extends Thread {
 
         Chat chat = chatController.chat(room, user, userMap, status, content);
 
+        pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike() + " " + content);
+        pw.flush();
+
         String body = "ChatId : " + chat.getId() + " LikeCount : " + chat.getLike() + " Content : " + content;
         String response = buildResponse(userName, SEND_CHAT_SUCCESS.name(), body);
         System.out.println(response);
