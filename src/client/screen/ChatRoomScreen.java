@@ -121,6 +121,7 @@ public class ChatRoomScreen {
 
         status1ChatArea = new JPanel();
         status1ChatArea.setLayout(new BoxLayout(status1ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
+        status1ChatArea.setAlignmentX(Component.LEFT_ALIGNMENT);
         status1ChatArea.setBackground(Color.WHITE);
         JScrollPane status1ScrollPane = new JScrollPane(status1ChatArea);
         status1ScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -145,6 +146,7 @@ public class ChatRoomScreen {
 
         status2ChatArea = new JPanel();
         status2ChatArea.setLayout(new BoxLayout(status2ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
+        status2ChatArea.setAlignmentX(Component.LEFT_ALIGNMENT);
         status2ChatArea.setBackground(Color.WHITE);
         JScrollPane status2ScrollPane = new JScrollPane(status2ChatArea);
         status2ScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -202,7 +204,6 @@ public class ChatRoomScreen {
                         }
                     }
                     chatInput.setText(""); // 입력 필드 초기화
-
                     //roomname,firststatus,secondstatus,username
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + userName + " : " + chat;
@@ -284,20 +285,37 @@ public class ChatRoomScreen {
         String firstStatus = roomData[4];
         String secondStatus = roomData[5];
 
-        JPanel messagePanel = new JPanel(new BorderLayout());
-        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
+        JPanel messagePanel = new JPanel();
+        messagePanel.setLayout(new GridBagLayout()); // 그리드백 레이아웃 사용
         messagePanel.setBackground(Color.WHITE); // 배경색 설정
 
-        //String htmlMessage = "<html>" + message.replaceAll("\n", "<br>") + "</html>";
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL; // 수평으로 확장
+        //gbc.insets = new Insets(1, 0, 0, 1); // 여백 설정
 
         JTextArea messageArea = new JTextArea(message);
         messageArea.setEditable(false);
         messageArea.setWrapStyleWord(true); // 단어 기준 줄바꿈
         messageArea.setLineWrap(true); // 자동 줄바꿈
-        messageArea.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-        messageArea.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        messageArea.setFont(new Font("Malgun Gothic", Font.PLAIN, 16));
+        //messageArea.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         messageArea.setBackground(Color.WHITE);
 
+        // 메시지 높이 동적 계산
+        int chatAreaWidth = status1ChatArea.getWidth() - 120; // 버튼 영역 고려
+        messageArea.setSize(new Dimension(chatAreaWidth, Short.MAX_VALUE)); // 폭 설정
+        messageArea.setPreferredSize(new Dimension(chatAreaWidth, messageArea.getPreferredSize().height));
+
+        // 메시지 영역을 패널에 추가
+        gbc.gridx = 0; // 첫 번째 열
+        gbc.weightx = 0; // 가로로 확장
+        gbc.anchor = GridBagConstraints.WEST; // 왼쪽 정렬
+        gbc.insets = new Insets(0, 0, 0, 10);
+        messagePanel.add(messageArea, gbc);
+
+        // 메시지 기본 높이 계산
+        FontMetrics metrics = messageArea.getFontMetrics(messageArea.getFont());
+        int lineHeight = metrics.getHeight(); // 줄 높이 계산
 
         String emojiHeart = "❤";
         JButton likeButton = new JButton(emojiHeart + " "+ like);
@@ -305,6 +323,7 @@ public class ChatRoomScreen {
         likeButton.setFocusPainted(false);
         likeButton.setBackground(Color.WHITE);
         likeButton.setForeground(Color.RED);  // 텍스트와 이모지 색을 빨간색으로 설정
+        likeButton.setPreferredSize(new Dimension(likeButton.getPreferredSize().width, lineHeight-5)); // 기존 너비 유지
 
         likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -316,7 +335,7 @@ public class ChatRoomScreen {
                     while ((likeResponse = br.readLine()) != null) {
                         if (likeResponse.startsWith(LIKE_CHAT_SUCCESS.name())) {
                             Integer likeCount = Integer.parseInt(likeResponse.split(" ")[1]);
-                            likeButton.setText(emojiHeart + " " + (likeCount));
+                            likeButton.setText(emojiHeart + " " + likeCount);
                             break;
                         }
                     }
@@ -326,22 +345,23 @@ public class ChatRoomScreen {
             }
         });
 
-        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
-        messagePanel.add(messageArea);
-        messagePanel.add(Box.createHorizontalStrut(10));
-        messagePanel.add(likeButton);
-        messagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
-        messagePanel.setPreferredSize(new Dimension(0, 80));
+        // 좋아요 버튼을 패널에 추가
+        gbc.gridx = 1; // 두 번째 열
+        gbc.weightx = 0; // 버튼은 고정 크기
+        gbc.anchor = GridBagConstraints.EAST; // 오른쪽 정렬
+        gbc.insets = new Insets(0, 0, 0, 0);
+        messagePanel.add(likeButton, gbc);
+
+        // 메시지 패널 크기 동적 설정
+        int panelHeight = Math.max(messageArea.getPreferredSize().height, likeButton.getPreferredSize().height);
+        messagePanel.setMaximumSize(new Dimension(status1ChatArea.getWidth(), panelHeight));
+        messagePanel.setPreferredSize(new Dimension(status1ChatArea.getWidth(), panelHeight));
 
         JPanel emptyPanel = new JPanel();
-        emptyPanel.setLayout(new BorderLayout());
         emptyPanel.setBackground(Color.WHITE);
-        emptyPanel.add(new JLabel(" "), BorderLayout.CENTER);
-        emptyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120)); // 최대 크기 설정
-        emptyPanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
-        emptyPanel.setPreferredSize(new Dimension(0, 80));
+        emptyPanel.setPreferredSize(new Dimension(status1ChatArea.getWidth(), panelHeight));
+        emptyPanel.setMaximumSize(new Dimension(status1ChatArea.getWidth(), panelHeight));
 
-        int linesToSync;
         if (status.equals(firstStatus)) {
 
             status1ChatArea.add(messagePanel); // 메시지 추가
@@ -357,27 +377,18 @@ public class ChatRoomScreen {
         status1ChatArea.repaint();
         status2ChatArea.revalidate();
         status2ChatArea.repaint();
-    }
 
-    private int calculateLineCount(JLabel label) {
-        FontMetrics fontMetrics = label.getFontMetrics(label.getFont());
-        int textWidth = fontMetrics.stringWidth(label.getText()); // 텍스트의 가로 길이
-        int panelWidth = status1ChatArea.getWidth(); // 패널의 현재 너비
+        // 양쪽 스크롤바 자동 이동
+        SwingUtilities.invokeLater(() -> {
+            JScrollPane scrollPane1 = (JScrollPane) status1ChatArea.getParent().getParent();
+            JScrollPane scrollPane2 = (JScrollPane) status2ChatArea.getParent().getParent();
 
-        // 패널의 너비에 맞춰 메시지가 몇 줄로 나뉘는지 계산
-        int lines = (int) Math.ceil((double) textWidth / panelWidth);
-        return Math.max(lines, 1); // 최소 1줄
-    }
+            JScrollBar verticalScrollBar1 = scrollPane1.getVerticalScrollBar();
+            JScrollBar verticalScrollBar2 = scrollPane2.getVerticalScrollBar();
 
-    private void syncLineCounts(JPanel targetPanel, int linesToAdd) {
-        for (int i = 0; i < linesToAdd; i++) {
-            JLabel emptyLine = new JLabel(" ");
-            emptyLine.setOpaque(true);
-            emptyLine.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-            emptyLine.setBackground(Color.WHITE);
-            emptyLine.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-            targetPanel.add(emptyLine);
-        }
+            verticalScrollBar1.setValue(verticalScrollBar1.getMaximum());
+            verticalScrollBar2.setValue(verticalScrollBar2.getMaximum());
+        });
     }
 
     private void exitPopup(JFrame parentFrame, String roomName) {
@@ -412,7 +423,7 @@ public class ChatRoomScreen {
         // STATUS 버튼 패널
         JPanel statusPanel = new JPanel();
         statusPanel.setBounds(70, 80, 200, 40);
-        statusPanel.setLayout(new GridLayout(1, 2, 10, 0)); // 상태 버튼 간격
+        statusPanel.setLayout(new GridLayout(1, 2, 10, 0));
 
         JButton status1Button = new JButton(firstStatus);
         JButton status2Button = new JButton(secondStatus);
@@ -432,14 +443,14 @@ public class ChatRoomScreen {
         // 버튼 클릭 이벤트 (선택 상태 표시)
         status1Button.addActionListener(event -> {
             selectedStatus[0] = firstStatus;
-            status1Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
+            status1Button.setBackground(new Color(173, 216, 230));
             status2Button.setBackground(Color.WHITE);
         });
 
         status2Button.addActionListener(event -> {
             selectedStatus[0] = secondStatus;
             status1Button.setBackground(Color.WHITE);
-            status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
+            status2Button.setBackground(new Color(173, 216, 230));
         });
 
         status1Button.setFocusPainted(false);
@@ -447,7 +458,6 @@ public class ChatRoomScreen {
 
         statusPanel.add(status1Button);
         statusPanel.add(status2Button);
-        //exitDialog.add(statusPanel);
         exitDialog.add(statusPanel, BorderLayout.CENTER);
 
         // 확인 버튼
@@ -473,9 +483,8 @@ public class ChatRoomScreen {
             }
         });
 
-        //exitDialog.add(confirmButton);
         exitDialog.add(confirmButton, BorderLayout.SOUTH);
-        exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
+        exitDialog.setLocationRelativeTo(parentFrame);
         exitDialog.setVisible(true);
     }
 
