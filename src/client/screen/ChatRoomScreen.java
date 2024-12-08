@@ -62,8 +62,6 @@ public class ChatRoomScreen {
         }
 
         //roomname,firststatus,secondstatus,username
-        String roomName = roomData[0];
-        String userName = roomData[1];
         String firstStatus = roomData[4];
         String secondStatus = roomData[5];
 

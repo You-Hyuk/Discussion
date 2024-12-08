@@ -9,6 +9,8 @@ import server.repository.RoomRepository;
 import java.io.PrintWriter;
 import java.util.*;
 
+import static server.dto.SuccessResponse.SEND_CHAT_SUCCESS;
+
 public class ChatController {
     private RoomRepository roomRepository = new RoomRepository();
     private ChatRepository chatRepository = new ChatRepository();
@@ -50,6 +52,13 @@ public class ChatController {
                     pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike()); // 메시지 출력
                     pw.flush();       // 버퍼 비우기
                 }
+            }
+        }
+
+        synchronized (userList) {
+            for (PrintWriter pw : userList) {
+                pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike() + " " + content);
+                pw.flush();
             }
         }
         chatRepository.saveChat(room, chat);
