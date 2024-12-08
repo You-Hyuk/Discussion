@@ -11,7 +11,7 @@ public class DiscussionClient {
         FileOutputStream fos = null;
         boolean endflag = false;
         try {
-            sock = new Socket("192.168.35.48", 10001);
+            sock = new Socket("172.30.1.52", 10001);
 
             pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));

@@ -108,12 +108,14 @@ public class ChatRoomScreen {
         JPanel status1Header = new JPanel(new GridLayout(2, 1));
         JLabel status1Label = new JLabel(firstStatus, SwingConstants.CENTER);
         JLabel status1Like = new JLabel(likeMost1, SwingConstants.CENTER);
-        status1Header.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        status1Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        status1Like.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status1Header.add(status1Label);
         status1Header.add(status1Like);
 
         status1ChatArea = new JPanel();
         status1ChatArea.setLayout(new BoxLayout(status1ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
+        status1ChatArea.setBackground(Color.WHITE);
         JScrollPane status1ScrollPane = new JScrollPane(status1ChatArea);
 
         status1Panel.add(status1Header, BorderLayout.NORTH); // 헤더 패널 추가
@@ -124,12 +126,14 @@ public class ChatRoomScreen {
         JPanel status2Header = new JPanel(new GridLayout(2, 1));
         JLabel status2Label = new JLabel(secondStatus, SwingConstants.CENTER);
         JLabel status2Like = new JLabel(likeMost2, SwingConstants.CENTER);
-        status2Header.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        status2Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        status2Like.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status2Header.add(status2Label);
         status2Header.add(status2Like);
 
         status2ChatArea = new JPanel();
         status2ChatArea.setLayout(new BoxLayout(status2ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
+        status2ChatArea.setBackground(Color.WHITE);
         JScrollPane status2ScrollPane = new JScrollPane(status2ChatArea);
 
         status2Panel.add(status2Header, BorderLayout.NORTH); // 헤더 패널 추가
@@ -141,6 +145,7 @@ public class ChatRoomScreen {
 
         // 하단 입력 영역
         JPanel inputPanel = new JPanel(new BorderLayout());
+        inputPanel.setBackground(Color.WHITE); // 배경색 설정
         chatInput = new JTextField();
         JButton sendButton = new JButton("전송");
 
@@ -265,19 +270,24 @@ public class ChatRoomScreen {
         String secondStatus = roomData[5];
 
         JPanel messagePanel = new JPanel(new BorderLayout());
-        JLabel messageLabel = new JLabel(message);
-        JButton likeButton = new JButton(" 좋아요 " + like);
-
-        messagePanel.setBackground(Color.WHITE);
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
+        messagePanel.setBackground(Color.WHITE); // 배경색 설정
 
-        messageLabel.setOpaque(true);
+        //String htmlMessage = "<html>" + message.replaceAll("\n", "<br>") + "</html>";
+        JLabel messageLabel = new JLabel(message);
+        messageLabel.setOpaque(true); // JLabel에 배경색 활성화
         messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        messageLabel.setBackground(Color.WHITE); // 연한 파란색
         messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-        likeButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+
+
+        String emojiHeart = "❤";
+        JButton likeButton = new JButton(emojiHeart + " "+ like);
+        likeButton.setFont(new Font("Arial Unicode MS", Font.PLAIN, 12));
         likeButton.setFocusPainted(false);
-        likeButton.setBackground(new Color(230, 230, 230));
+        likeButton.setBackground(Color.WHITE);
+        likeButton.setForeground(Color.RED);  // 텍스트와 이모지 색을 빨간색으로 설정
 
         likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -289,7 +299,7 @@ public class ChatRoomScreen {
                     while ((likeResponse = br.readLine()) != null) {
                         if (likeResponse.startsWith(LIKE_CHAT_SUCCESS.name())) {
                             Integer likeCount = Integer.parseInt(likeResponse.split(" ")[1]);
-                            likeButton.setText(" 좋아요 " + (likeCount));
+                            likeButton.setText(emojiHeart + " " + (likeCount));
                             break;
                         }
                     }
@@ -362,11 +372,16 @@ public class ChatRoomScreen {
         JDialog exitDialog = new JDialog(parentFrame, "토론방 퇴장", true);
         exitDialog.setSize(350, 300);
         exitDialog.setLayout(null);
+
+        // 다이얼로그 크기
+        int dialogWidth = exitDialog.getWidth();
+        int dialogHeight = exitDialog.getHeight();
+
         JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
         exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
         exitTitle.setBounds(0, 10, 350, 30);
         exitTitle.setForeground(Color.BLACK); // 검정색 텍스트
-        exitDialog.add(exitTitle);
+        exitDialog.add(exitTitle, BorderLayout.NORTH);
 
         String[] roomData = null;
         String response;
@@ -421,12 +436,13 @@ public class ChatRoomScreen {
 
         statusPanel.add(status1Button);
         statusPanel.add(status2Button);
-        exitDialog.add(statusPanel);
+        //exitDialog.add(statusPanel);
+        exitDialog.add(statusPanel, BorderLayout.CENTER);
 
         // 확인 버튼
         JButton confirmButton = new JButton("확인");
         confirmButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-        confirmButton.setBounds(125, 150, 100, 40);
+        confirmButton.setBounds(115, 150, 100, 40);
         confirmButton.setBackground(Color.WHITE);
         confirmButton.setForeground(Color.BLACK);
         confirmButton.addActionListener(event -> {
@@ -446,7 +462,8 @@ public class ChatRoomScreen {
             }
         });
 
-        exitDialog.add(confirmButton);
+        //exitDialog.add(confirmButton);
+        exitDialog.add(confirmButton, BorderLayout.SOUTH);
         exitDialog.setLocationRelativeTo(parentFrame); // 창 중앙에 표시
         exitDialog.setVisible(true);
     }
