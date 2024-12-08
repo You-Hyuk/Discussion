@@ -116,13 +116,13 @@ public class ChatThread extends Thread {
         Room room = roomController.findRoomByName(roomName);
         Integer likeCount = chatController.likeChat(room, chatId);
 
-
-        // 클라이언트에 성공 응답 전송
-        pw.println(LIKE_CHAT_SUCCESS.name() + " " + likeCount);
-        pw.flush();
-
         String body = "LikeCount : " + likeCount;
         String response = buildResponse(userName, LIKE_CHAT_SUCCESS.name(), body);
+
+        // 클라이언트에 성공 응답 전송
+        pw.println(response);
+        pw.flush();
+
         System.out.println(response);
     }
 
@@ -131,11 +131,11 @@ public class ChatThread extends Thread {
         String status = parsedBody.get("Status");
 
         roomController.vote(roomName, status);
-        pw.println(VOTE_DISCUSSION_SUCCESS.name());
-        pw.flush();
-
         String body = " ";
         String response = buildResponse(userName, VOTE_DISCUSSION_SUCCESS.name(), body);
+        pw.println(response);
+        pw.flush();
+
         System.out.println(response);
     }
 
@@ -148,18 +148,21 @@ public class ChatThread extends Thread {
 
         Chat chat = chatController.chat(room, user, userMap, status, content);
 
-        pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike() + " " + content);
-        pw.flush();
-
         String body = "ChatId : " + chat.getId() + " LikeCount : " + chat.getLike() + " Content : " + content;
         String response = buildResponse(userName, SEND_CHAT_SUCCESS.name(), body);
+
+        pw.println(response);
+        pw.flush();
+
         System.out.println(response);
     }
 
     private void exitRoom(HashMap<String, String> parsedBody) {
         String roomName = parsedBody.get("RoomName");
         roomController.removeUserFromRoom(roomName, user);
-        pw.println(EXIT_ROOM_SUCCESS.name()); // 종료 신호 전송
+        String body = " ";
+        String response = buildResponse(userName, EXIT_ROOM_SUCCESS.name(), body);
+        pw.println(response); // 종료 신호 전송
         pw.flush();
     }
 
@@ -169,15 +172,24 @@ public class ChatThread extends Thread {
         ArrayList<Chat> chatHistory = chatController.findChatHistory(room);
 
         for (Chat chat : chatHistory) {
-            pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
+            String body = " TimeStamp : " + chat.getTimestamp() +
+                    " UserName : " + chat.getUserName() +
+                    " Content : " +  chat.getMessage() +
+                    " Status : " + chat.getStatus() +
+                    " LikeCount : " + chat.getLike() +
+                    " ChatId : " +  chat.getId();
+            String response = buildResponse(userName, SEND_CHAT_HISTORY_SUCCESS.name(), body);
+            pw.println(response);
             pw.flush();
         }
 
-        pw.println(GET_CHAT_HISTORY_SUCCESS.name()); // 종료 신호
-        pw.flush();
-
         String body = " ";
         String response = buildResponse(userName, GET_CHAT_HISTORY_SUCCESS.name(), body);
+
+        pw.println(response); // 종료 신호
+        pw.flush();
+
+
         System.out.println(response);
     }
 
@@ -192,14 +204,23 @@ public class ChatThread extends Thread {
         Room enteredRoom = roomController.enterRoom(roomName, user);
         ArrayList<Chat> chatHistory = chatController.findChatHistory(enteredRoom);
         for (Chat chat : chatHistory) {
-            pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike() + " " + chat.getId());
+            String body =  " TimeStamp : " + chat.getTimestamp() +
+                    " UserName : " + chat.getUserName() +
+                    " Content : " +  chat.getMessage() +
+                    " Status : " + chat.getStatus() +
+                    " LikeCount : " + chat.getLike() +
+                    " ChatId : " +  chat.getId();
+            String response = buildResponse(userName, GET_CHAT_HISTORY_SUCCESS.name(), body);
+            pw.println(response);
             pw.flush();
         }
-        pw.println(ENTER_ROOM_SUCCESS.name()); // 종료 신호
-        pw.flush();
 
         String body = " ";
         String response = buildResponse(userName, ENTER_ROOM_SUCCESS.name(), body);
+
+        pw.println(response); // 종료 신호
+        pw.flush();
+
         System.out.println(response);
     }
 
@@ -207,17 +228,19 @@ public class ChatThread extends Thread {
         String roomName = parsedBody.get("RoomName");
         Room room = roomController.findRoomByName(roomName);
 
+        String body = " ";
+        String response = buildResponse(userName, FIND_ROOM_SUCCESS.name(), body);
+
         if (room != null) {
-            sendRoomData(room);
+            sendRoomData(userName, room);
         } else {
             pw.println(FIND_ROOM_FAILED.name()); // 방을 찾을 수 없음
             pw.flush();
         }
-        pw.println(FIND_ROOM_SUCCESS.name()); // 응답 종료
+        pw.println(response); // 응답 종료
         pw.flush();
 
-        String body = " ";
-        String response = buildResponse(userName, FIND_ROOM_SUCCESS.name(), body);
+
         System.out.println(response);
     }
 
@@ -237,7 +260,7 @@ public class ChatThread extends Thread {
     private void getRoomList() {
         List<Room> roomList = roomController.getRoomList();
         for (Room room : roomList) {
-            sendRoomData(room);
+            sendRoomData(userName, room);
         }
         pw.println(GET_ROOM_LIST_SUCCESS.name());
         pw.flush();
@@ -247,16 +270,15 @@ public class ChatThread extends Thread {
         System.out.println(response);
     }
 
-    private void sendRoomData(Room room) {
-        String roomData = String.join(",",
-                room.getRoomName(),
-                room.getUserName(),
-                String.valueOf(room.getFirstStatusCount()),
-                String.valueOf(room.getSecondStatusCount()),
-                room.getFirstStatus(),
-                room.getSecondStatus()
-        );
-        pw.println(roomData);
+    private void sendRoomData(String userName, Room room) {
+        String body = " RoomName : " +  room.getRoomName() +
+                " UserName : " + room.getUserName() +
+                " FirstStatusCount : " + String.valueOf(room.getFirstStatusCount()) +
+                " SecondStatusCount : " + String.valueOf(room.getSecondStatusCount()) +
+                " FirstStatus : " + room.getFirstStatus() +
+                " SecondStatus : " + room.getSecondStatus();
+        String response = buildResponse(userName, SEND_ROOM_DATA_SUCCESS.name(), body);
+        pw.println(response);
         pw.flush();
     }
 
@@ -264,7 +286,7 @@ public class ChatThread extends Thread {
         HashMap<String, String> result = new HashMap<>();
 
         // 정규 표현식: Command 뒤의 모든 내용을 Body로 처리
-        Pattern pattern = Pattern.compile("(?:\\[REQUEST\\])?UserName\\s*:\\s*(\\S+)\\s*Command\\s*:\\s*(\\S+)\\s*Body\\s*:\\s*(.*)");
+        Pattern pattern = Pattern.compile("(?:\\[Request\\])?UserName\\s*:\\s*(.+?)\\s*Command\\s*:\\s*(.+?)\\s*Body\\s*:\\s*(.*)");
         Matcher matcher = pattern.matcher(request);
 
         if (matcher.find()) {

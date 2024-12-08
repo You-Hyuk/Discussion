@@ -15,6 +15,8 @@ import java.util.*;
 import java.io.BufferedReader;
 import java.net.Socket;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static server.dto.ErrorResponse.FIND_ROOM_FAILED;
 import static server.dto.SuccessResponse.*;
@@ -42,25 +44,33 @@ public class MainScreen {
     // 방 리스트 갱신 로직
     private void refreshRoomTable() {
         try {
+            HashMap<String, String> parseResponse = new HashMap<>();
+            String command = " ";
+            String body = " ";
+
             roomHandler.getRoomList();
 
             // 서버 응답 처리
             tableModel.setRowCount(0); // 기존 데이터 초기화
             String response;
             while ((response = br.readLine()) != null) {
-                if (response.equals(GET_ROOM_LIST_SUCCESS.name()))
+                System.out.println(response);
+                parseResponse = parseResponse(response);
+                command = parseResponse.get("Command");
+                body = parseResponse.get("Body");
+
+                if (command.equals(GET_ROOM_LIST_SUCCESS.name()))
                     break; // 응답 종료
-                String[] roomData = response.split(",");
-                if (roomData.length == 6) { // 6개의 항목이 모두 있는지 확인
+                if (command.equals(SEND_ROOM_DATA_SUCCESS.name())) {
                     tableModel.addRow(new Object[]{
-                            roomData[0],
-                            roomData[1],
-                            roomData[4] + " : " + roomData[2] + " vs " + roomData[5] + " : " + roomData[3]
+                            parseBody(body).get("RoomName"),
+                            parseBody(body).get("UserName"),
+                            parseBody(body).get("FirstStatus") + " : " + parseBody(body).get("FirstStatusCount") + " vs " + parseBody(body).get("SecondStatus") + " : " + parseBody(body).get("SecondStatusCount")
                     });
                 }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+//            JOptionPane.showMessageDialog(frame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -264,14 +274,21 @@ public class MainScreen {
             return;
         }
         String[] roomData = null;
+        HashMap<String, String> parseResponse = new HashMap<>();
+        String command = " ";
+        String body = " ";
         List<Room> rooms = new ArrayList<>();
         try {
             roomHandler.findRoom(roomName);
             String response;
             while ((response = br.readLine()) != null) {
-                if (response.equals(FIND_ROOM_SUCCESS.name()))
+                System.out.println(response);
+                parseResponse = parseResponse(response);
+                command = parseResponse.get("Command");
+                body = parseResponse.get("Body");
+                if (command.equals(SEND_ROOM_DATA_SUCCESS.name()))
                     break;
-                else if (response.equals(FIND_ROOM_FAILED.name())) {
+                else if (command.equals(FIND_ROOM_FAILED.name())) {
                     JOptionPane.showMessageDialog(parentFrame, response, "오류", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -296,8 +313,8 @@ public class MainScreen {
         titleLabel.setForeground(Color.BLACK); // 검정색 텍스트
         dialog.add(titleLabel);
 
-        String firstStatus = roomData[4];
-        String secondStatus = roomData[5];
+        String firstStatus = parseBody(body).get("FirstStatus");
+        String secondStatus = parseBody(body).get("SecondStatus");
 
         // 상태 버튼 생성
         JButton status1Button = new JButton(firstStatus);
@@ -369,7 +386,11 @@ public class MainScreen {
 
                     // 채팅 내역 요청
                     while ((response = br.readLine()) != null) {
-                        if (response.equals(ENTER_ROOM_SUCCESS.name())) {
+                        System.out.println(response);
+                        HashMap<String, String> parsedResponse = parseResponse(response);
+                        String enterCommand = parsedResponse.get("Command");
+
+                        if (enterCommand.equals(ENTER_ROOM_SUCCESS.name())) {
                             break;
                         }
                     }
@@ -400,4 +421,36 @@ public class MainScreen {
         dialog.setVisible(true);
     }
 
+    private HashMap<String, String> parseBody(String body) {
+        HashMap<String, String> parsedData = new HashMap<>();
+
+        // 정규 표현식 수정
+        Pattern pattern = Pattern.compile("(\\w+)\\s*:\\s*(.*?)(?=\\s*\\w+\\s*:\\s*|$)");
+        Matcher matcher = pattern.matcher(body);
+
+        while (matcher.find()) {
+            String key = matcher.group(1).trim();  // Key
+            String value = matcher.group(2).trim(); // Value
+            parsedData.put(key, value);
+        }
+
+        return parsedData;
+    }
+
+    private HashMap<String, String> parseResponse(String request) {
+        HashMap<String, String> result = new HashMap<>();
+
+        // 정규 표현식: Command 뒤의 모든 내용을 Body로 처리
+        Pattern pattern = Pattern.compile("(?:\\[Response\\])?UserName\\s*:\\s*(.+?)\\s*Command\\s*:\\s*(.+?)\\s*Body\\s*:\\s*(.*)");
+        Matcher matcher = pattern.matcher(request);
+
+        if (matcher.find()) {
+            // 매칭된 값을 HashMap에 저장
+            result.put("UserName", matcher.group(1).trim());
+            result.put("Command", matcher.group(2).trim());
+            result.put("Body", matcher.group(3).trim());
+        }
+
+        return result;
+    }
 }
