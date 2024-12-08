@@ -78,6 +78,7 @@ public class ChatRoomScreen {
 
         JLabel titleLabel = new JLabel("토론 주제: " + roomName, SwingConstants.LEFT);
         titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
+        titleLabel.setToolTipText("토론 주제: " + roomName);
         topPanel.add(titleLabel, BorderLayout.WEST);
 
         Icon closeIcon = UIManager.getIcon("InternalFrame.closeIcon");
@@ -127,6 +128,9 @@ public class ChatRoomScreen {
 
         status1Panel.add(status1Header, BorderLayout.NORTH); // 헤더 패널 추가
         status1Panel.add(status1ScrollPane, BorderLayout.CENTER); // 스크롤 패널 추가
+        status1Panel.setToolTipText(firstStatus);
+
+
 
         // 우측 (status2) 채팅 영역
         JPanel status2Panel = new JPanel(new BorderLayout());
@@ -148,6 +152,7 @@ public class ChatRoomScreen {
 
         status2Panel.add(status2Header, BorderLayout.NORTH); // 헤더 패널 추가
         status2Panel.add(status2ScrollPane, BorderLayout.CENTER); // 스크롤 패널 추가
+        status2Panel.setToolTipText(secondStatus);
 
         chatPanel.add(status1Panel);
         chatPanel.add(status2Panel);
@@ -381,10 +386,6 @@ public class ChatRoomScreen {
         exitDialog.setSize(350, 300);
         exitDialog.setLayout(null);
 
-        // 다이얼로그 크기
-        int dialogWidth = exitDialog.getWidth();
-        int dialogHeight = exitDialog.getHeight();
-
         JLabel exitTitle = new JLabel("토론방 퇴장", SwingConstants.CENTER);
         exitTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
         exitTitle.setBounds(0, 10, 350, 30);
@@ -408,7 +409,6 @@ public class ChatRoomScreen {
         String firstStatus = roomData[4];
         String secondStatus = roomData[5];
 
-
         // STATUS 버튼 패널
         JPanel statusPanel = new JPanel();
         statusPanel.setBounds(70, 80, 200, 40);
@@ -416,6 +416,9 @@ public class ChatRoomScreen {
 
         JButton status1Button = new JButton(firstStatus);
         JButton status2Button = new JButton(secondStatus);
+
+        status1Button.setToolTipText(firstStatus);
+        status2Button.setToolTipText(secondStatus);
 
         // 기본 스타일 설정
         status1Button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));

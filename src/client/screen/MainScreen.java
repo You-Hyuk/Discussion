@@ -66,6 +66,9 @@ public class MainScreen {
 
 
     public void createMainScreen() {
+        UIManager.put("ToolTip.font", new Font("Malgun Gothic", Font.PLAIN, 20)); // 원하는 크기와 폰트 설정
+        UIManager.put("ToolTip.border", BorderFactory.createLineBorder(Color.GRAY)); // 테두리 설정
+
         if (this.frame == null) {
             this.frame = new JFrame("토론 플랫폼 - 메인 화면");
         }
@@ -346,6 +349,10 @@ public class MainScreen {
             neutralButton.setBackground(Color.WHITE); // 다른 버튼은 흰색
             status2Button.setBackground(new Color(173, 216, 230)); // 연한 파란색
         });
+
+        status1Button.setToolTipText(firstStatus);
+        status2Button.setToolTipText(secondStatus);
+
 
         // 확인 버튼
         JButton confirmButton = new JButton("확인");
