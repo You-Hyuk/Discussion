@@ -27,15 +27,16 @@ public class ChatRepository {
         File file = new File(path);
         try {
             if (file.createNewFile()) { // 파일이 존재하지 않으면 새로 생성
-                System.out.println("파일이 생성되었습니다: " + file.getName());
+                System.out.println("[System] " + "파일이 생성되었습니다: " + file.getName());
+
             } else {
-                System.out.println("파일이 이미 존재합니다.");
+                System.out.println("[System] " + "파일이 이미 존재합니다.");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         room.setChatFileName(file.getName());
-        System.out.println("생성된 채팅방 파일 이름: " + room.getChatFileName());
+        System.out.println("[System] " + "생성된 채팅방 파일 이름:" + room.getChatFileName());
     }
 
     public void saveChat(Room room, Chat chat){
@@ -104,7 +105,7 @@ public class ChatRepository {
         File chatLog = new File(DIRECTORY_PATH+ roomName + ".txt");
         if (chatLog.exists()) {
             if (!chatLog.delete()) {
-                System.out.println("채팅기록 파일 삭제 실패: " + roomName);
+                System.out.println("[System] " + "채팅 기록 파일 삭제를 실패하였습니다.");
             }
         }
     }

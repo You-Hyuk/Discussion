@@ -38,6 +38,6 @@ public class ChatHandler implements RequestBuilder {
 
     @Override
     public String buildRequest(String userName, String command, String body) {
-        return  "[REQUEST] " + "UserName : " + userName + " Command : " + command + " Body : " + body;
+        return  "[Request] " + "UserName : " + userName + " Command : " + command + " Body : " + body;
     }
 }

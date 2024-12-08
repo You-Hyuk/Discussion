@@ -41,7 +41,7 @@ public class ChatThread extends Thread {
 
             userName = br.readLine();
             user = new User(userName, pw);
-            System.out.println("userName = " + userName);
+            System.out.println("[System] " + userName + " 님이 입장하였습니다.");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -116,9 +116,14 @@ public class ChatThread extends Thread {
         Room room = roomController.findRoomByName(roomName);
         Integer likeCount = chatController.likeChat(room, chatId);
 
+
         // 클라이언트에 성공 응답 전송
         pw.println(LIKE_CHAT_SUCCESS.name() + " " + likeCount);
         pw.flush();
+
+        String body = "LikeCount : " + likeCount;
+        String response = buildResponse(userName, LIKE_CHAT_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void voteDiscussion(HashMap<String, String> parsedBody) {
@@ -128,6 +133,10 @@ public class ChatThread extends Thread {
         roomController.vote(roomName, status);
         pw.println(VOTE_DISCUSSION_SUCCESS.name());
         pw.flush();
+
+        String body = " ";
+        String response = buildResponse(userName, VOTE_DISCUSSION_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void sendChat(HashMap<String, String> parsedBody) {
@@ -139,8 +148,12 @@ public class ChatThread extends Thread {
 
         Chat chat = chatController.chat(room, user, userMap, status, content);
 
-        pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike());
+        pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike() + " " + content);
         pw.flush();
+
+        String body = "ChatId : " + chat.getId() + " LikeCount : " + chat.getLike() + " Content : " + content;
+        String response = buildResponse(userName, SEND_CHAT_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void exitRoom(HashMap<String, String> parsedBody) {
@@ -162,6 +175,10 @@ public class ChatThread extends Thread {
 
         pw.println(GET_CHAT_HISTORY_SUCCESS.name()); // 종료 신호
         pw.flush();
+
+        String body = " ";
+        String response = buildResponse(userName, GET_CHAT_HISTORY_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void enterRoom(HashMap<String, String> parsedBody) {
@@ -180,6 +197,10 @@ public class ChatThread extends Thread {
         }
         pw.println(ENTER_ROOM_SUCCESS.name()); // 종료 신호
         pw.flush();
+
+        String body = " ";
+        String response = buildResponse(userName, ENTER_ROOM_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void findRoom(HashMap<String, String> parsedBody) {
@@ -194,6 +215,10 @@ public class ChatThread extends Thread {
         }
         pw.println(FIND_ROOM_SUCCESS.name()); // 응답 종료
         pw.flush();
+
+        String body = " ";
+        String response = buildResponse(userName, FIND_ROOM_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void createRoom(HashMap<String, String> parsedBody, String userName) {
@@ -203,6 +228,10 @@ public class ChatThread extends Thread {
 
         Room room = new Room(roomName, firstStatus, secondStatus, userName);
         chatController.createRoom(room);
+
+        String body = " ";
+        String response = buildResponse(userName, CREATE_ROOM_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void getRoomList() {
@@ -212,6 +241,10 @@ public class ChatThread extends Thread {
         }
         pw.println(GET_ROOM_LIST_SUCCESS.name());
         pw.flush();
+
+        String body = " ";
+        String response = buildResponse(userName, GET_ROOM_LIST_SUCCESS.name(), body);
+        System.out.println(response);
     }
 
     private void sendRoomData(Room room) {
@@ -259,5 +292,9 @@ public class ChatThread extends Thread {
         }
 
         return parsedData;
+    }
+
+    public String buildResponse(String userName, String command, String body) {
+        return  "[Response] " + "UserName : " + userName + " Command : " + command + " Body : " + body;
     }
 }

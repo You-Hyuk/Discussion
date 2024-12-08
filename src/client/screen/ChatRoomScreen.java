@@ -4,6 +4,7 @@ import client.handler.ChatHandler;
 import client.handler.RoomHandler;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -62,8 +63,6 @@ public class ChatRoomScreen {
         }
 
         //roomname,firststatus,secondstatus,username
-        String roomName = roomData[0];
-        String userName = roomData[1];
         String firstStatus = roomData[4];
         String secondStatus = roomData[5];
 
@@ -180,6 +179,8 @@ public class ChatRoomScreen {
         SwingUtilities.invokeLater(() -> {
             loadChatHistory();
         });
+
+        startMessageListener();
 
         // 전송 버튼 액션 리스너
         sendButton.addActionListener(new ActionListener() {
@@ -488,4 +489,39 @@ public class ChatRoomScreen {
         exitDialog.setVisible(true);
     }
 
+    private void startMessageListener() {
+        Timer messagePollingTimer = new Timer(100, e -> {
+            try {
+                while (br.ready()) { // 메시지가 준비된 경우만 처리
+                    String response = br.readLine();
+                    if (response != null && response.startsWith(RECEIVE_CHAT_SUCCESS.name())) {
+                        // 메시지 파싱
+                        String[] chatData = response.split(" ");
+                        String timestamp = chatData[1];
+                        String sender = chatData[2];
+                        String message = chatData[3];
+                        String messageStatus = chatData[4];
+                        int likeCount = Integer.parseInt(chatData[5]);
+                        String chatId = chatData[6];
+
+                        String formattedMessage = "[" + timestamp + "] " + sender + " : " + message;
+
+                        // UI 업데이트
+                        addMessageToUI(formattedMessage, messageStatus, chatId, likeCount);
+                    } else if (response != null) {
+                        System.out.println("다른 유형의 메시지: " + response);
+                    }
+                }
+            } catch (Exception ex) {
+                System.out.println("메시지 수신 중 오류 발생: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
+
+        messagePollingTimer.start(); // 타이머 시작
+    }
+
+    private void addMessageToUI(String message, String messageStatus, String chatId, int likeCount) {
+        SwingUtilities.invokeLater(() -> addMessage(message, messageStatus, chatId, likeCount));
+    }
 }

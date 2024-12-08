@@ -13,7 +13,7 @@ public class DiscussionServer {
         try {
             HashMap<String, List<PrintWriter>> userMap = new HashMap<>();
             ServerSocket server = new ServerSocket(10001);
-            System.out.println("접속을 기다립니다.");
+            System.out.println("[System] " + "접속을 기다립니다.");
 
             // 방 삭제 스케줄러 쓰레드 실행
             new Thread(() -> {
