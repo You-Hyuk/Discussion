@@ -24,7 +24,6 @@ public class ChatController {
     public void createRoom(Room room){
         chatRepository.createChatFile(room);
         roomRepository.createRoom(room);
-        System.out.println(room.getRoomName() + " 생성 완료");
     }
 
 
@@ -46,32 +45,6 @@ public class ChatController {
         receiveChat(room, chat, userMap);
 
         return chat;
-//        String userName = user.getUserName();
-//        Chat chat = new Chat(userName, content, status);
-//
-//        List<PrintWriter> userList = (List<PrintWriter>) userMap.get(room.getRoomName());
-//        if (userList == null) {
-//            userList = new ArrayList<>(); // 빈 리스트로 초기화
-//            userMap.put(room.getRoomName(), userList); // userMap에 추가
-//        }
-//
-//        if (userList != null) {
-//            synchronized (userList) {
-//                for (PrintWriter pw : userList) {
-//                    pw.println(chat.getTimestamp() + " " + chat.getUserName() + " " + chat.getMessage() + " " + chat.getStatus() + " " + chat.getLike()); // 메시지 출력
-//                    pw.flush();       // 버퍼 비우기
-//                }
-//            }
-//        }
-//
-//        synchronized (userList) {
-//            for (PrintWriter pw : userList) {
-//                pw.println(SEND_CHAT_SUCCESS.name() + " " + chat.getId()+ " " + chat.getLike() + " " + content);
-//                pw.flush();
-//            }
-//        }
-//        chatRepository.saveChat(room, chat);
-//        return chat;
     }
 
     public void receiveChat(Room room, Chat chat, HashMap<String, List<PrintWriter>> userMap) {
@@ -96,7 +69,7 @@ public class ChatController {
                 pw.flush();
             }
         }
-
+        System.out.println("[System] " + "Command : " + RECEIVE_CHAT_SUCCESS.name() + " RoomName : " +  room.getRoomName());
     }
 
     public void deleteExpiredRooms() {

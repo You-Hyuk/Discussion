@@ -41,7 +41,7 @@ public class ChatThread extends Thread {
 
             userName = br.readLine();
             user = new User(userName, pw);
-            System.out.println("userName = " + userName);
+            System.out.println("[System] " + userName + " 님이 입장하였습니다.");
         } catch (Exception ex) {
             ex.printStackTrace();
         }

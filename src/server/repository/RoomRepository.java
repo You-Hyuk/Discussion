@@ -24,7 +24,7 @@ public class RoomRepository {
         }catch (Exception e){
             //e.getMessage();
         }
-        System.out.println("해당 이름의 채팅방이 존재하지 않습니다.");
+        System.out.println("[System] 해당 이름의 채팅방이 존재하지 않습니다.");
         return null;
     }
 
@@ -33,7 +33,7 @@ public class RoomRepository {
         ArrayList<Room> rooms = readRoom(); // 파일에서 Room 리스트 읽기
         Room room = findRoomByName(roomName); // Room 객체 찾기
         if (room == null) {
-            System.out.println("Room not found: " + roomName);
+            System.out.println("[System] 해당 이름의 채팅방이 존재하지 않습니다.");
             return null; // 방이 존재하지 않으면 null 반환
         }
 
@@ -92,11 +92,12 @@ public class RoomRepository {
 
         } catch (EOFException eof) {
             // EOFException 발생 시 빈 리스트로 초기화
-            System.out.println("파일이 비어 있거나 처음 생성된 상태입니다.");
+            System.out.println("[System] 파일이 비어 있거나 처음 생성된 상태입니다.");
             rooms = new ArrayList<>();  // 빈 리스트 반환
         } catch (FileNotFoundException fnf) {
             // 파일이 없을 경우 새로운 리스트를 생성
-            System.out.println("파일이 없습니다. 새 파일을 생성합니다.");
+
+            System.out.println("[System] 파일이 없습니다. 새 파일을 생성합니다.");
             rooms = new ArrayList<>();
         } catch (Exception e) {
             e.getMessage();
@@ -147,7 +148,7 @@ public class RoomRepository {
             for (Room room : rooms) {
                 // 방의 Timestamp 확인
                 if (currentTime - room.getTimestamp().getTime() >= 24 * 60 * 60 * 1000) {
-                    System.out.println(room.getRoomName() + " 방이 삭제되었습니다 (24시간 초과).");
+                    System.out.println("[System] " + room.getRoomName() + " 방이 삭제되었습니다 (24시간 초과).");
                     ChatRepository chatRepository = new ChatRepository();
                     chatRepository.deleteChatLog(room.getRoomName());
                 } else {
