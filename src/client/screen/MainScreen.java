@@ -358,6 +358,7 @@ public class MainScreen {
             if (selectedStatus[0] != null) {
                 try {
                     String response;
+                    roomHandler.voteDiscussion(roomName,selectedStatus[0]);
                     roomHandler.enterRoom(roomName, selectedStatus[0]);
 
                     // 채팅 내역 요청
