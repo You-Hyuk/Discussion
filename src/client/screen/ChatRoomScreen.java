@@ -122,6 +122,8 @@ public class ChatRoomScreen {
         status1ChatArea.setLayout(new BoxLayout(status1ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
         status1ChatArea.setBackground(Color.WHITE);
         JScrollPane status1ScrollPane = new JScrollPane(status1ChatArea);
+        status1ScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        status1ScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         status1Panel.add(status1Header, BorderLayout.NORTH); // 헤더 패널 추가
         status1Panel.add(status1ScrollPane, BorderLayout.CENTER); // 스크롤 패널 추가
@@ -141,6 +143,8 @@ public class ChatRoomScreen {
         status2ChatArea.setLayout(new BoxLayout(status2ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
         status2ChatArea.setBackground(Color.WHITE);
         JScrollPane status2ScrollPane = new JScrollPane(status2ChatArea);
+        status2ScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        status2ScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         status2Panel.add(status2Header, BorderLayout.NORTH); // 헤더 패널 추가
         status2Panel.add(status2ScrollPane, BorderLayout.CENTER); // 스크롤 패널 추가
@@ -280,12 +284,14 @@ public class ChatRoomScreen {
         messagePanel.setBackground(Color.WHITE); // 배경색 설정
 
         //String htmlMessage = "<html>" + message.replaceAll("\n", "<br>") + "</html>";
-        JLabel messageLabel = new JLabel(message);
-        messageLabel.setOpaque(true); // JLabel에 배경색 활성화
-        messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-        messageLabel.setBackground(Color.WHITE); // 연한 파란색
-        messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
+        JTextArea messageArea = new JTextArea(message);
+        messageArea.setEditable(false);
+        messageArea.setWrapStyleWord(true); // 단어 기준 줄바꿈
+        messageArea.setLineWrap(true); // 자동 줄바꿈
+        messageArea.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        messageArea.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        messageArea.setBackground(Color.WHITE);
 
 
         String emojiHeart = "❤";
@@ -315,34 +321,30 @@ public class ChatRoomScreen {
             }
         });
 
-        messagePanel.add(messageLabel);
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
+        messagePanel.add(messageArea);
         messagePanel.add(Box.createHorizontalStrut(10));
         messagePanel.add(likeButton);
-        messagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // 최대 크기 설정
-        messagePanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
-        messagePanel.setPreferredSize(new Dimension(0, 50));
+        messagePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+        messagePanel.setPreferredSize(new Dimension(0, 80));
 
         JPanel emptyPanel = new JPanel();
         emptyPanel.setLayout(new BorderLayout());
         emptyPanel.setBackground(Color.WHITE);
         emptyPanel.add(new JLabel(" "), BorderLayout.CENTER);
-        emptyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // 최대 크기 설정
+        emptyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120)); // 최대 크기 설정
         emptyPanel.setMinimumSize(new Dimension(0, 50)); // 최소 크기 설정
-        emptyPanel.setPreferredSize(new Dimension(0, 50));
+        emptyPanel.setPreferredSize(new Dimension(0, 80));
 
         int linesToSync;
         if (status.equals(firstStatus)) {
-//            status1ChatArea.add(messagePanel);
-//            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-//            syncLineCounts(status2ChatArea, linesToSync);
+
             status1ChatArea.add(messagePanel); // 메시지 추가
             status2ChatArea.add(emptyPanel);
         } else if (status.equals(secondStatus)) {
             status2ChatArea.add(messagePanel); // 메시지 추가
             status1ChatArea.add(emptyPanel);
-//            status2ChatArea.add(messagePanel);
-//            linesToSync = calculateLineCount(messageLabel); // 새 메시지가 차지하는 줄 수 계산
-//            syncLineCounts(status1ChatArea, linesToSync);
+
         }
 
         // UI 갱신
