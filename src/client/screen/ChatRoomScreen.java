@@ -28,7 +28,6 @@ public class ChatRoomScreen {
     private RoomHandler roomHandler;
     private ChatHandler chatHandler;
 
-
     public ChatRoomScreen(String roomName, String userName, Socket sock, PrintWriter pw, BufferedReader br, String status) {
         this.roomName = roomName;
         this.userName = userName;
@@ -41,6 +40,11 @@ public class ChatRoomScreen {
     }
 
     public void createChatRoomScreen() {
+
+        // 툴팁의 폰트 크기 변경
+        UIManager.put("ToolTip.font", new Font("Malgun Gothic", Font.PLAIN, 20)); // 원하는 크기와 폰트 설정
+        UIManager.put("ToolTip.border", BorderFactory.createLineBorder(Color.GRAY)); // 테두리 설정
+
         JFrame frame = new JFrame("토론 플랫폼 - " + roomName);
         String[] roomData = null;
         String response;
@@ -63,7 +67,7 @@ public class ChatRoomScreen {
         String firstStatus = roomData[4];
         String secondStatus = roomData[5];
 
-        String likeMost1 = "status1 최다 좋아요 메시지";
+        String likeMost1 = "status1 최다 좋아요 메시지 status1 최다 좋아요 메시지 status1 최다 좋아요 메시지 status1 최다 좋아요 메시지";
         String likeMost2 = "status2 최다 좋아요 메시지";
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
@@ -108,6 +112,7 @@ public class ChatRoomScreen {
         JPanel status1Header = new JPanel(new GridLayout(2, 1));
         JLabel status1Label = new JLabel(firstStatus, SwingConstants.CENTER);
         JLabel status1Like = new JLabel(likeMost1, SwingConstants.CENTER);
+        status1Like.setToolTipText("<html><p style='width:300px;'>" + likeMost1 + "</p></html>");
         status1Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status1Like.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status1Header.add(status1Label);
@@ -126,6 +131,7 @@ public class ChatRoomScreen {
         JPanel status2Header = new JPanel(new GridLayout(2, 1));
         JLabel status2Label = new JLabel(secondStatus, SwingConstants.CENTER);
         JLabel status2Like = new JLabel(likeMost2, SwingConstants.CENTER);
+        status2Like.setToolTipText("<html><p style='width:300px;'>" + likeMost2 + "</p></html>");
         status2Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status2Like.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status2Header.add(status2Label);
