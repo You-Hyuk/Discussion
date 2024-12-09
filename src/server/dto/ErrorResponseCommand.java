@@ -1,5 +1,5 @@
 package server.dto;
 
-public enum ErrorResponse {
+public enum ErrorResponseCommand {
     FIND_ROOM_FAILED;
 }

@@ -29,12 +29,9 @@ public class Chat implements Serializable {
         return sdf.format(new Date(millis));
     }
 
-
     public String getUserName() {
         return userName;
     }
-
-
 
     public String getMessage() {
         return message;

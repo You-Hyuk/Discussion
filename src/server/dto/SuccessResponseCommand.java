@@ -1,6 +1,6 @@
 package server.dto;
 
-public enum SuccessResponse {
+public enum SuccessResponseCommand {
     GET_ROOM_LIST_SUCCESS,
     FIND_ROOM_SUCCESS,
     ENTER_ROOM_SUCCESS,

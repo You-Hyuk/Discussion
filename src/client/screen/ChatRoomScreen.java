@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static server.dto.SuccessResponse.*;
+import static server.dto.SuccessResponseCommand.*;
 
 public class ChatRoomScreen {
     private final String roomName;

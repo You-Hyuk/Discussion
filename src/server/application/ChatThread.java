@@ -15,8 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static client.dto.RequestCommand.*;
-import static server.dto.ErrorResponse.FIND_ROOM_FAILED;
-import static server.dto.SuccessResponse.*;
+import static server.dto.ErrorResponseCommand.FIND_ROOM_FAILED;
+import static server.dto.SuccessResponseCommand.*;
 
 public class ChatThread extends Thread {
     private Socket sock;

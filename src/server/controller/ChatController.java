@@ -9,7 +9,7 @@ import server.repository.RoomRepository;
 import java.io.PrintWriter;
 import java.util.*;
 
-import static server.dto.SuccessResponse.RECEIVE_CHAT_SUCCESS;
+import static server.dto.SuccessResponseCommand.RECEIVE_CHAT_SUCCESS;
 
 public class ChatController {
     private RoomRepository roomRepository = new RoomRepository();
