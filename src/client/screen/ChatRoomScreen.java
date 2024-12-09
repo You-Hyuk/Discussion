@@ -295,7 +295,7 @@ public class ChatRoomScreen {
                     chatId = chatData[5];
 
                     // 포맷된 메시지 생성
-                    String formattedMessage = "[" + timestamp + "]" + userName + " : " + message;
+                    String formattedMessage = "[" + timestamp + "] " + userName + " : " + message;
                     // 메시지를 상태에 따라 UI에 표시 (EDT에서 실행)
                     SwingUtilities.invokeLater(() -> {
                         addMessage(formattedMessage, chatData[3], chatData[5], Integer.valueOf(chatData[4]));
@@ -368,7 +368,7 @@ public class ChatRoomScreen {
         likeButton.setFocusPainted(false);
         likeButton.setBackground(Color.WHITE);
         likeButton.setForeground(Color.RED);  // 텍스트와 이모지 색을 빨간색으로 설정
-        likeButton.setPreferredSize(new Dimension(likeButton.getPreferredSize().width, lineHeight-5)); // 기존 너비 유지
+        //likeButton.setPreferredSize(new Dimension(likeButton.getPreferredSize().width, lineHeight-5)); // 기존 너비 유지
 
         likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
