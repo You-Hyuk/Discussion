@@ -296,8 +296,6 @@ public class ChatRoomScreen {
         String command = " ";
         String body = " ";
 
-        String firstStatus = "찬성";
-        String secondStatus = "반대";
 
         try {
             roomHandler.findRoom(roomName);
@@ -314,6 +312,9 @@ public class ChatRoomScreen {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
+
+        String firstStatus = parseBody(body).get("FirstStatus");
+        String secondStatus = parseBody(body).get("SecondStatus");
 
 
         JPanel messagePanel = new JPanel();
