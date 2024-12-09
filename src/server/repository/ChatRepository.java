@@ -13,8 +13,18 @@ public class ChatRepository {
 
     private final String DIRECTORY_PATH = "src/server/data/";
 
-    public void createChatFile(Room room){
-        String fileName = room.getRoomName() + ".txt";
+    // 공백을 _로 변환
+    private String encodeFileName(String name) {
+        return name.replace(" ", "_");
+    }
+
+    // _를 공백으로 복원
+    private String decodeFileName(String name) {
+        return name.replace("_", " ");
+    }
+
+    public void createChatFile(Room room) {
+        String fileName = encodeFileName(room.getRoomName()) + ".txt";
         String path = DIRECTORY_PATH + fileName;
 
         // data 디렉토리 생성 (존재하지 않을 때만)
@@ -28,7 +38,6 @@ public class ChatRepository {
         try {
             if (file.createNewFile()) { // 파일이 존재하지 않으면 새로 생성
                 System.out.println("[System] " + "파일이 생성되었습니다: " + file.getName());
-
             } else {
                 System.out.println("[System] " + "파일이 이미 존재합니다.");
             }
@@ -39,9 +48,9 @@ public class ChatRepository {
         System.out.println("[System] " + "생성된 채팅방 파일 이름:" + room.getChatFileName());
     }
 
-    public void saveChat(Room room, Chat chat){
+    public void saveChat(Room room, Chat chat) {
         try {
-            String filePath = DIRECTORY_PATH + room.getRoomName() + ".txt";
+            String filePath = DIRECTORY_PATH + encodeFileName(room.getRoomName()) + ".txt";
 
             ArrayList<Chat> chats = readChatHistory(room);
 
@@ -50,23 +59,22 @@ public class ChatRepository {
             }
 
             chats.add(chat);
-            fos = new FileOutputStream(filePath); //InputThread에서 BufferedReader로 읽은 line을 저장하기 위해 Writer 사용
+            fos = new FileOutputStream(filePath); // 파일 저장
             oos = new ObjectOutputStream(fos);
 
             oos.writeObject(chats);
 
-        }catch (IOException e){
-            e.getMessage();
-        }finally {
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
             try {
-                oos.close();
-                fos.close();
-            }catch (IOException e){
+                if (oos != null) oos.close();
+                if (fos != null) fos.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
-
 
     public ArrayList<Chat> readChatHistory(Room room) {
         if (room.getChatFileName() == null) {
@@ -75,9 +83,9 @@ public class ChatRepository {
 
         ArrayList<Chat> chatHistory = null;
         String chatFileName = room.getChatFileName();
-        String path = DIRECTORY_PATH + chatFileName;
+        String path = DIRECTORY_PATH + encodeFileName(chatFileName);
 
-        try{
+        try {
             FileInputStream fis = new FileInputStream(path);
             ObjectInputStream ois = new ObjectInputStream(fis);
             chatHistory = (ArrayList<Chat>) ois.readObject();
@@ -102,7 +110,7 @@ public class ChatRepository {
     }
 
     public void deleteChatLog(String roomName) {
-        File chatLog = new File(DIRECTORY_PATH+ roomName + ".txt");
+        File chatLog = new File(DIRECTORY_PATH + encodeFileName(roomName) + ".txt");
         if (chatLog.exists()) {
             if (!chatLog.delete()) {
                 System.out.println("[System] " + "채팅 기록 파일 삭제를 실패하였습니다.");
@@ -113,7 +121,7 @@ public class ChatRepository {
     public Integer updateLikeCount(Room room, String chatId) {
         try {
             Integer likeCount = 0;
-            String filePath = DIRECTORY_PATH + room.getRoomName() + ".txt";
+            String filePath = DIRECTORY_PATH + encodeFileName(room.getRoomName()) + ".txt";
             ArrayList<Chat> chats = readChatHistory(room);
             for (Chat chat : chats) {
                 if (chat.getId().equals(chatId)) {

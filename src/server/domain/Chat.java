@@ -29,47 +29,29 @@ public class Chat implements Serializable {
         return sdf.format(new Date(millis));
     }
 
-
     public String getUserName() {
         return userName;
     }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public Integer getLike() {
         return like;
     }
 
-    public void setLike(Integer like) {
-        this.like = like;
-    }
 
     public void incrementLike() {
         this.like++;
@@ -77,10 +59,6 @@ public class Chat implements Serializable {
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String Id) {
-        this.id=id;
     }
 
     @Override

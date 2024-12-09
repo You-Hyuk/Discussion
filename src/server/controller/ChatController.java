@@ -9,7 +9,7 @@ import server.repository.RoomRepository;
 import java.io.PrintWriter;
 import java.util.*;
 
-import static server.dto.SuccessResponse.RECEIVE_CHAT_SUCCESS;
+import static server.dto.SuccessResponseCommand.RECEIVE_CHAT_SUCCESS;
 
 public class ChatController {
     private RoomRepository roomRepository = new RoomRepository();
@@ -41,13 +41,15 @@ public class ChatController {
         // 메시지 저장
         chatRepository.saveChat(room, chat);
 
+        String userName = user.getUserName();
+
         // 모든 사용자에게 메시지 전송
-        receiveChat(room, chat, userMap);
+        receiveChat(room, userName, chat, userMap);
 
         return chat;
     }
 
-    public void receiveChat(Room room, Chat chat, HashMap<String, List<PrintWriter>> userMap) {
+    public void receiveChat(Room room, String userName, Chat chat, HashMap<String, List<PrintWriter>> userMap) {
         // 방에 있는 사용자 리스트 가져오기
         List<PrintWriter> userList = userMap.get(room.getRoomName());
 
@@ -58,13 +60,15 @@ public class ChatController {
 
         synchronized (userList) {
             for (PrintWriter pw : userList) {
-                String response = RECEIVE_CHAT_SUCCESS.name() + " " +
-                        chat.getTimestamp() + " " +
-                        chat.getUserName() + " " +
-                        chat.getMessage() + " " +
-                        chat.getStatus() + " " +
-                        chat.getLike() + " " +
-                        chat.getId();
+                String response = "[Response] UserName : " + userName +
+                        " Command : " + RECEIVE_CHAT_SUCCESS.name() +
+                        " Body : " +
+                        " TimeStamp : " + chat.getTimestamp() +
+                        " UserName : " + chat.getUserName() +
+                        " Content : " +  chat.getMessage() +
+                        " Status : " + chat.getStatus() +
+                        " LikeCount : " + chat.getLike() +
+                        " ChatId : " +  chat.getId();
                 pw.println(response);
                 pw.flush();
             }
