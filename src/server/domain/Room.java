@@ -43,57 +43,36 @@ public class Room implements Serializable {
         return userName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
 
     public String getFirstStatus() {
         return firstStatus;
     }
 
-    public void setFirstStatus(String firstStatus) {
-        this.firstStatus = firstStatus;
-    }
 
     public String getSecondStatus() {
         return secondStatus;
     }
 
-    public void setSecondStatus(String secondStatus) {
-        this.secondStatus = secondStatus;
-    }
 
     public Integer getFirstStatusCount() {
         return firstStatusCount;
     }
 
-    public void setFirstStatusCount(Integer firstStatusCount) {
-        this.firstStatusCount = firstStatusCount;
-    }
 
     public Integer getSecondStatusCount() {
         return secondStatusCount;
     }
 
-    public void setSecondStatusCount(Integer secondStatusCount) {
-        this.secondStatusCount = secondStatusCount;
-    }
 
     public Integer getChatCount() {
         return chatCount;
     }
 
-    public void setChatCount(Integer chatCount) {
-        this.chatCount = chatCount;
-    }
 
     public Timestamp getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
 
     @Override
     public String toString() {
@@ -126,15 +105,9 @@ public class Room implements Serializable {
         this.firstStatusCount++;
     }
 
-    public void decrementFirstStatusCount() {
-        this.firstStatusCount = Math.max(0, this.firstStatusCount - 1);
-    }
 
     public void incrementSecondStatusCount() {
         this.secondStatusCount++;
     }
 
-    public void decrementSecondStatusCount() {
-        this.secondStatusCount = Math.max(0, this.secondStatusCount - 1);
-    }
 }
