@@ -457,7 +457,6 @@ public class ChatRoomScreen {
 
                 if (command.equals(FIND_ROOM_SUCCESS.name()))
                     break;
-                roomData = response.split(",");
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(parentFrame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
@@ -550,14 +549,6 @@ public class ChatRoomScreen {
                     command = parseResponse.get("Command");
                     body = parseResponse.get("Body");
                     if (response != null && command.equals(RECEIVE_CHAT_SUCCESS.name())) {
-                        // 메시지 파싱
-//                        String[] chatData = response.split(" ");
-//                        String timestamp = chatData[1];
-//                        String sender = chatData[2];
-//                        String message = chatData[3];
-//                        String messageStatus = chatData[4];
-//                        int likeCount = Integer.parseInt(chatData[5]);
-//                        String chatId = chatData[6];
                         String timestamp = parseBody(body).get("TimeStamp");
                         String userName = parseBody(body).get("UserName");
                         String message = parseBody(body).get("Message");
