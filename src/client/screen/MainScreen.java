@@ -85,7 +85,7 @@ public class MainScreen {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
-        //frame.getContentPane().setBackground(Color.black); // 흰색, 어디 적용되는지 모름
+        frame.setLocationRelativeTo(null);
 
         // 상단 패널
         JPanel topPanel = new JPanel(new BorderLayout());

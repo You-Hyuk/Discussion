@@ -49,6 +49,9 @@ public class ChatRoomScreen {
         UIManager.put("ToolTip.border", BorderFactory.createLineBorder(Color.GRAY)); // 테두리 설정
 
         JFrame frame = new JFrame("토론 플랫폼 - " + roomName);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+        frame.setLocationRelativeTo(null);
         String[] roomData = null;
         String response;
         HashMap<String, String> parseResponse = new HashMap<>();
@@ -75,8 +78,52 @@ public class ChatRoomScreen {
         String secondStatus = parseBody(body).get("SecondStatus");
 
 
-        String likeMost1 = "status1 최다 좋아요 메시지 status1 최다 좋아요 메시지 status1 최다 좋아요 메시지 status1 최다 좋아요 메시지";
+        String likeMost1 = "status1 최다 좋아요 메시지";
         String likeMost2 = "status2 최다 좋아요 메시지";
+//        try{
+//            chatHandler.getChaHistory(roomName);
+//
+//            String mostLikedMessage1="";
+//            Integer maxLikes1=-1;
+//            String mostLikedMessage2="";
+//            Integer maxLikes2=-1;
+//            while ((response = br.readLine()) != null) {
+//                if (response.equals(GET_CHAT_HISTORY_SUCCESS.name()))
+//                    break;
+//                String[] chatEntries = response.split("\n");
+//                for (String chatEntry : chatEntries) {
+//                    String[] chatData = chatEntry.split(" ");
+//
+//                    // 데이터 배열 크기 검증
+//                        String message = chatData[2];
+//                        String status = chatData[3];
+//                        Integer likeCount = Integer.parseInt(chatData[4]);
+//
+//                        // 최다 좋아요 메시지 찾기
+//                        if (status.equals(firstStatus)) {
+//                            if (likeCount > maxLikes1) {
+//                                maxLikes1 = likeCount;
+//                                mostLikedMessage1 = message;
+//                            }
+//                        } else if (status.equals(secondStatus)) {
+//                            if (likeCount > maxLikes2) {
+//                                maxLikes2 = likeCount;
+//                                mostLikedMessage2 = message;
+//                            }
+//                        }
+//
+//                }
+//            }
+//
+//            // 최종 업데이트
+//            likeMost1 = mostLikedMessage1;
+//            likeMost2 = mostLikedMessage2;
+//
+//        } catch (Exception ex) {
+//            JOptionPane.showMessageDialog(null, "채팅 기록 불러오기 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+//            ex.printStackTrace();
+//        }
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
@@ -228,7 +275,6 @@ public class ChatRoomScreen {
                     // 메시지를 상태에 따라 출력
                     addMessage(formattedMessage, status, chatId, likeCount);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
                     JOptionPane.showMessageDialog(frame, "메시지 전송 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -274,7 +320,7 @@ public class ChatRoomScreen {
                     System.out.println("chatStatus = " + chatStatus);
 
                     // 포맷된 메시지 생성
-                    String formattedMessage = "[" + timestamp + "]" + userName + " : " + content;
+                    String formattedMessage = "[" + timestamp + "] " + userName + " : " + content;
                     // 메시지를 상태에 따라 UI에 표시 (EDT에서 실행)
                     SwingUtilities.invokeLater(() -> {
                         addMessage(formattedMessage, chatStatus, chatHistoryId, chatLikeCount);
@@ -351,7 +397,7 @@ public class ChatRoomScreen {
         likeButton.setFocusPainted(false);
         likeButton.setBackground(Color.WHITE);
         likeButton.setForeground(Color.RED);  // 텍스트와 이모지 색을 빨간색으로 설정
-        likeButton.setPreferredSize(new Dimension(likeButton.getPreferredSize().width, lineHeight-5)); // 기존 너비 유지
+        //likeButton.setPreferredSize(new Dimension(likeButton.getPreferredSize().width, lineHeight-5)); // 기존 너비 유지
 
         likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -457,6 +503,7 @@ public class ChatRoomScreen {
 
                 if (command.equals(FIND_ROOM_SUCCESS.name()))
                     break;
+                roomData = response.split(",");
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(parentFrame, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
