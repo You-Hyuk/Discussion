@@ -203,6 +203,7 @@ public class ChatRoomScreen {
                     String[] roomData = null;
                     String chatId = "";
                     Integer likeCount = 0;
+                    String chatStatus = "";
                     while ((response = br.readLine()) != null) {
                         System.out.println(response);
 
@@ -213,6 +214,7 @@ public class ChatRoomScreen {
                         if (command.equals(RECEIVE_CHAT_SUCCESS.name())) {
                             chatId = parseBody(body).get("ChatId");
                             likeCount = Integer.parseInt(parseBody(body).get("LikeCount"));
+                            chatStatus = parseBody(body).get("Status");
                             break;
                         }
                     }
@@ -221,8 +223,9 @@ public class ChatRoomScreen {
                     String timestamp = new SimpleDateFormat("HH:mm").format(new Date());
                     String formattedMessage = "[" + timestamp + "] " + userName + " : " + chat;
 
+                    System.out.println("status = " + chatStatus + "!1111");
                     // 메시지를 상태에 따라 출력
-                    addMessage(formattedMessage, status, chatId, likeCount);
+                    addMessage(formattedMessage, chatStatus, chatId, likeCount);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "메시지 전송 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
                 }
@@ -271,6 +274,8 @@ public class ChatRoomScreen {
                     // 포맷된 메시지 생성
                     String formattedMessage = "[" + timestamp + "] " + userName + " : " + content;
                     // 메시지를 상태에 따라 UI에 표시 (EDT에서 실행)
+
+                    System.out.println("chatStatus = " + chatStatus);
                     SwingUtilities.invokeLater(() -> {
                         addMessage(formattedMessage, chatStatus, chatHistoryId, chatLikeCount);
                     });
