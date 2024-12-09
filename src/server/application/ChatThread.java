@@ -179,6 +179,7 @@ public class ChatThread extends Thread {
                     " LikeCount : " + chat.getLike() +
                     " ChatId : " +  chat.getId();
             String response = buildResponse(userName, SEND_CHAT_HISTORY_SUCCESS.name(), body);
+            System.out.println(response);
             pw.println(response);
             pw.flush();
         }
