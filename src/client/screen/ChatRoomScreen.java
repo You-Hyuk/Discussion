@@ -296,6 +296,9 @@ public class ChatRoomScreen {
         String command = " ";
         String body = " ";
 
+        String firstStatus = "찬성";
+        String secondStatus = "반대";
+
         try {
             roomHandler.findRoom(roomName);
             // 서버 응답 처리
@@ -304,15 +307,14 @@ public class ChatRoomScreen {
                 command = parseResponse.get("Command");
                 body = parseResponse.get("Body");
 
-                if (command.equals(SEND_ROOM_DATA_SUCCESS.name()))
+                if (command.equals(SEND_ROOM_DATA_SUCCESS.name())) {
                     break;
+                }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "방 목록 갱신 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
 
-        String firstStatus = parseBody(body).get("FirstStatus");
-        String secondStatus = parseBody(body).get("SecondStatus");
 
         JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new GridBagLayout()); // 그리드백 레이아웃 사용
@@ -456,7 +458,7 @@ public class ChatRoomScreen {
                 command = parseResponse.get("Command");
                 body = parseResponse.get("Body");
 
-                if (command.equals(FIND_ROOM_SUCCESS.name()))
+                if (command.equals(SEND_ROOM_DATA_SUCCESS.name()))
                     break;
                 roomData = response.split(",");
             }
@@ -472,6 +474,8 @@ public class ChatRoomScreen {
         statusPanel.setBounds(70, 80, 200, 40);
         statusPanel.setLayout(new GridLayout(1, 2, 10, 0));
 
+        System.out.println("firstStatus = " + firstStatus);
+        System.out.println("secondStatus = " + secondStatus);
         JButton status1Button = new JButton(firstStatus);
         JButton status2Button = new JButton(secondStatus);
 
@@ -553,8 +557,8 @@ public class ChatRoomScreen {
                     if (response != null && command.equals(RECEIVE_CHAT_SUCCESS.name())) {
                         String timestamp = parseBody(body).get("TimeStamp");
                         String userName = parseBody(body).get("UserName");
-                        String message = parseBody(body).get("Message");
-                        String status = parseBody(body).get("Stauts");
+                        String message = parseBody(body).get("Content");
+                        String status = parseBody(body).get("Status");
                         Integer likeCount = Integer.parseInt(parseBody(body).get("LikeCount"));
                         String chatId = parseBody(body).get("ChatId");
 
