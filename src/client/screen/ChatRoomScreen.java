@@ -124,12 +124,8 @@ public class ChatRoomScreen {
         JPanel status1Panel = new JPanel(new BorderLayout());
         JPanel status1Header = new JPanel(new GridLayout(2, 1));
         JLabel status1Label = new JLabel(firstStatus, SwingConstants.CENTER);
-        JLabel status1Like = new JLabel(likeMost1, SwingConstants.CENTER);
-        status1Like.setToolTipText("<html><p style='width:300px;'>" + likeMost1 + "</p></html>");
         status1Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        status1Like.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status1Header.add(status1Label);
-        status1Header.add(status1Like);
 
         status1ChatArea = new JPanel();
         status1ChatArea.setLayout(new BoxLayout(status1ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
@@ -149,12 +145,8 @@ public class ChatRoomScreen {
         JPanel status2Panel = new JPanel(new BorderLayout());
         JPanel status2Header = new JPanel(new GridLayout(2, 1));
         JLabel status2Label = new JLabel(secondStatus, SwingConstants.CENTER);
-        JLabel status2Like = new JLabel(likeMost2, SwingConstants.CENTER);
-        status2Like.setToolTipText("<html><p style='width:300px;'>" + likeMost2 + "</p></html>");
         status2Label.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        status2Like.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         status2Header.add(status2Label);
-        status2Header.add(status2Like);
 
         status2ChatArea = new JPanel();
         status2ChatArea.setLayout(new BoxLayout(status2ChatArea, BoxLayout.Y_AXIS)); // 세로로 정렬
