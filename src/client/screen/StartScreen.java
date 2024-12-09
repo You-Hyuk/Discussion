@@ -29,6 +29,7 @@ public class StartScreen {
         frame.setSize(800, 600);
         frame.setLayout(null); // Absolute layout for precise placement
         frame.getContentPane().setBackground(Color.WHITE); // 흰색 배경
+        frame.setLocationRelativeTo(null);
 
         // 상단 타이틀
         JLabel titleLabel = new JLabel("토론 플랫폼");
